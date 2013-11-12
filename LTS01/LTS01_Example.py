@@ -4,14 +4,14 @@
 
 import smbus
 import struct
-import I2CHUB02
+#import ../I2CHUB02/I2CHUB02
 import LTS01
 
-I2C_bus_number = 6
-I2CHUB_address = 0x70
+I2C_bus_number = 5
+#I2CHUB_address = 0x70
 
 # activate I2CHUB port connected to LTS01A sensor
-I2CHUB02.setup(I2C_bus_number, I2CHUB_address, I2CHUB02.ch0);
+#I2CHUB02.setup(I2C_bus_number, I2CHUB_address, I2CHUB02.ch0);
 
 LTS01A_address = 0x48
 

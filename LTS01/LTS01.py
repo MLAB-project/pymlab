@@ -8,13 +8,7 @@
 # return temperature.
 
 import smbus
-import I2CHUB02
 import struct
-
-I2C_bus_number = 6
-I2CHUB_address = 0x70
-
-I2CHUB02.setup(I2C_bus_number, I2CHUB_address, I2CHUB02.ch0);
 
 LTS01A_address = 0x48
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 # Python driver for MLAB MAG01A module with HMC5888L Magnetometer sensor wrapper class
 # Based on https://bitbucket.org/thinkbowl/i2clibraries/src/14683feb0f96,
@@ -25,7 +25,7 @@ class hmc5883l:
         8.10: [7, 4.35],
     }
 
-    def __init__(self, port=1, address=0x1E, gauss=1.3, declination=(0,0)):
+    def __init__(self, port=5, address=0x1E, gauss=1.3, declination=(0,0)):
         self.bus = smbus.SMBus(port)
         self.address = address
 
@@ -81,7 +81,7 @@ class hmc5883l:
         return (degrees, minutes)
 
     def degrees(self, (degrees, minutes)):
-        return str(degrees) + "°" + str(minutes) + "'"
+        return str(degrees) + "deg" + str(minutes) + "min"
 
     def __str__(self):
         (x, y, z) = self.axes()
