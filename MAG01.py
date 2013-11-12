@@ -8,7 +8,7 @@ import math
 import time
 import sys
 
-class hmc5883l:
+class MAG01(object):
 
     __scales = {
         0.88: [0, 0.73],
@@ -89,7 +89,7 @@ class hmc5883l:
 
 if __name__ == "__main__":
     # http://magnetic-declination.com/Great%20Britain%20(UK)/Harrogate#
-    compass = hmc5883l(gauss = 4.7, declination = (-2,5))
+    compass = MAG01(gauss = 4.7, declination = (-2,5))
     while True:
         sys.stdout.write("\rHeading: " + compass.degrees(compass.heading()) + "     ")
         sys.stdout.flush()

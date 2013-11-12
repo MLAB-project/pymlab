@@ -7,7 +7,7 @@ import struct
 #import ../I2CHUB02/I2CHUB02
 import LTS01
 
-I2C_bus_number = 5
+I2C_bus_number = 8
 #I2CHUB_address = 0x70
 
 # activate I2CHUB port connected to LTS01A sensor
