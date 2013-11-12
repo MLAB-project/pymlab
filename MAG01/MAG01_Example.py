@@ -1,11 +1,7 @@
 #!/usr/bin/python
 
 # Python driver for MLAB MAG01A module with HMC5888L Magnetometer sensor wrapper class
-# Based on https://bitbucket.org/thinkbowl/i2clibraries/src/14683feb0f96,
-# but uses smbus rather than quick2wire and sets some different init
-# params.
 
-# This code is adopted from: 
 
 import time
 import sys
