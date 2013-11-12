@@ -4,9 +4,6 @@
 
 import smbus
 
-
-#I2CHUB_address = 0x70
-#I2CHUB_bus_number = 6
 class i2chub(object):
 	ch0 = 0b00000001
 	ch1 = 0b00000010
@@ -22,12 +19,12 @@ class i2chub(object):
 	  self.address = address
 
 
-	def setup(i2c_channel_setup):
-	  bus.write_byte(address, i2c_channel_setup);
+	def setup(self,i2c_channel_setup):
+	  self.bus.write_byte(self.address, i2c_channel_setup);
 	  return -1;
 
 	def status(self):
-	  return bus.read_byte(address);
+	  return self.bus.read_byte(self.address);
 
 
 
