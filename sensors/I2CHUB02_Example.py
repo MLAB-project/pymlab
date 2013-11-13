@@ -2,16 +2,19 @@
 
 # Python library for I2CHUB02A MLAB module with TCA9548A i2c bus expander. 
 # Example code
+# Program takes two arguments
 
 import time
 import I2CHUB02
 import sys
 
-# Example of library use: 
+address = 0x70 
 
-address = 0x70
+# Example of example use: 
+# sudo ./I2CHUB02_Example.py 5
 
-hub = I2CHUB02.i2chub(int(sys.argv[1]), address)
+
+hub = I2CHUB02.i2chub(int(sys.argv[1]),address)
 
 print "Get initial I2CHUB setup:"
 print "I2CHUB channel setup:", bin(hub.status());

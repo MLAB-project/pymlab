@@ -7,7 +7,10 @@ import time
 import sys
 import MAG01
 
-magnetometer = MAG01.mag01(8, gauss = 4.7, declination = (-2,5))
+# Example of example use: 
+# sudo ./MAG01_Example.py 5
+
+magnetometer = MAG01.mag01(int(sys.argv[1]), gauss = 4.7, declination = (-2,5))
 
 while True:
 	(x, y, z) = magnetometer.axes()

@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-# Python library for I2CHUB02A MLAB module with TCA9548A i2c bus expander. 
-
 import smbus
 
 class i2chub(object):
+	'Python library for I2CHUB02A MLAB module with TCA9548A i2c bus expander. '
+
 	ch0 = 0b00000001
 	ch1 = 0b00000010
 	ch2 = 0b00000100
