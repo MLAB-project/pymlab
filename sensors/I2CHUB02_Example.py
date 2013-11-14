@@ -13,7 +13,6 @@ address = 0x70
 # Example of example use: 
 # sudo ./I2CHUB02_Example.py 5
 
-
 hub = I2CHUB02.i2chub(int(sys.argv[1]),address)
 
 print "Get initial I2CHUB setup:"
