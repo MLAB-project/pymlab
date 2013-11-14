@@ -8,6 +8,16 @@ import math
 import time
 import sys
 
+
+class Overflow(object):
+	def __repr__(self):
+		return "OVERFLOW"
+Overflow.__str__ = Overflow.__repr__
+
+
+OVERFLOW = Overflow()
+
+
 class mag01(object):
 
     __scales = {
@@ -46,7 +56,7 @@ class mag01(object):
 
     def __convert(self, data, offset):
         val = self.twos_complement(data[offset] << 8 | data[offset+1], 16)
-        if val == -4096: return None
+        if val == -4096: return Over
         return round(val * self.__scale, 4)
 
     def axes(self):
@@ -59,7 +69,7 @@ class mag01(object):
 
     def heading(self):
         (x, y, z) = self.axes()
-        headingRad = math.atan2(y, x)
+        headingRad = math.atan2(float(y), float(x))
         headingRad += self.__declination
 
         # Correct for reversed heading
