@@ -11,19 +11,17 @@ import smbus
 import struct
 
 class lts01(object):
-
-	self.INTERRUPT_Mode = 0b00000010
-	self.COMPARATOR_Mode = 0b00000000
-
 	def __init__(self, port=5, address=0x48):
+          self.INTERRUPT_Mode = 0b00000010
+          self.COMPARATOR_Mode = 0b00000000
 	  self.bus = smbus.SMBus(port)
 	  self.address = address
 
 	def config(self):
-	  return self.bus.read_byte_data(address,0x01);
+	  return self.bus.read_byte_data(self.address,0x01);
 
-	def temp(self,bus_number, address):
-	  temp = struct.unpack("<h", struct.pack(">H", self.bus.read_word_data(address,0x00)))[0] / 256.0 
+	def temp(self):
+	  temp = struct.unpack("<h", struct.pack(">H", self.bus.read_word_data(self.address,0x00)))[0] / 256.0 
 	#temperature calculation register_value * 0.00390625; (Sensor is a big-endian but SMBus is little-endian by default)
 	  return temp
 

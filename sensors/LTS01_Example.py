@@ -18,5 +18,5 @@ LTS01A_address = 0x48
 
 thermometer = LTS01.lts01(int(sys.argv[1]),LTS01A_address)
 
-	print "LTS01A status",  bin(thermometer.config())
-	print "LTS01A temp", thermometer.temp()
+print "LTS01A status",  bin(thermometer.config())
+print "LTS01A temp", thermometer.temp()
