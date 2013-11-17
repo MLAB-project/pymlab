@@ -31,9 +31,9 @@ class mag01(object):
         8.10: [7, 4.35],
     }
 
-    def __init__(self, port=5, address=0x1E, gauss=1.3, declination=(0,0)):
+    def __init__(self, port=5, gauss=1.3, declination=(0,0)):
         self.bus = smbus.SMBus(port)
-        self.address = address
+        self.address = 0x1E		#HMC5883L magnetometer factory default address
 
         (degrees, minutes) = declination
         self.__declDegrees = degrees

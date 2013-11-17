@@ -10,6 +10,8 @@ time.sleep(0.5)
 
 sht_sensor = SHT25.sht25(int(sys.argv[1]))
 
+i=0
+
 while True:
 
   if i<100: 
