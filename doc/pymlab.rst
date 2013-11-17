@@ -33,3 +33,10 @@ pymlab Package
     :undoc-members:
     :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+
+    pymlab.sensors
+

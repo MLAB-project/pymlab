@@ -59,28 +59,34 @@ class Config(object):
 	"""
 	Example:
 
-	>>> root = mult(
-	... 	address = 0x70,
-	... 	name    = "Multiplexer 1",
-	... 	children = {
-	... 		0x01: mult(
-	... 			address = 0x72,
-	... 			name    = "Multiplexer 2",
-	... 			children = {
-	... 				0x01: sens(
-	... 					address = 0x68,
-	... 					name    = "Sensor 2",
-	... 				),
-	... 			},
-	... 		),
-	... 		0x03: sens(
-	... 			address = 0x68,
-	... 			name    = "Sensor 1",
-	... 		),
-	... 	},
-	... )
-	...
+	>>> cfg = Config()
+	>>> cfg.load_python("config_file.py")
 
+	Contents of `config_file.py`:
+
+	.. code-block:: python
+
+		root = mult(
+			address = 0x70,
+			name    = "Multiplexer 1",
+			children = {
+				0x01: mult(
+					address = 0x72,
+					name    = "Multiplexer 2",
+					children = {
+						0x01: sens(
+							address = 0x68,
+							name    = "Sensor 2",
+						),
+					},
+				),
+				0x03: sens(
+					address = 0x68,
+					name    = "Sensor 1",
+				),
+			},
+		)
+	
 	"""
 
 	def __init__(self):
