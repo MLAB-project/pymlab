@@ -8,6 +8,8 @@ import math
 import time
 import sys
 
+from pymlab.sensors import Device
+
 
 class Overflow(object):
 	def __repr__(self):
@@ -18,7 +20,34 @@ Overflow.__str__ = Overflow.__repr__
 OVERFLOW = Overflow()
 
 
-class mag01(object):
+class MAG01(Device):
+    """
+    Example:
+
+    .. code-block:: python
+
+        #!/usr/bin/python
+
+        # Python driver for MLAB MAG01A module with HMC5888L Magnetometer sensor wrapper class
+
+
+        import time
+        import sys
+        from pymlab import mag01
+
+        # Example of example use: 
+        # sudo ./MAG01_Example.py 5
+
+        magnetometer = mag01.MAG01(int(sys.argv[1]), gauss = 8.10, declination = (-2,5))
+
+        while True:
+            (x, y, z) = magnetometer.axes()
+        #   sys.stdout.write("\rHeading: " + magnetometer.degrees(magnetometer.heading()) + " X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " )
+            sys.stdout.write(" X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " + "\r\n")
+            sys.stdout.flush()
+            time.sleep(0.5)
+    
+    """
 
     __scales = {
         0.88: [0, 0.73],
@@ -31,9 +60,8 @@ class mag01(object):
         8.10: [7, 4.35],
     }
 
-    def __init__(self, port=5, gauss=1.3, declination=(0,0)):
-        self.bus = smbus.SMBus(port)
-        self.address = 0x1E		#HMC5883L magnetometer factory default address
+    def __init__(self, parent = None, address = 0x1E, gauss=1.3, declination=(0,0), **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
 
         (degrees, minutes) = declination
         self.__declDegrees = degrees
@@ -41,10 +69,10 @@ class mag01(object):
         self.__declination = (degrees + minutes / 60) * math.pi / 180
 
         (reg, self.__scale) = self.__scales[gauss]
-        self.bus.write_byte_data(self.address, 0x00, 0x70) # 8 Average, 15 Hz, normal measurement
-        self.bus.write_byte_data(self.address, 0x01, reg << 5) # Scale
-        self.bus.write_byte_data(self.address, 0x02, 0x00) # Continuous measurement
-
+        #self.bus.write_byte_data(self.address, 0x00, 0x70) # 8 Average, 15 Hz, normal measurement
+        #self.bus.write_byte_data(self.address, 0x01, reg << 5) # Scale
+        #self.bus.write_byte_data(self.address, 0x02, 0x00) # Continuous measurement
+    
     def declination(self):
         return (self.__declDegrees, self.__declMinutes)
 
@@ -99,7 +127,7 @@ class mag01(object):
 
 if __name__ == "__main__":
     # http://magnetic-declination.com/Great%20Britain%20(UK)/Harrogate#
-    compass = mag01(gauss = 4.7, declination = (-2,5))
+    compass = MAG01(gauss = 4.7, declination = (-2,5))
     while True:
         sys.stdout.write("\rHeading: " + compass.degrees(compass.heading()) + "     ")
         sys.stdout.flush()

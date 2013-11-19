@@ -5,7 +5,7 @@
 import smbus
 import struct
 #import ../I2CHUB02/I2CHUB02
-import LTS01
+import lts01
 import sys
 
 I2C_bus_number = 8
@@ -16,7 +16,7 @@ I2C_bus_number = 8
 
 LTS01A_address = 0x48
 
-thermometer = LTS01.lts01(int(sys.argv[1]),LTS01A_address)
+thermometer = lts01.LTS01(int(sys.argv[1]),LTS01A_address)
 
 print "LTS01A status",  bin(thermometer.config())
 print "LTS01A temp", thermometer.temp()
