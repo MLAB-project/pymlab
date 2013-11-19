@@ -6,9 +6,8 @@ import sys
 
 print "SHT25 humidity and temperature sensor example \r\n"
 print "Temperature  Humidity[%%]  \r\n"
-time.sleep(0.5)
-
 sht_sensor = SHT25.sht25(int(sys.argv[1]))
+time.sleep(0.5)
 
 i=0
 
