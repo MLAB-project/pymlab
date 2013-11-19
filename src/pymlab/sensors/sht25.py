@@ -3,17 +3,21 @@
 import smbus
 import time
 
+from pymlab.sensors import Device
+
 
 #TODO: Implement measurement checksum checking 
 
-class SHT25(object):
+class SHT25(Device):
 	'Python library for SHT25v01A MLAB module with Sensirion SHT25 i2c humidity and temperature sensor.'
 
 	def soft_reset(self):
 		self.bus.write_byte(self.address, 0xFE);
 		return
 
-	def __init__(self, port=5):
+	def __init__(self, parent = None, address = 0x40):
+		Device.__init__(self, parent, address)
+
 		self.SHT25_HEATER_ON = 0x04
 		self.SHT25_HEATER_OFF = 0x00
 		self.SHT25_OTP_reload_off = 0x02
@@ -21,10 +25,10 @@ class SHT25(object):
 		self.SHT25_RH8_T12 = 0x01
 		self.SHT25_RH10_T13 = 0x80
 		self.SHT25_RH11_T11 = 0x81
-		self.address = 0x40	# SHT25 has only one device address (factory set)
+		#self.address = 0x40	# SHT25 has only one device address (factory set)
 
-		self.bus = smbus.SMBus(port)
-		self.soft_reset();
+		#self.bus = smbus.SMBus(port)
+		#self.soft_reset();
 
 	def setup(self, setup_reg ):  # writes to status register and returns its value
 		reg=self.bus.read_byte_data(self.address, 0xE7);    # Read status actual status register

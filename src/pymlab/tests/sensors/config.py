@@ -28,7 +28,8 @@ bus = [
 port = 5
 
 bus = [
-	{ "type": "mag01", "address": 0x68 }
+	{ "type": "mag01", "address": 0x68 },
+	{ "type": "sht25" }
 ]
 		""")
 

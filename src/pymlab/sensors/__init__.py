@@ -49,6 +49,7 @@ class Device(object):
 		self.parent  = parent
 		self.address = address
 		self.channel = kwargs.get("channel", None)
+		self.name    = kwargs.get("name", None)
 
 	def __repr__(self):
 		return obj_repr(self, address = self.address)
