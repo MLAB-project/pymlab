@@ -56,6 +56,8 @@ class Device(object):
 		self.channel = kwargs.get("channel", None)
 		self.name    = kwargs.get("name", None)
 
+		self.routing_disabled = False
+
 	def __repr__(self):
 		if self.name is not None:
 			return obj_repr(self, address = self.address, name = self.name)
@@ -73,6 +75,9 @@ class Device(object):
 		return { self.name: self, }
 
 	def route(self, child = None):
+		if self.routing_disabled:
+			return False
+
 		if child is None:
 			path = []
 			node = self
@@ -119,7 +124,13 @@ class SimpleBus(Device):
 			result.update(child.get_named_devices())
 		return result
 
-	def route(self, child):
+	def route(self, child = None):
+		if self.routing_disabled:
+			return False
+		
+		if child is None:
+			return Device.route(self)
+
 		if child.address not in self.children:
 			return False
 		return True
@@ -155,12 +166,27 @@ class Bus(SimpleBus):
 		return self._named_devices[name]
 
 	def write_byte(self, address, value):
-		LOGGER.debug("Writing byte %r to address %r!", value, address)
+		LOGGER.debug("Writing byte %r to address %s!", value, hex(address))
 		return self.smbus.write_byte(address, value)
 
 	def read_byte(self, address):
 		LOGGER.debug("Reading byte from address %r!", address)
 		return self.smbus.read_byte(address)
+
+	def write_byte_data(self, address, register, value):
+		"""Write a byte value to a device register."""
+		LOGGER.debug("Writing byte data %r to register %s to address %s",
+			value, hex(register), hex(address))
+		return self.smbus.write_byte_data(address, register, value)
+
+	def read_byte_data(self, address, register):
+		return self.smbus.read_byte_data(address, register)
+
+	def write_i2c_block_data(self, *args):
+		raise NotImplementedError()
+	
+	def read_i2c_block_data(self, address, register):
+		return self.smbus.read_i2c_block_data(address, register)
 
 
 def main():

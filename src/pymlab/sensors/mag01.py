@@ -12,9 +12,11 @@ from pymlab.sensors import Device
 
 
 class Overflow(object):
-	def __repr__(self):
-		return "OVERFLOW"
-Overflow.__str__ = Overflow.__repr__
+    def __repr__(self):
+        return "OVERFLOW"
+
+    def __str__(self):
+        return repr(self)
 
 
 OVERFLOW = Overflow()
@@ -131,6 +133,7 @@ class MAG01(Device):
                "Axis Z: " + str(z) + "\n" \
                "Declination: " + self.degrees(self.declination()) + "\n" \
                "Heading: " + self.degrees(self.heading()) + "\n"
+
 
 if __name__ == "__main__":
     # http://magnetic-declination.com/Great%20Britain%20(UK)/Harrogate#

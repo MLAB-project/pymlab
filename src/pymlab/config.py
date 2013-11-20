@@ -9,8 +9,7 @@ Author: Jan Milík <milikjan@fit.cvut.cz>
 import sys
 import json
 
-from utils import obj_repr, PrettyPrinter
-
+from utils import obj_repr, PrettyPrinterS
 from pymlab.sensors import Bus, SimpleBus
 
 
@@ -130,12 +129,6 @@ class Config(object):
 
 		raise ValueError("Cannot create a device from: {!r}!".format(value))
 
-	def _mult(self, *args, **kwargs):
-		return Multiplexer(self, *args, **kwargs)
-
-	def _sens(self, *args, **kwargs):
-		return Sensor(self, *args, **kwargs)
-
 	def config(self, **kwargs):
 		self.port = kwargs.get("port", 5)
 		self._bus = self.build_device(kwargs.get("bus", []))
@@ -143,8 +136,8 @@ class Config(object):
 	def load_python(self, source):
 		local_vars = {
 			"cfg":  self,
-			"mult": self._mult,
-			"sens": self._sens,
+			#"mult": self._mult,
+			#"sens": self._sens,
 			#"mult": Multiplexer,
 			#"sens": Sensor,
 		}

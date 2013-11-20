@@ -93,13 +93,23 @@ class I2CHub(Device):
 			raise ValueError("Device doesn't have a channel.")
 		self.channels[device.channel].add_child(device)
 	
-	def route(self, child):
+	def route(self, child = None):
+		if self.routing_disabled:
+			return False
+
+		if child is None:
+			return Device.route(self)
+
 		LOGGER.debug("Routing multiplexer to %r" % (child, ))
 		if child.channel is None:
 			LOGGER.error("Child doesn't have a channel: %r" % (child, ))
 			return False
+
+		self.routing_disabled = True
 		if (self.status & child.channel) == 0:
 			self.setup(child.channel)
+		self.routing_disabled = False
+
 		#self.setup(child.channel)
 		return True
 
@@ -109,4 +119,6 @@ class I2CHub(Device):
 		return -1;
 
 	def get_status(self):
-		return self.bus.read_byte(self.address);
+		self.route()
+		self._status = self.bus.read_byte(self.address)
+		return self._status
