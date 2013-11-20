@@ -11,8 +11,8 @@ from pymlab import config
 
 
 if len(sys.argv) != 4:
-	sys.stderr.write("Script expects 3 arguments.")
-	sys.stderr.write("Usage: script.py port hub_address hub_config")
+	sys.stderr.write("Script expects 3 arguments.\n")
+	sys.stderr.write("Usage: script.py port hub_address hub_config\n")
 	sys.exit(1)
 
 port = int(sys.argv[1])
