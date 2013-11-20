@@ -80,7 +80,10 @@ class I2CHub(Device):
 		return self._status
 
 	def get_named_devices(self):
-		result = {}
+		if self.name is None:
+			result = {}
+		else:
+			result = { self.name: self, }
 		for channel in self.channels.itervalues():
 			result.update(channel.get_named_devices())
 		return result
