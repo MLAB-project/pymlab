@@ -68,8 +68,22 @@ class I2CHub(Device):
 				channel = channel,
 			)
 
+		self._status = None
+
 	def __getitem__(self, key):
 		return self.channels[key]
+
+	@property
+	def status(self):
+		if self._status is None:
+			self._status = self.get_status()
+		return self._status
+
+	def get_named_devices(self):
+		result = {}
+		for channel in self.channels.itervalues():
+			result.update(channel.get_named_devices())
+		return result
 
 	def add_child(self, device):
 		if device.channel is None:
@@ -81,12 +95,15 @@ class I2CHub(Device):
 		if child.channel is None:
 			LOGGER.error("Child doesn't have a channel: %r" % (child, ))
 			return False
-		self.setup(child.channel)
+		if (self.status & child.channel) == 0:
+			self.setup(child.channel)
+		#self.setup(child.channel)
 		return True
 
 	def setup(self, i2c_channel_setup):
+		self._status = i2c_channel_setups
 		self.bus.write_byte(self.address, i2c_channel_setup);
 		return -1;
 
-	def status(self):
+	def get_status(self):
 		return self.bus.read_byte(self.address);

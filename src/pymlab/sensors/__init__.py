@@ -6,10 +6,15 @@ Author: Jan Milík <milikjan@fit.cvut.cz>
 """
 
 
+import logging
+
 import smbus
 
 #from pymlab import config
 from pymlab.utils import obj_repr
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 CHANNEL_0 = 0b00000001
@@ -52,6 +57,8 @@ class Device(object):
 		self.name    = kwargs.get("name", None)
 
 	def __repr__(self):
+		if self.name is not None:
+			return obj_repr(self, address = self.address, name = self.name)
 		return obj_repr(self, address = self.address)
 
 	@property
@@ -59,6 +66,11 @@ class Device(object):
 		if isinstance(self.parent, Bus):
 			return self.parent
 		return self.parent.bus
+
+	def get_named_devices(self):
+		if self.name is None:
+			return {}
+		return { self.name: self, }
 
 	def route(self, child = None):
 		if child is None:
@@ -96,10 +108,16 @@ class SimpleBus(Device):
 			self.children[child.address] = child
 
 	def __iter__(self):
-		return self.itervalues()
+		return self.children.itervalues()
 
 	def __getitem__(self, key):
 		return self.children[key]
+
+	def get_named_devices(self):
+		result = {}
+		for child in self:
+			result.update(child.get_named_devices())
+		return result
 
 	def route(self, child):
 		if child.address not in self.children:
@@ -117,10 +135,32 @@ class Bus(SimpleBus):
 	def __init__(self, port = 5):
 		SimpleBus.__init__(self, None)
 
-		self.bus = smbus.SMBus(port)
+		self.port = port
+		self._smbus = None
+
+		self._named_devices = None
 	
 	def __repr__(self):
 		return obj_repr(self, port = self.port)
+
+	@property
+	def smbus(self):
+		if self._smbus is None:
+			self._smbus = smbus.SMBus(self.port)
+		return self._smbus
+
+	def get_device(self, name):
+		if self._named_devices is None:
+			self._named_devices = self.get_named_devices()
+		return self._named_devices[name]
+
+	def write_byte(self, address, value):
+		LOGGER.debug("Writing byte %r to address %r!", value, address)
+		return self.smbus.write_byte(address, value)
+
+	def read_byte(self, address):
+		LOGGER.debug("Reading byte from address %r!", address)
+		return self.smbus.read_byte(address)
 
 
 def main():

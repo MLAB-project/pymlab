@@ -15,8 +15,8 @@ class SHT25(Device):
 		self.bus.write_byte(self.address, 0xFE);
 		return
 
-	def __init__(self, parent = None, address = 0x40):
-		Device.__init__(self, parent, address)
+	def __init__(self, parent = None, address = 0x40, **kwargs):
+		Device.__init__(self, parent, address, **kwargs)
 
 		self.SHT25_HEATER_ON = 0x04
 		self.SHT25_HEATER_OFF = 0x00

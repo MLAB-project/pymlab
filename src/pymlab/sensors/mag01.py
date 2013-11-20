@@ -87,6 +87,13 @@ class MAG01(Device):
         if val == -4096: return Over
         return round(val * self.__scale, 4)
 
+    def setup(self, gauss = 1.3):
+        reg, self.__scale = self.__scales[gauss]
+        
+        self.bus.write_byte_data(0x00, 0x70) # 8 Average, 15 Hz, normal measurement
+        self.bus.write_byte_data(0x01, reg << 5) # Scale
+        self.bus.write_byte_data(0x02, 0x00) # Continuous measurement
+
     def axes(self):
         data = self.bus.read_i2c_block_data(self.address, 0x00)
         #print map(hex, data)

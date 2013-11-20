@@ -44,6 +44,33 @@ bus = [
 ]
 		""")
 
+	def test_load_python_03(self):
+		cfg = config.Config()
+		cfg.load_python("""
+port = 1
+
+bus = [
+    {
+        "type": "i2chub",
+        "address": 0x72,
+        
+        "children": [
+            {
+                "type": "i2chub",
+                "address": 0x70,
+                "channel": 1,
+                
+                "children": [
+                    { "type": "sht25", "channel": 2, },
+                    { "type": "mag01", "channel": 2, },
+                ],
+            },
+        ],
+    },
+]
+
+		""")
+
 
 def main():
     unittest.main()

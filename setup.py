@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf8 -*-
 
-from setuptools import setup
+from setuptools import setup, find_packages
 import sys
 import os
 import os.path as path
@@ -21,7 +21,8 @@ setup(
     long_description = pymlab.__doc__,
     url              = 'http://pypi.python.org/pypi/nmapps',
     
-    packages    = ['pymlab', ],
+    #packages    = ['pymlab', 'pymlab.sensors', 'pymlab.tests', ],
+    packages    = find_packages("src"),
     package_dir = {'': 'src'},
     # py_modules  = ['nmapps'],
     provides    = ['pymlab'],

@@ -65,17 +65,16 @@ class Config(object):
 	
 	"""
 
-	def __init__(self):
+	def __init__(self, **kwargs):
 		self.drivers = {}
 
 		self.port      = 5
-		self.root_node = None
-		self.named_nodes = {}
-
 		self._bus = None
 
 		self.init_drivers()
 
+		self.config(**kwargs)
+	
 	@property
 	def bus(self):
 		if self._bus is None:
@@ -92,22 +91,8 @@ class Config(object):
 			"sht25": sht25.SHT25,
 		}
 
-	def create_driver(self, type, **kwargs):
-		try:
-			cls = self.drivers[type]
-		except KeyError:
-			raise Exception("Unknown sensor type: %r!" % (type, ))
-
-		return cls(**kwargs)
-	
-	def add_node(self, node):
-		if node.name is not None:
-			if node.name in self.named_nodes:
-				raise Exception("Node named %r already exists in the configuration." % (node.name, ))
-			self.named_nodes[node.name] = node
-
-	def get_node(self, name):
-		return self.named_nodes[name]
+	def get_device(self, name):
+		return self.bus.get_device(name)
 
 	def build_device(self, value, parent = None):
 		if isinstance(value, list) or isinstance(value, tuple):
@@ -132,7 +117,7 @@ class Config(object):
 			kwargs.pop("type")
 
 			children = kwargs.pop("children", [])
-			
+
 			result = fn(**kwargs)
 
 			for child in children:
@@ -151,6 +136,10 @@ class Config(object):
 	def _sens(self, *args, **kwargs):
 		return Sensor(self, *args, **kwargs)
 
+	def config(self, **kwargs):
+		self.port = kwargs.get("port", 5)
+		self._bus = self.build_device(kwargs.get("bus", []))
+
 	def load_python(self, source):
 		local_vars = {
 			"cfg":  self,
@@ -161,7 +150,7 @@ class Config(object):
 		}
 		exec source in globals(), local_vars
 		self.port = local_vars.get("port", self.port)
-		self._bus = self.build_device(local_vars.get("bus"), [])
+		self._bus = self.build_device(local_vars.get("bus", []))
 
 	def load_file(self, file_name):
 		if file_name.endswith(".py"):
