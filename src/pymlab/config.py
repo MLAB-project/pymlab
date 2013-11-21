@@ -9,7 +9,7 @@ Author: Jan Milík <milikjan@fit.cvut.cz>
 import sys
 import json
 
-from utils import obj_repr, PrettyPrinterS
+from utils import obj_repr, PrettyPrinter
 from pymlab.sensors import Bus, SimpleBus
 
 
@@ -92,7 +92,7 @@ class Config(object):
 
 	def get_device(self, name):
 		return self.bus.get_device(name)
-
+	
 	def build_device(self, value, parent = None):
 		if isinstance(value, list) or isinstance(value, tuple):
 			if parent is None:
@@ -150,6 +150,9 @@ class Config(object):
 			with open(file_name, "r") as f:
 				return self.load_python(f.read())
 		raise ValueError("Unknown file type: {!r}".format(file_name))
+
+	def initialize(self):
+		self.bus.initialize()
 
 
 def main():

@@ -8,6 +8,8 @@ import sys
 from pymlab import config
 
 
+#### Script Arguments ###############################################
+
 if len(sys.argv) != 3:
 	sys.stderr.write("Invalid number of arguments.\n")
 	sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
@@ -16,15 +18,27 @@ if len(sys.argv) != 3:
 port    = eval(sys.argv[1])
 address = eval(sys.argv[2])
 
+
+#### Sensor Configuration ###########################################
+
 cfg = config.Config(
 	port = port,
 	bus = [
-		{ "type": "mag01", "address": address, "name": "mag", },
+		{
+			"name":          "mag",
+			"type":        "mag01",
+			"address":     address,
+			"gauss":           8.1,
+			"declination": (-2, 5),
+		},
 	],
 )
+cfg.initialize()
 
 mag = cfg.get_device("mag")
-#magnetometer = MAG01.mag01(int(sys.argv[1]), gauss = 8.10, declination = (-2,5))
+
+
+#### Data Logging ###################################################
 
 try:
 	while True:

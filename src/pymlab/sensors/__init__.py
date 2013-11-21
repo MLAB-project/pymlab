@@ -95,6 +95,18 @@ class Device(object):
 		
 		return False
 
+	def initialize(self):
+		"""This method does nothing, it is meant to be overriden
+		in derived classes. Also, this method is not meant to be called
+		directly by the user, normally a call to
+		:meth:`pymlab.sensors.Bus.initialize` should be used.
+
+		Perform any initialization of the device that
+		may require communication. This is meant to be done
+		after the configuration has been set up (after instantiating
+		:class:`pymlab.config.Config` and setting it up)."""
+		pass
+
 	def write_byte(self, value):
 		return self.bus.write_byte(self.address, value)
 
@@ -127,7 +139,7 @@ class SimpleBus(Device):
 	def route(self, child = None):
 		if self.routing_disabled:
 			return False
-		
+
 		if child is None:
 			return Device.route(self)
 
@@ -140,6 +152,15 @@ class SimpleBus(Device):
 			raise Exception("")
 		self.children[device.address] = device
 		device.parent = self
+
+	def initialize(self):
+		"""See :meth:`pymlab.sensors.Device.initialize` for more information.
+		
+		Calls `initialize()` on all devices connected to the bus.
+		"""
+		Device.initialize(self)
+		for child in self.children:
+			child.initialize()
 
 
 class Bus(SimpleBus):

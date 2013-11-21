@@ -51,7 +51,7 @@ class MAG01(Device):
     
     """
 
-    __scales = {
+    SCALES = {
         0.88: [0, 0.73],
         1.30: [1, 0.92],
         1.90: [2, 1.22],
@@ -62,21 +62,23 @@ class MAG01(Device):
         8.10: [7, 4.35],
     }
 
-    def __init__(self, parent = None, address = 0x1E, gauss=1.3, declination=(0,0), **kwargs):
+    def __init__(self, parent = None, address = 0x1E, gauss = 1.3, declination = (0,0), **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
         (degrees, minutes) = declination
-        self.__declDegrees = degrees
-        self.__declMinutes = minutes
-        self.__declination = (degrees + minutes / 60) * math.pi / 180
+        self._declDegrees = degrees
+        self._declMinutes = minutes
+        self._declination = (degrees + minutes / 60) * math.pi / 180
 
-        (reg, self.__scale) = self.__scales[gauss]
+        self._gauss = gauss
+        (reg, self._scale) = self.SCALES[gauss]
+
         #self.bus.write_byte_data(self.address, 0x00, 0x70) # 8 Average, 15 Hz, normal measurement
         #self.bus.write_byte_data(self.address, 0x01, reg << 5) # Scale
         #self.bus.write_byte_data(self.address, 0x02, 0x00) # Continuous measurement
     
     def declination(self):
-        return (self.__declDegrees, self.__declMinutes)
+        return (self._declDegrees, self._declMinutes)
 
     def twos_complement(self, val, len):
         # Convert twos compliment to integer
@@ -84,13 +86,15 @@ class MAG01(Device):
             val = val - (1<<len)
         return val
 
-    def __convert(self, data, offset):
+    def _convert(self, data, offset):
         val = self.twos_complement(data[offset] << 8 | data[offset+1], 16)
         if val == -4096: return Over
-        return round(val * self.__scale, 4)
+        return round(val * self._scale, 4)
 
-    def setup(self, gauss = 1.3):
-        reg, self.__scale = self.__scales[gauss]
+    def initialize(self):
+        Device.initialize()
+
+        reg, self._scale = self.SCALES[self._gauss]
         
         self.bus.write_byte_data(0x00, 0x70) # 8 Average, 15 Hz, normal measurement
         self.bus.write_byte_data(0x01, reg << 5) # Scale
@@ -99,15 +103,15 @@ class MAG01(Device):
     def axes(self):
         data = self.bus.read_i2c_block_data(self.address, 0x00)
         #print map(hex, data)
-        x = self.__convert(data, 3)
-        y = self.__convert(data, 7)
-        z = self.__convert(data, 5)
+        x = self._convert(data, 3)
+        y = self._convert(data, 7)
+        z = self._convert(data, 5)
         return (x,y,z)
 
     def heading(self):
         (x, y, z) = self.axes()
         headingRad = math.atan2(float(y), float(x))
-        headingRad += self.__declination
+        headingRad += self._declination
 
         # Correct for reversed heading
         if headingRad < 0:

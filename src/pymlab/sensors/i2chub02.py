@@ -57,6 +57,8 @@ class I2CHub(Device):
 	ch6 = 0b01000000
 	ch7 = 0b10000000
 
+	ALL_CHANNELS = 0b11111111
+
 	def __init__(self, parent = None, address=0x70, **kwargs):
 		Device.__init__(self, parent, address, **kwargs)
 
@@ -113,11 +115,20 @@ class I2CHub(Device):
 		#self.setup(child.channel)
 		return True
 
+	def initialize(self):
+		Device.initialize(self)
+
+		for channel, bus in self.channels.iteritems():
+			self.setup(channel)
+			bus.initialize()
+
+		self.setup(self.ALL_CHANNELS)
+
 	def setup(self, i2c_channel_setup):
 		self._status = i2c_channel_setups
 		self.bus.write_byte(self.address, i2c_channel_setup);
 		return -1;
-
+	
 	def get_status(self):
 		self.route()
 		self._status = self.bus.read_byte(self.address)
