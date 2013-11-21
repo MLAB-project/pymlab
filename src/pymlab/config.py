@@ -9,7 +9,7 @@ Author: Jan Milík <milikjan@fit.cvut.cz>
 import sys
 import json
 
-from utils import obj_repr, PrettyPrinterS
+from utils import obj_repr, PrettyPrinter
 from pymlab.sensors import Bus, SimpleBus
 
 

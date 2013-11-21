@@ -114,7 +114,7 @@ class I2CHub(Device):
 		return True
 
 	def setup(self, i2c_channel_setup):
-		self._status = i2c_channel_setups
+		self._status = i2c_channel_setup
 		self.bus.write_byte(self.address, i2c_channel_setup);
 		return -1;
 
