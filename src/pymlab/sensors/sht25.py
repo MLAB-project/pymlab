@@ -6,7 +6,7 @@ import time
 from pymlab.sensors import Device
 
 
-#TODO: Implement measurement checksum checking 
+#TODO: Implement output data checksum checking 
 
 class SHT25(Device):
 	'Python library for SHT25v01A MLAB module with Sensirion SHT25 i2c humidity and temperature sensor.'
