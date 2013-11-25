@@ -57,12 +57,12 @@ class ALTIMET01(Device):
         # check if pressure or temperature are ready (both) [STATUS, 0x00 register]
         #if (int(STA,16) & 0x04) == 4:
         # OUT_P
-        p_MSB = self.bus.read_byte(0x01)
-        p_CSB = self.bus.read_byte(0x02)
-        p_LSB = self.bus.read_byte(0x03)
+        p_MSB = self.bus.read_byte_data(self.address,0x01)
+        p_CSB = self.bus.read_byte_data(self.address,0x02)
+        p_LSB = self.bus.read_byte_data(self.address,0x03)
         
-        t_MSB = self.bus.read_byte(0x04)
-        t_LSB = self.bus.read_byte(0x05)
+        t_MSB = self.bus.read_byte_data(self.address,0x04)
+        t_LSB = self.bus.read_byte_data(self.address,0x05)
         
         t = float(t_MSB + float((t_LSB >> 4)/16.0))
         p = float((p_MSB << 10)|(p_CSB << 2)|(p_LSB >> 6)) + float((p_LSB >> 4)/4.0)
