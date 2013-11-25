@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 
+
 from pymlab.sensors import Device
 
-def ALTIMET01(Device):
+
+class ALTIMET01(Device):
 	"""
 	Python library for ALTIMET01A MLAB module with MPL3115A2 Freescale Semiconductor i2c altimeter and barometer sensor.
 	"""
-
+    
 	def __init__(self, parent = None, address = 0x60, **kwargs):
 		Device.__init__(self, parent, address, **kwargs)
-
+        
 		#MPL3115A register address
 		self.MPL3115_STATUS              =0x00
 		self.MPL3115_PRESSURE_DATA       =0x01
@@ -66,9 +68,11 @@ def ALTIMET01(Device):
   		p = float((p_MSB << 10)|(p_CSB << 2)|(p_LSB >> 6)) + float((p_LSB >> 4)/4.0)
 		return (t, p);
 
+
 def main():
 	print __doc__
 
 
 if __name__ == "__main__":
 	main()
+
