@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
-import logging
-
-import smbus
-
-from pymlab.sensors import Device, SimpleBus
+from pymlab.sensors import Device
 
 def ALTIMET01(Device):
-	'Python library for ALTIMET01A MLAB module with MPL3115A2 Freescale Semiconductor i2c altimeter and barometer sensor.'
+	"""
+	Python library for ALTIMET01A MLAB module with MPL3115A2 Freescale Semiconductor i2c altimeter and barometer sensor.
+	"""
 
 	def __init__(self, parent = None, address = 0x60, **kwargs):
 		Device.__init__(self, parent, address, **kwargs)
