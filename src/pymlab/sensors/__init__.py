@@ -159,7 +159,7 @@ class SimpleBus(Device):
 		Calls `initialize()` on all devices connected to the bus.
 		"""
 		Device.initialize(self)
-		for child in self.children:
+		for child in self.children.itervalues():
 			child.initialize()
 
 

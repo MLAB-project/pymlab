@@ -45,11 +45,11 @@ class ALTIMET01(Device):
     
     def initialize(self):
         # Set to Barometer  
-        self.bus.write_byte_data(self.address, self.MPL3115_CTRL_REG1, "0xB8");
+        self.bus.write_byte_data(self.address, self.MPL3115_CTRL_REG1, 0xB8);
         # Enable Data Flags in PT_DATA_CFG
-        self.bus.write_byte_data(self.address, self.MPL3115_PT_DATA_CFG, "0x07")
+        self.bus.write_byte_data(self.address, self.MPL3115_PT_DATA_CFG, 0x07)
         # Set Active, barometer mode with an OSR = 128
-        self.bus.write_byte_data(self.address, self.MPL3115_CTRL_REG1, "0x39")
+        self.bus.write_byte_data(self.address, self.MPL3115_CTRL_REG1, 0x39)
     
     def get_tp(self):
         # Read STATUS Register
