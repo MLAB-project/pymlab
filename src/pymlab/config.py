@@ -81,13 +81,14 @@ class Config(object):
 		return self._bus
 
 	def init_drivers(self):
-		from pymlab.sensors import lts01, mag01, sht25, i2chub02
+		from pymlab.sensors import lts01, mag01, sht25, i2chub02, altimet01
 		self.drivers = {
 			"i2chub": i2chub02.I2CHub,
 
 			"lts01": lts01.LTS01,
 			"mag01": mag01.MAG01,
 			"sht25": sht25.SHT25,
+			"altimet01": altimet01.ALTIMET01,
 		}
 
 	def get_device(self, name):

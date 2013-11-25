@@ -6,7 +6,7 @@ import smbus
 
 from pymlab.sensors import Device, SimpleBus
 
-def altimet(Device):
+def ALTIMET01(Device):
 	'Python library for ALTIMET01A MLAB module with MPL3115A2 Freescale Semiconductor i2c altimeter and barometer sensor.'
 
 	def __init__(self, parent = None, address = 0x60, **kwargs):
@@ -64,9 +64,9 @@ def altimet(Device):
             	t_MSB = self.bus.read_byte(0x04)
             	t_LSB = self.bus.read_byte(0x05)
 
-   		t = float(t_MSB + float((t_LSB >> 4)/16.0)))
-  		p = float((p_MSB << 10)|(p_CSB << 2)|(p_LSB >> 6)) + float((p_LSB >> 4)/4.0))
-		return (t);
+   		t = float(t_MSB + float((t_LSB >> 4)/16.0))
+  		p = float((p_MSB << 10)|(p_CSB << 2)|(p_LSB >> 6)) + float((p_LSB >> 4)/4.0)
+		return (t, p);
 
 def main():
 	print __doc__

@@ -25,26 +25,23 @@ cfg = config.Config(
 	port = port,
 	bus = [
 		{
-			"name":          "mag",
-			"type":        "mag01",
+			"name":          "altimet",
+			"type":        "altimet01",
 			"address":     address,
-			"gauss":           8.1,
-			"declination": (-2, 5),
 		},
 	],
 )
 cfg.initialize()
 
-mag = cfg.get_device("mag")
+gauge = cfg.get_device("altimet")
 
 
 #### Data Logging ###################################################
 
 try:
 	while True:
-		(x, y, z) = mag.axes()
-		#sys.stdout.write("\rHeading: " + magnetometer.degrees(magnetometer.heading()) + " X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " )
-		sys.stdout.write(" X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " + "\r\n")
+		(t, p) = gauge.get_tp()
+		sys.stdout.write(" Temperature: " + str(t) + " Pressure: " + str(p) + "\r\n")
 		sys.stdout.flush()
 		time.sleep(0.5)
 except KeyboardInterrupt:
