@@ -75,6 +75,21 @@ bus = [
 
         """)
 
+    def test_load_python_04(self):
+        cfg = config.Config()
+        cfg.load_python("""
+port = 1
+
+bus = [
+    {
+        "type": "altimet01",
+        "name": "alt",
+    },
+]
+
+        """)
+
+
 
 def main():
     unittest.main()
