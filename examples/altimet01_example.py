@@ -35,6 +35,7 @@ cfg = config.Config(
 cfg.initialize()
 
 gauge = cfg.get_device("altimet")
+time.sleep(0.5)
 
 
 #### Data Logging ###################################################
@@ -43,7 +44,6 @@ try:
     with open("temperature.log", "a") as f:
         while True:
             (t, p) = gauge.get_tp()
-            #sys.stdout.write(" Temperature: " + str(t) + " Preassure: " + str(p) + "\r\n")
             sys.stdout.write(" Temperature: %.2f  Pressure: %d\n" % (t, p, ))
             f.write("%d\t%s\t%.2f\t%d\n" % (time.time(), datetime.datetime.now().isoformat(), t, p, ))
             sys.stdout.flush()
