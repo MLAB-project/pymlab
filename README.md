@@ -5,27 +5,22 @@ MLAB I2C bus modules binding. Most of code is writen in Python.
 
 
 Installation
-============
-
-
-Dependencies
 ------------
 
-  $ sudo apt-get install python-setuptools
+### Dependencies
+
+    $ sudo apt-get install python-setuptools
+
+### Install in to Python development system
+
+    $ sudo python setup.py develop
 
 
-Install in to Python development system
-------------
 
-  $ sudo python setup.py develop
+Usage
+-----
 
-
-
-Using
-============
-
-Example
--------
+### Example
 
 ```python
 from pymlab import config
