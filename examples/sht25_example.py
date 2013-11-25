@@ -1,12 +1,36 @@
 #!/usr/bin/python
 
-import SHT25
 import time
 import sys
+from pymlab import config
+
+#### Script Arguments ###############################################
+
+if len(sys.argv) != 3:
+    sys.stderr.write("Invalid number of arguments.\n")
+    sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
+    sys.exit(1)
+
+port    = eval(sys.argv[1])
+address = eval(sys.argv[2])
+
+#### Sensor Configuration ###########################################
+
+cfg = config.Config(
+    port = port,
+    bus = [
+        {
+            "name":          "sht25",
+            "type":        "sht25",
+            "address":     address,
+        },
+    ],
+)
+cfg.initialize()
 
 print "SHT25 humidity and temperature sensor example \r\n"
 print "Temperature  Humidity[%%]  \r\n"
-sht_sensor = SHT25.sht25(int(sys.argv[1]))
+sht_sensor = cfg.get_device("sht25")
 time.sleep(0.5)
 
 i=0
