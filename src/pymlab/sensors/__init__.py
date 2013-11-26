@@ -164,6 +164,9 @@ class SimpleBus(Device):
 
 
 class Bus(SimpleBus):
+    INT8  = struct.Struct(">b")
+    INT16 = struct.Struct(">h")
+
 	def __init__(self, port = 5):
 		SimpleBus.__init__(self, None)
 
@@ -208,6 +211,14 @@ class Bus(SimpleBus):
 	
 	def read_i2c_block_data(self, address, register):
 		return self.smbus.read_i2c_block_data(address, register)
+
+    def write_int16(self, address, register, value):
+        data = self.INT16.pack(value)
+        return self.write_i2c_block_data(address, register, data)
+    
+    def read_int16(self, address, register):
+        data = self.read_i2c_block_data(address, register)
+        return self.INT16.unpack(data)[0]
 
 
 def main():
