@@ -13,6 +13,7 @@ try:
     from pymlab import config
 except ImportError:
     config = None
+from pymlab.sensors import Device
 
 
 @unittest.skipIf(config is None, "Could not import `pymlab.config`.")
@@ -75,20 +76,37 @@ bus = [
 
         """)
 
-    def test_load_python_04(self):
+    def _test_load_python(self, driver_name):
         cfg = config.Config()
         cfg.load_python("""
 port = 1
 
 bus = [
-    {
-        "type": "altimet01",
-        "name": "alt",
-    },
+    {{ "type": "{}", "name": "dev", }},
 ]
 
-        """)
-
+        """.format(driver_name))
+        
+        dev = cfg.get_device("dev")
+        self.assertIsInstance(dev, Device)
+    
+    def test_load_python_altimet01(self):
+        self._test_load_python("altimet01")
+    
+    def test_load_python_sht25(self):
+        self._test_load_python("sht25")
+    
+    def test_load_python_mag01(self):
+        self._test_load_python("mag01")
+    
+    def test_load_python_i2chub(self):
+        self._test_load_python("i2chub")
+    
+    def test_load_python_lts01(self):
+        self._test_load_python("lts01")
+    
+    def test_load_python_alt01(self):
+        self._test_load_python("alt01")
 
 
 def main():
