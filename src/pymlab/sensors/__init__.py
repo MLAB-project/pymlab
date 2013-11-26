@@ -220,7 +220,7 @@ class Bus(SimpleBus):
 class DriverRegistry(object):
     def __init__(self):
         self.drivers = {}
-
+    
     def __pprint__(self, printer, level = 0):
         printer.writeln("DRIVER REGISTRY:")
         printer.indent()
@@ -246,6 +246,23 @@ class DriverRegistry(object):
             self.add_class(names, cls)
             return cls
         return decorator
+        
+    def init_driver(self, name, kwargs):
+        try:
+            cls = self.drivers[name]
+        except KeyError:
+            raise ValueError("No such device driver: %r." % (name, ))
+        
+        try:
+            driver = cls(**kwargs)
+        except Exception, e:
+            LOGGER.exception(e)
+            raise RuntimeError("Failed to initialize the %s driver (name %r)." % (
+                cls.__name__,
+                name,
+            ))
+        
+        return driver
 
 
 DRIVER_REGISTRY = DriverRegistry()
