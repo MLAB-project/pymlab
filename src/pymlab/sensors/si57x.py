@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sys
-import rr
+#import rr
 import time
 import i2c
 

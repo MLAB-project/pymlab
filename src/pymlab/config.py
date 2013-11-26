@@ -8,9 +8,13 @@ Author: Jan Milík <milikjan@fit.cvut.cz>
 
 import sys
 import json
+import logging
 
 from utils import obj_repr, PrettyPrinter
 from pymlab.sensors import Bus, SimpleBus
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Node(object):
@@ -173,3 +177,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

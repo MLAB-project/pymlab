@@ -5,12 +5,13 @@ import logging
 
 import smbus
 
-from pymlab.sensors import Device, SimpleBus
+from pymlab.sensors import Device, SimpleBus, register
 
 
 LOGGER = logging.getLogger(__name__)
 
 
+@register("i2chub")
 class I2CHub(Device):
 	"""Python library for I2CHUB02A MLAB module with TCA9548A i2c bus expander.
 

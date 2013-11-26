@@ -8,7 +8,7 @@ import math
 import time
 import sys
 
-from pymlab.sensors import Device
+from pymlab.sensors import Device, register
 
 
 class Overflow(object):
@@ -22,6 +22,7 @@ class Overflow(object):
 OVERFLOW = Overflow()
 
 
+@register("mag01")
 class MAG01(Device):
     """
     Example:

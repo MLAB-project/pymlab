@@ -3,11 +3,11 @@
 import smbus
 import time
 
-from pymlab.sensors import Device
+from pymlab.sensors import Device, register
 
 
 #TODO: Implement output data checksum checking 
-
+@register("sht25")
 class SHT25(Device):
 	'Python library for SHT25v01A MLAB module with Sensirion SHT25 i2c humidity and temperature sensor.'
 

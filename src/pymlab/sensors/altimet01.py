@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 
-from pymlab.sensors import Device
+from pymlab.sensors import Device, register
 
 
+@register(["alt01", "altimet01"])
 class ALTIMET01(Device):
     """
     Python library for ALTIMET01A MLAB module with MPL3115A2 Freescale Semiconductor i2c altimeter and barometer sensor.

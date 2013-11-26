@@ -10,9 +10,10 @@
 
 import struct
 
-from pymlab.sensors import Device
+from pymlab.sensors import Device, register
 
 
+@register("lts01")
 class LTS01(Device):
 	"""
 	Example:
@@ -61,3 +62,4 @@ class LTS01(Device):
 	def setup(self):
 		self.bus.write_byte_data(address, setup)
 		return -1
+
