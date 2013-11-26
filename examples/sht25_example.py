@@ -1,30 +1,61 @@
 #!/usr/bin/python
 
-import SHT25
 import time
+import datetime
 import sys
+from pymlab import config
+
+#### Script Arguments ###############################################
+
+if len(sys.argv) != 3:
+    sys.stderr.write("Invalid number of arguments.\n")
+    sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
+    sys.exit(1)
+
+port    = eval(sys.argv[1])
+address = eval(sys.argv[2])
+
+#### Sensor Configuration ###########################################
+
+cfg = config.Config(
+    port = port,
+    bus = [
+        {
+            "name":          "sht25",
+            "type":        "sht25",
+            "address":     address,
+        },
+    ],
+)
+cfg.initialize()
 
 print "SHT25 humidity and temperature sensor example \r\n"
 print "Temperature  Humidity[%%]  \r\n"
-sht_sensor = SHT25.sht25(int(sys.argv[1]))
+sht_sensor = cfg.get_device("sht25")
 time.sleep(0.5)
 
 i=0
 
-while True:
+#### Data Logging ###################################################
 
-  if i<100: 
-    sht_config = sht_sensor.SHT25_RH12_T14 | sht_sensor.SHT25_HEATER_OFF; # loop alters on chip heater on and off to check correct function
-  else:
-    sht_config = sht_sensor.SHT25_RH12_T14 | sht_sensor.SHT25_HEATER_ON;
-  if i > 120: 
-    i = 0;
-   
-  temperature = sht_sensor.get_temp();
-  humidity = sht_sensor.get_hum();
+try:
+    with open("TempHum.log", "a") as f:
+        while True:
+            if i<100: 
+                sht_config = sht_sensor.SHT25_RH12_T14 | sht_sensor.SHT25_HEATER_OFF; # loop alters on chip heater on and off to check correct function
+            else:
+                sht_config = sht_sensor.SHT25_RH12_T14 | sht_sensor.SHT25_HEATER_ON;
+            if i > 120: 
+                i = 0;
 
-  print temperature, humidity, sht_sensor.setup(sht_config), sht_config
-  i=i+1
-  time.sleep(1)
+            temperature = sht_sensor.get_temp();
+            humidity = sht_sensor.get_hum();
+            sys.stdout.write(" Temperature: %.2f  Humidity: %d Status: %d \n" % (temperature, humidity, sht_sensor.setup(sht_config) ))
+            f.write("%d\t%s\t%.2f\t%.1f\t%d\n" % (time.time(), datetime.datetime.now().isoformat(), temperature, humidity, sht_sensor.setup(sht_config) ))
+            sys.stdout.flush()
+            i=i+1
+            time.sleep(10)
+except KeyboardInterrupt:
+    sys.exit(0)
 
 

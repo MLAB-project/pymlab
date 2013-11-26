@@ -46,11 +46,11 @@ class ALTIMET01(Device):
     
     def initialize(self):
         # Set to Barometer  
-        self.bus.write_byte_data(self.address, self.MPL3115_CTRL_REG1, "0xB8");
+        self.bus.write_byte_data(self.address, self.MPL3115_CTRL_REG1, 0xB8);
         # Enable Data Flags in PT_DATA_CFG
-        self.bus.write_byte_data(self.address, self.MPL3115_PT_DATA_CFG, "0x07")
+        self.bus.write_byte_data(self.address, self.MPL3115_PT_DATA_CFG, 0x07)
         # Set Active, barometer mode with an OSR = 128
-        self.bus.write_byte_data(self.address, self.MPL3115_CTRL_REG1, "0x39")
+        self.bus.write_byte_data(self.address, self.MPL3115_CTRL_REG1, 0x39)
     
     def get_tp(self):
         # Read STATUS Register
@@ -58,12 +58,12 @@ class ALTIMET01(Device):
         # check if pressure or temperature are ready (both) [STATUS, 0x00 register]
         #if (int(STA,16) & 0x04) == 4:
         # OUT_P
-        p_MSB = self.bus.read_byte(0x01)
-        p_CSB = self.bus.read_byte(0x02)
-        p_LSB = self.bus.read_byte(0x03)
+        p_MSB = self.bus.read_byte_data(self.address,0x01)
+        p_CSB = self.bus.read_byte_data(self.address,0x02)
+        p_LSB = self.bus.read_byte_data(self.address,0x03)
         
-        t_MSB = self.bus.read_byte(0x04)
-        t_LSB = self.bus.read_byte(0x05)
+        t_MSB = self.bus.read_byte_data(self.address,0x04)
+        t_LSB = self.bus.read_byte_data(self.address,0x05)
         
         t = float(t_MSB + float((t_LSB >> 4)/16.0))
         p = float((p_MSB << 10)|(p_CSB << 2)|(p_LSB >> 6)) + float((p_LSB >> 4)/4.0)

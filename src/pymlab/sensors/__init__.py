@@ -160,14 +160,14 @@ class SimpleBus(Device):
         self.children[device.address] = device
         device.parent = self
 
-    def initialize(self):
-        """See :meth:`pymlab.sensors.Device.initialize` for more information.
-        
-        Calls `initialize()` on all devices connected to the bus.
-        """
-        Device.initialize(self)
-        for child in self.children:
-            child.initialize()
+	def initialize(self):
+		"""See :meth:`pymlab.sensors.Device.initialize` for more information.
+		
+		Calls `initialize()` on all devices connected to the bus.
+		"""
+		Device.initialize(self)
+		for child in self.children.itervalues():
+			child.initialize()
 
 
 class Bus(SimpleBus):
