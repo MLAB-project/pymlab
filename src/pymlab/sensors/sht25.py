@@ -46,30 +46,23 @@ class SHT25(Device):
         self.bus.write_byte(self.address, 0xE3); # start temperature measurement
         time.sleep(0.1)
 
-#        MSB=self.bus.read_byte(self.address)
-#        LSB=self.bus.read_byte(self.address)
-#        Check=self.bus.read_byte(self.address)
-#
-#        LSB = LSB >> 2; # trow out status bits
-#
-#        data = (( MSB << 8) + (LSB << 2));
+        data = self.bus.read_int16(self.address)
+        data &= ~0b11    # trow out status bits
 
-        data = self.bus.read_int16(self.address, 0x00)
-
-        return(-46.85 + 175.72*(data/16384.0));
+        return(-46.85 + 175.72*(data/65536.0));
 
     def get_hum(self):
         self.bus.write_byte(self.address, 0xE5); # start humidity measurement
         time.sleep(0.1)
 
-        MSB=self.bus.read_byte(self.address)
-        LSB=self.bus.read_byte(self.address)
-        Check=self.bus.read_byte(self.address)
+#        MSB=self.bus.read_byte(self.address)
+#        LSB=self.bus.read_byte(self.address)
+#        Check=self.bus.read_byte(self.address)
 
-        LSB = LSB >> 2; # trow out status bits
+        data = self.bus.read_uint16(self.address)
+        data &= ~0b11    # trow out status bits
 
-        data = ((MSB << 8) + (LSB << 2) );
-        return(-6.0 + 125.0*(data/4096.0));
+        return(-6.0 + 125.0*(data/65536.0));
 
 
 def main():

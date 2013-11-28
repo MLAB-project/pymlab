@@ -166,6 +166,7 @@ class SimpleBus(Device):
 class Bus(SimpleBus):
     INT8  = struct.Struct(">b")
     INT16 = struct.Struct(">h")
+    UINT16 = struct.Struct(">H")
 
     def __init__(self, port = 5):
         SimpleBus.__init__(self, None)
@@ -207,7 +208,7 @@ class Bus(SimpleBus):
         return self.smbus.read_byte_data(address, register)
 
     def write_i2c_block_data(self, *args):
-        raise NotImplementedError()
+	raise NotImplementedError()
     
     def read_i2c_block_data(self, address, register):
         return self.smbus.read_i2c_block_data(address, register)
@@ -216,13 +217,17 @@ class Bus(SimpleBus):
         data = self.INT16.pack(value)
         return self.smbus.write_i2c_block_data(address, register, data)
     
-    def read_int16(self, address, register):
-#        data[0] = self.smbus.read_byte(address)
-#        data[1] = self.smbus.read_byte(address)
-        MSB=self.smbus.read_byte(address)
-        LSB=self.smbus.read_byte(address)
-        data=struct.pack(">H", MSB LSB)
+    def read_int16(self, address):
+        MSB = self.smbus.read_byte(address)
+        LSB = self.smbus.read_byte(address)
+        data = bytes(bytearray([MSB, LSB]))
         return self.INT16.unpack(data)[0]
+
+    def read_uint16(self, address):
+        MSB = self.smbus.read_byte(address)
+        LSB = self.smbus.read_byte(address)
+        data = bytes(bytearray([MSB, LSB]))
+        return self.UINT16.unpack(data)[0]
 
 
 def main():

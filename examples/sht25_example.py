@@ -48,7 +48,7 @@ try:
 
             temperature = sht_sensor.get_temp();
             humidity = sht_sensor.get_hum();
-            sys.stdout.write(" Temperature: %.2f  Humidity: %d Status: %d \n" % (temperature, humidity, sht_sensor.setup(sht_config) ))
+            sys.stdout.write(" Temperature: %.2f  Humidity: %.1f Status: %d \n" % (temperature, humidity, sht_sensor.setup(sht_config) ))
             f.write("%d\t%s\t%.2f\t%.1f\t%d\n" % (time.time(), datetime.datetime.now().isoformat(), temperature, humidity, sht_sensor.setup(sht_config) ))
             sys.stdout.flush()
             i=i+1
