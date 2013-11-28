@@ -7,13 +7,12 @@ from pymlab import config
 
 #### Script Arguments ###############################################
 
-if len(sys.argv) != 3:
+if len(sys.argv) != 2:
     sys.stderr.write("Invalid number of arguments.\n")
     sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
     sys.exit(1)
 
 port    = eval(sys.argv[1])
-address = eval(sys.argv[2])
 
 #### Sensor Configuration ###########################################
 
@@ -23,7 +22,6 @@ cfg = config.Config(
         {
             "name":          "sht25",
             "type":        "sht25",
-            "address":     address,
         },
     ],
 )
@@ -54,7 +52,7 @@ try:
             f.write("%d\t%s\t%.2f\t%.1f\t%d\n" % (time.time(), datetime.datetime.now().isoformat(), temperature, humidity, sht_sensor.setup(sht_config) ))
             sys.stdout.flush()
             i=i+1
-            time.sleep(10)
+            time.sleep(1)
 except KeyboardInterrupt:
     sys.exit(0)
 

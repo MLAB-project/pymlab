@@ -64,7 +64,7 @@ class ALTIMET01(Device):
         t_MSB = self.bus.read_byte_data(self.address,0x04)
         t_LSB = self.bus.read_byte_data(self.address,0x05)
         
-        t = float(t_MSB + float((t_LSB >> 4)/16.0))
+        t = float(t_MSB + (t_LSB >> 4)/16.0)
         p = float((p_MSB << 10)|(p_CSB << 2)|(p_LSB >> 6)) + float((p_LSB >> 4)/4.0)
         return (t, p);
 

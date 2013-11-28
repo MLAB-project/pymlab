@@ -7,7 +7,7 @@ Author: Jan Milík <milikjan@fit.cvut.cz>
 
 
 import logging
-
+import struct
 import smbus
 
 #from pymlab import config
@@ -214,10 +214,14 @@ class Bus(SimpleBus):
 
     def write_int16(self, address, register, value):
         data = self.INT16.pack(value)
-        return self.write_i2c_block_data(address, register, data)
+        return self.smbus.write_i2c_block_data(address, register, data)
     
     def read_int16(self, address, register):
-        data = self.read_i2c_block_data(address, register)
+#        data[0] = self.smbus.read_byte(address)
+#        data[1] = self.smbus.read_byte(address)
+        MSB=self.smbus.read_byte(address)
+        LSB=self.smbus.read_byte(address)
+        data=struct.pack(">H", MSB LSB)
         return self.INT16.unpack(data)[0]
 
 

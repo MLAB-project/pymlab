@@ -25,7 +25,6 @@ class LTS01(Device):
 
 		import smbus
 		import struct
-		#import ../I2CHUB02/I2CHUB02
 		import lts01
 		import sys
 
