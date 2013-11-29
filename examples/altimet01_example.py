@@ -13,7 +13,7 @@ from pymlab import config
 
 if len(sys.argv) != 2:
     sys.stderr.write("Invalid number of arguments.\n")
-    sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
+    sys.stderr.write("Usage: %s #I2CPORT \n" % (sys.argv[0], ))
     sys.exit(1)
 
 port    = eval(sys.argv[1])
@@ -25,9 +25,12 @@ cfg = config.Config(
     port = port,
     bus = [
         {
-            "name":          "altimet",
-            "type":        "altimet01",
-        },
+	    	"type": "i2chub",
+	    	"address": 0x72,
+	   	"children": [
+            		{"name": "altimet", "type": "altimet01" , "channel": 6, },
+	],
+        }, 
     ],
 )
 cfg.initialize()

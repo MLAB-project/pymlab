@@ -133,3 +133,4 @@ class I2CHub(Device):
 		self.route()
 		self._status = self.bus.read_byte(self.address)
 		return self._status
+

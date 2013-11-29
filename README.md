@@ -45,7 +45,7 @@ cfg = config.Config(
 						{ "name": "mag",  "type": "mag01", "channel": 2, },
 					],
 				},
-		    ],
+		    		],
 		},
 	],
 )
