@@ -2,21 +2,40 @@
 
 # Python library for LTS01A MLAB module with MAX31725 i2c Local Temperature Sensor
 
-import smbus
-import struct
-#import ../I2CHUB02/I2CHUB02
-import lts01
+import time
+import datetime
 import sys
+from pymlab import config
 
-I2C_bus_number = 8
-#I2CHUB_address = 0x70
+#### Script Arguments ###############################################
 
-# activate I2CHUB port connected to LTS01A sensor
-#I2CHUB02.setup(I2C_bus_number, I2CHUB_address, I2CHUB02.ch0);
+if len(sys.argv) != 2:
+    sys.stderr.write("Invalid number of arguments.\n")
+    sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
+    sys.exit(1)
 
-LTS01A_address = 0x48
+port    = eval(sys.argv[1])
+address = 0x48
+#### Sensor Configuration ###########################################
 
-thermometer = lts01.LTS01(int(sys.argv[1]),LTS01A_address)
+cfg = config.Config(
+    port = port,
+    bus = [
+        {
+            "name":          "lts01",
+            "type":        "lts01",
+            "address":        address,
+        },
+    ],
+)
+cfg.initialize()
 
-print "LTS01A status",  bin(thermometer.config())
-print "LTS01A temp", thermometer.temp()
+print "LTS01 temperature sensor module example \r\n"
+print "Temperature  Humidity[%%]  \r\n"
+sensor = cfg.get_device("lts01")
+time.sleep(0.5)
+
+#### Data Logging ###################################################
+
+#print "LTS01A status",  bin(sensor.setup())
+print "LTS01A temp", sensor.get_temp()

@@ -11,13 +11,12 @@ from pymlab import config
 
 #### Script Arguments ###############################################
 
-if len(sys.argv) != 3:
+if len(sys.argv) != 2:
     sys.stderr.write("Invalid number of arguments.\n")
     sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
     sys.exit(1)
 
 port    = eval(sys.argv[1])
-address = eval(sys.argv[2])
 
 
 #### Sensor Configuration ###########################################
@@ -28,7 +27,6 @@ cfg = config.Config(
         {
             "name":          "altimet",
             "type":        "altimet01",
-            "address":     address,
         },
     ],
 )

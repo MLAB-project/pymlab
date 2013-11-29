@@ -3,7 +3,6 @@
 # Python driver for MLAB MAG01A module with HMC5888L Magnetometer sensor wrapper class
 # This code is adopted from: 
 
-import smbus
 import math
 import time
 import sys

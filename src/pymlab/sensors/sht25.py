@@ -36,32 +36,28 @@ class SHT25(Device):
         self.SOFT_RESET = 0b11111110
 
     def setup(self, setup_reg ):  # writes to status register and returns its value
-        reg=self.bus.read_byte_data(self.address, 0xE7);    # Read status actual status register
-        reg = (reg & 0x3A) | setup_reg;    # modify actual register status
-        self.bus.write_byte_data(self.address, 0xE6, reg); # write new status register
-        reg=self.bus.read_byte_data(self.address, 0xE7);    # Read status actual status register for check purposes
+        reg=self.bus.read_byte_data(self.address, self.READ_USR_REG);    # Read status actual status register
+        reg = (reg & 0x3A) | setup_reg;    # modify actual register status leave reserved bits without 
+        self.bus.write_byte_data(self.address, self.WRITE_USR_REG, reg); # write new status register
+        reg=self.bus.read_byte_data(self.address, self.READ_USR_REG);    # Read status actual status register for check purposes
         return (reg);
 
     def get_temp(self):
-        self.bus.write_byte(self.address, 0xE3); # start temperature measurement
+        self.bus.write_byte(self.address, self.TRIG_T_noHOLD); # start temperature measurement
         time.sleep(0.1)
 
         data = self.bus.read_int16(self.address)
-        data &= ~0b11    # trow out status bits
-
+#        data &= ~0b11    # trow out status bits
+        print( data)
         return(-46.85 + 175.72*(data/65536.0));
 
     def get_hum(self):
-        self.bus.write_byte(self.address, 0xE5); # start humidity measurement
+        self.bus.write_byte(self.address, self.TRIG_RH_noHOLD); # start humidity measurement
         time.sleep(0.1)
 
-#        MSB=self.bus.read_byte(self.address)
-#        LSB=self.bus.read_byte(self.address)
-#        Check=self.bus.read_byte(self.address)
-
         data = self.bus.read_uint16(self.address)
-        data &= ~0b11    # trow out status bits
-
+#        data &= ~0b11    # trow out status bits
+        print( data)
         return(-6.0 + 125.0*(data/65536.0));
 
 

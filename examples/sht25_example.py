@@ -38,6 +38,7 @@ i=0
 
 try:
     with open("TempHum.log", "a") as f:
+        
         while True:
             if i<100: 
                 sht_config = sht_sensor.SHT25_RH12_T14 | sht_sensor.SHT25_HEATER_OFF; # loop alters on chip heater on and off to check correct function
