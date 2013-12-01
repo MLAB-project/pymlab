@@ -34,12 +34,13 @@ cfg = config.Config(
     ],
 )
 cfg.initialize()
-
 gauge = cfg.get_device("altimet")
 time.sleep(0.5)
 
 
 #### Data Logging ###################################################
+
+gauge.route()
 
 try:
     with open("temperature.log", "a") as f:
