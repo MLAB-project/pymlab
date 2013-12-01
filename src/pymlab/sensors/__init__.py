@@ -48,8 +48,18 @@ OVERFLOW = Overflow()
 
 
 class Device(object):
-    """Base class for all MLAB sensors."""  
-    
+    """Base class for all MLAB sensors.
+
+    .. attribute:: channel
+
+       I2C hub channel number to which the device is connected. Channels
+       are numbered from 0 (on a 8 channel hub, the channels
+       have numbers 0-7). This attribute has no meaning if the device
+       isn't connected to a I2C hub
+       (see :class:`pymlab.sensors.i2chub02.I2CHub`).
+
+    """
+
     def __init__(self, parent = None, address = 0x70, **kwargs):
         self.parent  = parent
         self.address = address
@@ -92,7 +102,7 @@ class Device(object):
                 if not node.route(child):
                     return False
             return True
-        
+
         return False
 
     def initialize(self):
@@ -155,7 +165,7 @@ class SimpleBus(Device):
 
     def initialize(self):
         """See :meth:`pymlab.sensors.Device.initialize` for more information.
-        
+
         Calls `initialize()` on all devices connected to the bus.
         """
         Device.initialize(self)
@@ -175,7 +185,7 @@ class Bus(SimpleBus):
         self._smbus = None
 
         self._named_devices = None
-    
+
     def __repr__(self):
         return obj_repr(self, port = self.port)
 
@@ -209,14 +219,14 @@ class Bus(SimpleBus):
 
     def write_i2c_block_data(self, *args):
 	raise NotImplementedError()
-    
+
     def read_i2c_block_data(self, address, register):
         return self.smbus.read_i2c_block_data(address, register)
 
     def write_int16(self, address, register, value):
         data = self.INT16.pack(value)
         return self.smbus.write_i2c_block_data(address, register, data)
-    
+
     def read_int16(self, address):
         MSB = self.smbus.read_byte(address)
         LSB = self.smbus.read_byte(address)

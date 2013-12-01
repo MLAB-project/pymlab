@@ -20,7 +20,7 @@ class I2CHub(Device):
 
 		#!/usr/bin/python
 
-		# Python library for I2CHUB02A MLAB module with TCA9548A i2c bus expander. 
+		# Python library for I2CHUB02A MLAB module with TCA9548A i2c bus expander.
 		# Example code
 		# Program takes two arguments
 
@@ -28,7 +28,7 @@ class I2CHub(Device):
 		import I2CHUB02
 		import sys
 
-		# Example of example use: 
+		# Example of example use:
 		# sudo ./I2CHUB02_Example.py 5
 
 		hub = I2CHUB02.i2chub(int(sys.argv[1]),eval(sys.argv[2]))
@@ -38,7 +38,7 @@ class I2CHub(Device):
 
 		#print "Setup I2CHUB to channel configuration: ", bin(hub.ch0 |hub.ch2 | hub.ch3 | hub.ch7);
 		#hub.setup(hub.ch0 |hub.ch2 | hub.ch3 | hub.ch7);
-		#this connect the channels O and 7 on the I2CHUB02A togeather with master bus. 
+		#this connect the channels O and 7 on the I2CHUB02A togeather with master bus.
 
 		print "Setup I2CHUB to channel configuration: ", bin(eval(sys.argv[3]));
 		hub.setup(eval(sys.argv[3]));
@@ -94,7 +94,7 @@ class I2CHub(Device):
 		if device.channel is None:
 			raise ValueError("Device doesn't have a channel.")
 		self.channels[device.channel].add_child(device)
-	
+
 	def route(self, child = None):
 		if self.routing_disabled:
 			return False
@@ -108,8 +108,9 @@ class I2CHub(Device):
 			return False
 
 		self.routing_disabled = True
-		if (self.status & child.channel) == 0:
-			self.setup(child.channel)
+		mask = 1 << child.channel
+		if (self.status & mask) == 0:
+			self.setup(mask)
 		self.routing_disabled = False
 
 		#self.setup(child.channel)
@@ -128,7 +129,7 @@ class I2CHub(Device):
 		self._status = i2c_channel_setup
 		self.bus.write_byte(self.address, i2c_channel_setup);
 		return -1;
-	
+
 	def get_status(self):
 		self.route()
 		self._status = self.bus.read_byte(self.address)
