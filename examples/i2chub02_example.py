@@ -32,8 +32,6 @@ cfg = config.Config(
 )
 
 hub = cfg.get_device("hub")
-#hub = I2CHUB02.i2chub(int(sys.argv[1]),eval(sys.argv[2]))
-
 
 #### Communication ##################################################
 
@@ -45,3 +43,4 @@ hub.setup(hub_config)
 
 time.sleep(0.1)
 print "final I2C hub channel status:", bin(hub.get_status())
+

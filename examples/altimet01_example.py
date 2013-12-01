@@ -29,8 +29,13 @@ cfg = config.Config(
 	    	"address": 0x72,
 	   	"children": [
             		{"name": "altimet", "type": "altimet01" , "channel": 6, },
-	],
-        }, 
+		],
+        },
+#        {
+#            "name":          "altimet",
+#            "type":        "altimet01",
+#        },
+ 
     ],
 )
 cfg.initialize()
