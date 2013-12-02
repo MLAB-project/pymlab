@@ -109,7 +109,7 @@ class I2CHub(Device):
 
 		self.routing_disabled = True
 		mask = 1 << child.channel
-		if (self.status & mask) == 0:
+		if (self.status != mask):
 			self.setup(mask)
 		self.routing_disabled = False
 
@@ -120,7 +120,7 @@ class I2CHub(Device):
 		Device.initialize(self)
 
 		for channel, bus in self.channels.iteritems():
-			self.setup(channel)
+			self.setup(1 << channel)
 			bus.initialize()
 
 		self.setup(self.ALL_CHANNELS)
