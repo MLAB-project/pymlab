@@ -9,7 +9,7 @@ Installation
 
 ### Dependencies
 
-    $ sudo apt-get install python-setuptools
+    $ sudo apt-get install python-setuptools python-smbus
 
 ### Install in to Python development system
 
