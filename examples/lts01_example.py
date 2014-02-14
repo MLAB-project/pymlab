@@ -33,9 +33,13 @@ cfg.initialize()
 print "LTS01 temperature sensor module example \r\n"
 print "Temperature  Humidity[%%]  \r\n"
 sensor = cfg.get_device("lts01")
-time.sleep(0.5)
 
 #### Data Logging ###################################################
 
-#print "LTS01A status",  bin(sensor.setup())
-print "LTS01A temp", sensor.get_temp()
+try:
+    while True:
+        sys.stdout.write("LTS01A temp:" + str(sensor.get_temp()) + "\r\n")
+        sys.stdout.flush()
+        time.sleep(0.5)
+except KeyboardInterrupt:
+    sys.exit(0)
