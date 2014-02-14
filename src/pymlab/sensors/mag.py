@@ -71,10 +71,6 @@ class MAG01(Device):
 
         self._gauss = gauss
         (reg, self._scale) = self.SCALES[gauss]
-
-        #self.bus.write_byte_data(self.address, 0x00, 0x70) # 8 Average, 15 Hz, normal measurement
-        #self.bus.write_byte_data(self.address, 0x01, reg << 5) # Scale
-        #self.bus.write_byte_data(self.address, 0x02, 0x00) # Continuous measurement
     
     def declination(self):
         return (self._declDegrees, self._declMinutes)
@@ -91,13 +87,11 @@ class MAG01(Device):
         return round(val * self._scale, 4)
 
     def initialize(self):
-        Device.initialize()
-
         reg, self._scale = self.SCALES[self._gauss]
         
-        self.bus.write_byte_data(0x00, 0x70) # 8 Average, 15 Hz, normal measurement
-        self.bus.write_byte_data(0x01, reg << 5) # Scale
-        self.bus.write_byte_data(0x02, 0x00) # Continuous measurement
+        self.bus.write_byte_data(self.address, 0x00, 0x70) # 8 Average, 15 Hz, normal measurement
+        self.bus.write_byte_data(self.address, 0x01, reg << 5) # Scale
+        self.bus.write_byte_data(self.address, 0x02, 0x00) # Continuous measurement
 
     def axes(self):
         data = self.bus.read_i2c_block_data(self.address, 0x00)
