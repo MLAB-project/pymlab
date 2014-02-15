@@ -94,7 +94,7 @@ class MAG01(Device):
         self.bus.write_byte_data(self.address, 0x02, 0x00) # Continuous measurement
 
     def axes(self):
-        data = self.bus.read_i2c_block_data(self.address, 0x00)
+        data = self.bus.read_block_data(self.address, 0x00)
         #print map(hex, data)
         x = self._convert(data, 3)
         y = self._convert(data, 7)

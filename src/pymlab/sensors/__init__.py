@@ -217,15 +217,21 @@ class Bus(SimpleBus):
     def read_byte_data(self, address, register):
         return self.smbus.read_byte_data(address, register)
 
+    def write_block_data(self, address, register, value):
+        return self.smbus.write_block_data(address, register, value)
+
+    def read_block_data(self, address, register):
+        return self.smbus.read_block_data(address, register)
+
     def write_i2c_block_data(self, *args):
 	raise NotImplementedError()
 
     def read_i2c_block_data(self, address, register):
-        return self.smbus.read_i2c_block_data(address, register)
+	raise NotImplementedError()
 
     def write_int16(self, address, register, value):
         data = self.INT16.pack(value)
-        return self.smbus.write_i2c_block_data(address, register, data)
+        return self.smbus.write_block_data(address, register, data)
 
     def read_int16(self, address):
         MSB = self.smbus.read_byte(address)
