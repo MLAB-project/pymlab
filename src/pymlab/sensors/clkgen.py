@@ -9,17 +9,17 @@ from pymlab.sensors import Device
 
 class CLKGEN01(Device):
 
-    def __init__(self, parent = None, address = 0x55, gauss = 1.3, declination = (0,0), **kwargs):
+    def __init__(self, parent = None, address = 0x55, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
-        self.R_HS = 0x07
-        self.R_RFREQ4 = 0x08
-        self.R_RFREQ3 = 0x09
-        self.R_RFREQ2 = 0x0A
-        self.R_RFREQ1 = 0x0B
-        self.R_RFREQ0 = 0x0C
-        self.R_RFMC = 0x87
-        self.R_FDCO = 0x89
+        self.R_HS = 7
+        self.R_RFREQ4 = 8
+        self.R_RFREQ3 = 9
+        self.R_RFREQ2 = 10
+        self.R_RFREQ1 = 11
+        self.R_RFREQ0 = 12
+        self.R_RFMC = 135
+        self.R_FDCO = 137
 
         self.HS_DIV_MASK = 0xE0
         self.N1_H_MASK = 0x1F
@@ -36,51 +36,64 @@ class CLKGEN01(Device):
 
     def get_rfreq(self):
         rfreq = self.bus.read_byte_data(self.address,self.R_RFREQ0)
-        rfreq += (self.bus.read_byte_data(self.address,self.R_RFREQ1)<<8)
-        rfreq += (self.bus.read_byte_data(self.address,self.R_RFREQ2)<<16)
-        rfreq += (self.bus.read_byte_data(self.address,self.R_RFREQ3)<<24)
-        rfreq += ((self.bus.read_byte_data(self.address,self.R_RFREQ4) & self.RFREQ4_MASK)<<32)
-        return (rfreq>>28)+((rfreq & 0x0FFFFFFF)/2.0**28)
+        rfreq |= (self.bus.read_byte_data(self.address,self.R_RFREQ1)<<8)
+        rfreq |= (self.bus.read_byte_data(self.address,self.R_RFREQ2)<<16)
+        rfreq |= (self.bus.read_byte_data(self.address,self.R_RFREQ3)<<24)
+        rfreq |= ((self.bus.read_byte_data(self.address,self.R_RFREQ4) & self.RFREQ4_MASK)<<32)
+        return rfreq/2.0**28
+#        return (rfreq>>28)+((rfreq & 0x0FFFFFFF)/2.0**28)
 
     def get_n1_div(self):
-        n1 = ((self.bus.read_byte_data(self.address, self.R_RFREQ4) & self.N1_L_MASK)>>6)
-        n1 += ((self.bus.read_byte_data(self.address, self.R_HS) & self.N1_H_MASK)<<2)
-        return n1
+        n1 = ((self.bus.read_byte_data(self.address, self.R_HS) & self.N1_H_MASK)<<2)
+        n1 |= self.bus.read_byte_data(self.address, self.R_RFREQ4)>>6
+        return n1+1
 
     def get_hs_div(self):
-        return ((self.bus.read_byte_data(self.address, self.R_HS))>>5)
+        return (((self.bus.read_byte_data(self.address, self.R_HS))>>5) + 4)
 
     def set_rfreq(self, freq):
-        self.bus.write_byte_data(self.address, self.R_RFERQ0, (freq & 0xFF))
-        self.bus.write_byte_data(self.address, self.R_RFERQ1, ((freq>>8) & 0xFF))
-        self.bus.write_byte_data(self.address, self.R_RFERQ2, ((freq>>16) & 0xFF))
-        self.bus.write_byte_data(self.address, self.R_RFERQ3, ((freq>>24) & 0xFF))
-        reg = self.bus.read_byte_data(self.address, self.R_RFERQ4)
-        self.bus.write_byte_data(self.address, self.R_RFERQ4, (((freq>>32) & self.RFREQ4_MASK) | (reg & self.N1_L_MASK)))
+        freq_int = int(freq * (2.0**28))
+        sys.stdout.write("\r\n" + " freq: " + str(freq) + " freq_int: " + hex(freq_int) + "\r\n")
+
+        reg = self.bus.read_byte_data(self.address, self.R_RFREQ4)
+        self.bus.write_byte_data(self.address, self.R_RFREQ4, (((freq_int>>32) & self.RFREQ4_MASK) | (reg & self.N1_L_MASK)))
+        self.bus.write_byte_data(self.address, self.R_RFREQ0, (freq_int & 0xFF))
+        self.bus.write_byte_data(self.address, self.R_RFREQ1, ((freq_int>>8) & 0xFF))
+        self.bus.write_byte_data(self.address, self.R_RFREQ2, ((freq_int>>16) & 0xFF))
+        self.bus.write_byte_data(self.address, self.R_RFREQ3, ((freq_int>>24) & 0xFF))
 
     def set_hs_div(self, div):
         reg = self.bus.read_byte_data(self.address, self.R_HS)
-        self.bus.write_byte_data(self.address, self.R_HS, ((div<<5) | (reg & self.N1_H_MASK)))
+        self.bus.write_byte_data(self.address, self.R_HS, (((div-4)<<5) | (reg & self.N1_H_MASK)))
 
     def set_n1_div(self, div):
+        div = div - 1
         reg = self.bus.read_byte_data(self.address, self.R_HS)
-        self.bus.write_byte_data(self.address, self.R_HS, ((div>>2) | (reg & self.HS_DIV_MASK)))
+        self.bus.write_byte_data(self.address, self.R_HS, (((div>>2) & self.N1_H_MASK) | (reg & self.HS_DIV_MASK)))
         reg = self.bus.read_byte_data(self.address, self.R_RFREQ4)
-        self.bus.write_byte_data(self.address, self.R_RFREQ4, (((div & self.N1_L_MASK)<<6) | (reg & self.RFREQ4_MASK)))
+        self.bus.write_byte_data(self.address, self.R_RFREQ4, (((div<<6) & self.N1_L_MASK) | (reg & self.RFREQ4_MASK)))
 
     def freeze_m(self):
-        reg = self.bus.read_byte_data(self.address, self.R_RFMC) | self.RFMC_FREEZE_M
-        self.bus.write_byte_data(self.address, self.R_RFMC, reg)
+#        reg = self.bus.read_byte_data(self.address, self.R_RFMC) | self.RFMC_FREEZE_M
+        self.bus.write_byte_data(self.address, self.R_RFMC, self.RFMC_FREEZE_M)
 
     def unfreeze_m(self):
-        reg = self.bus.read_byte_data(self.address, self.R_RFMC) & ~(self.RFMC_FREEZE_M)
+#        reg = self.bus.read_byte_data(self.address, self.R_RFMC) & ~(self.RFMC_FREEZE_M)
+        self.bus.write_byte_data(self.address, self.R_RFMC, 0)
+
+    def new_freq(self):
+#        reg = self.bus.read_byte_data(self.address, self.R_RFMC) | self.RFMC_NEW_FREQ
+        self.bus.write_byte_data(self.address, self.R_RFMC, self.RFMC_NEW_FREQ)
+
+    def reset(self):
+        reg = self.bus.read_byte_data(self.address, self.R_RFMC) | self.RFMC_RST
         self.bus.write_byte_data(self.address, self.R_RFMC, reg)
 
     def freeze_dco(self):
-        self.bus.write_byte_data(self.address, self.R_RDCO, self.FDCO_FREEZE_DCO)
+        self.bus.write_byte_data(self.address, self.R_FDCO, self.FDCO_FREEZE_DCO)
 
     def unfreeze_dco(self):
-        self.bus.write_byte_data(self.address, self.R_RDCO, 0)
+        self.bus.write_byte_data(self.address, self.R_FDCO, 0)
 
     def reset_reg(self):
         reg = self.bus.read_byte_data(self.address, self.R_RFMC) | self.RFMC_RST
@@ -89,6 +102,44 @@ class CLKGEN01(Device):
     def recall_nvm(self):
         reg = self.bus.read_byte_data(self.address, self.R_RFMC) | self.RFMC_RECALL
         self.bus.write_byte_data(self.address, self.R_RFMC, reg)
+
+    def set_freq(self, fout, freq):
+        hsdiv_tuple = (4, 5, 6, 7, 9, 11)
+        n1div_tuple = (1,) + tuple(range(2,129,2))
+        fdco_min = 5670.0
+        hsdiv = self.get_hs_div()
+        n1div = self.get_n1_div()
+
+        if abs((freq-fout)*1e6/fout) > 3500:        
+            fdco = fout * hsdiv * n1div
+            fxtal =  fdco / self.get_rfreq()
+            # fxtal = 114.285        
+        
+            for hsdiv_iter in hsdiv_tuple:
+                for n1div_iter in n1div_tuple:
+                    fdco_new = freq * hsdiv_iter * n1div_iter
+                    if (fdco_new >= 4850) and (fdco_new <= 5670):
+                        if (fdco_new <= fdco_min):
+                            fdco_min = fdco_new        
+                            hsdiv = hsdiv_iter
+                            n1div = n1div_iter
+            rfreq = fdco_min / fxtal        
+            sys.stdout.write("\r\n" + " fdco_new: " + str(fdco_min) + " hsdiv: " + str(hsdiv) + " n1div: " + str(n1div) + " rfreq: " + str(rfreq) + "\r\n")
+        
+            self.freeze_dco()
+            self.set_hs_div(hsdiv)
+            self.set_n1_div(n1div)
+            self.set_rfreq(rfreq)
+            self.unfreeze_dco()
+            self.new_freq()
+        else:
+            rfreq = self.get_rfreq() * (freq/fout)
+
+            sys.stdout.write("\r\n" + " rfreq: " + str(rfreq) + "\r\n")
+            self.freeze_m()            
+            self.set_rfreq(rfreq)
+            self.unfreeze_m()            
+        
 
     # For Si571 only !
     def freeze_vcadc(self):

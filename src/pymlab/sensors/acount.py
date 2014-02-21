@@ -64,7 +64,7 @@ class ACOUNTER02(Device):
 
     def get_freq(self):
         count = self.read_count()
-        return (count/9999900.0)*1e6         #convert  ~10s  of pulse counting to  frequency
+        return (count/(10.0 - 100.0e-6))         #convert  ~10s  of pulse counting to  frequency
 
 
 if __name__ == "__main__":
