@@ -53,8 +53,6 @@ class CLKGEN01(Device):
 
     def set_rfreq(self, freq):
         freq_int = int(freq * (2.0**28))
-        sys.stdout.write("\r\n" + " freq: " + str(freq) + " freq_int: " + hex(freq_int) + "\r\n")
-
         reg = self.bus.read_byte_data(self.address, self.R_RFREQ4)
         self.bus.write_byte_data(self.address, self.R_RFREQ4, (((freq_int>>32) & self.RFREQ4_MASK) | (reg & self.N1_L_MASK)))
         self.bus.write_byte_data(self.address, self.R_RFREQ0, (freq_int & 0xFF))
@@ -104,18 +102,18 @@ class CLKGEN01(Device):
         self.bus.write_byte_data(self.address, self.R_RFMC, reg)
 
     def set_freq(self, fout, freq):
-        hsdiv_tuple = (4, 5, 6, 7, 9, 11)
-        n1div_tuple = (1,) + tuple(range(2,129,2))
-        fdco_min = 5670.0
-        hsdiv = self.get_hs_div()
-        n1div = self.get_n1_div()
+        hsdiv_tuple = (4, 5, 6, 7, 9, 11)           # possible dividers
+        n1div_tuple = (1,) + tuple(range(2,129,2))  #
+        fdco_min = 5670.0           # set maximum as minimum
+        hsdiv = self.get_hs_div()   # read curent dividers
+        n1div = self.get_n1_div()   #
 
-        if abs((freq-fout)*1e6/fout) > 3500:        
-            fdco = fout * hsdiv * n1div
-            fxtal =  fdco / self.get_rfreq()
-            # fxtal = 114.285        
+        if abs((freq-fout)*1e6/fout) > 3500:  
+            # Large change of frequency      
+            fdco = fout * hsdiv * n1div # calculate high frequency oscillator
+            fxtal =  fdco / self.get_rfreq()  # should be fxtal = 114.285        
         
-            for hsdiv_iter in hsdiv_tuple:
+            for hsdiv_iter in hsdiv_tuple:      # find dividers with minimal power consumption
                 for n1div_iter in n1div_tuple:
                     fdco_new = freq * hsdiv_iter * n1div_iter
                     if (fdco_new >= 4850) and (fdco_new <= 5670):
@@ -124,19 +122,18 @@ class CLKGEN01(Device):
                             hsdiv = hsdiv_iter
                             n1div = n1div_iter
             rfreq = fdco_min / fxtal        
-            sys.stdout.write("\r\n" + " fdco_new: " + str(fdco_min) + " hsdiv: " + str(hsdiv) + " n1div: " + str(n1div) + " rfreq: " + str(rfreq) + "\r\n")
         
-            self.freeze_dco()
+            self.freeze_dco()       # write registers
             self.set_hs_div(hsdiv)
             self.set_n1_div(n1div)
             self.set_rfreq(rfreq)
             self.unfreeze_dco()
             self.new_freq()
         else:
+            # Small change of frequency
             rfreq = self.get_rfreq() * (freq/fout)
 
-            sys.stdout.write("\r\n" + " rfreq: " + str(rfreq) + "\r\n")
-            self.freeze_m()            
+            self.freeze_m()         # write registers           
             self.set_rfreq(rfreq)
             self.unfreeze_m()            
         
