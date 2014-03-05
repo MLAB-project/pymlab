@@ -38,22 +38,22 @@ class SMBusDriver(Driver):
         self.smbus = smbus
     
     def write_byte(self, address, value):
-        self.smbus.write_byte(address, value)
+        return self.smbus.write_byte(address, value)
     
     def read_byte(self, address):
-        self.smbus.read_byte(address, value)
+        return self.smbus.read_byte(address, value)
     
     def write_byte_data(self, address, register, value):
-        self.smbus.write_byte_data(address, register, value)
+        return self.smbus.write_byte_data(address, register, value)
     
     def read_byte_data(self, address, register):
-        self.smbus.read_byte_data(address, register)
+        return self.smbus.read_byte_data(address, register)
     
     def write_block_data(self, address, register, value):
-        self.smbus.write_block_data(address, register, value)
+        return self.smbus.write_block_data(address, register, value)
     
     def read_block_data(self, address, register):
-        self.smbus.read_block_data(address, register)
+        return self.smbus.read_block_data(address, register)
 
 
 class HIDDriver(Driver):
