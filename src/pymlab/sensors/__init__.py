@@ -12,6 +12,7 @@ import smbus
 
 #from pymlab import config
 from pymlab.utils import obj_repr
+from pymlab.sensors import iic
 
 
 LOGGER = logging.getLogger(__name__)
@@ -177,71 +178,71 @@ class Bus(SimpleBus):
     INT8  = struct.Struct(">b")
     INT16 = struct.Struct(">h")
     UINT16 = struct.Struct(">H")
-
-    def __init__(self, port = 5):
+    
+    def __init__(self, **kwargs):
         SimpleBus.__init__(self, None)
-
-        self.port = port
-        self._smbus = None
-
+        
+        self._driver = None
+        self._driver_config = dict(kwargs)
+        
         self._named_devices = None
-
+    
     def __repr__(self):
         return obj_repr(self, port = self.port)
-
+    
     @property
-    def smbus(self):
-        if self._smbus is None:
-            self._smbus = smbus.SMBus(self.port)
-        return self._smbus
-
+    def driver(self):
+        if self._driver is None:
+            self._driver = iic.load_driver(**self._driver_config)
+        return self._driver
+    
     def get_device(self, name):
         if self._named_devices is None:
             self._named_devices = self.get_named_devices()
         return self._named_devices[name]
-
+    
     def write_byte(self, address, value):
         LOGGER.debug("Writing byte %r to address %s!", value, hex(address))
-        return self.smbus.write_byte(address, value)
-
+        return self.driver.write_byte(address, value)
+    
     def read_byte(self, address):
         LOGGER.debug("Reading byte from address %r!", address)
-        return self.smbus.read_byte(address)
-
+        return self.driver.read_byte(address)
+    
     def write_byte_data(self, address, register, value):
         """Write a byte value to a device register."""
         LOGGER.debug("Writing byte data %r to register %s to address %s",
             value, hex(register), hex(address))
-        return self.smbus.write_byte_data(address, register, value)
-
+        return self.driver.write_byte_data(address, register, value)
+    
     def read_byte_data(self, address, register):
-        return self.smbus.read_byte_data(address, register)
-
+        return self.driver.read_byte_data(address, register)
+    
     def write_block_data(self, address, register, value):
-        return self.smbus.write_block_data(address, register, value)
-
+        return self.driver.write_block_data(address, register, value)
+    
     def read_block_data(self, address, register):
-        return self.smbus.read_block_data(address, register)
-
+        return self.driver.read_block_data(address, register)
+    
     def write_i2c_block_data(self, *args):
-	raise NotImplementedError()
-
+        raise NotImplementedError()
+    
     def read_i2c_block_data(self, address, register):
-	raise NotImplementedError()
-
+        raise NotImplementedError()
+    
     def write_int16(self, address, register, value):
         data = self.INT16.pack(value)
-        return self.smbus.write_block_data(address, register, data)
-
+        return self.driver.write_block_data(address, register, data)
+    
     def read_int16(self, address):
-        MSB = self.smbus.read_byte(address)
-        LSB = self.smbus.read_byte(address)
+        MSB = self.driver.read_byte(address)
+        LSB = self.driver.read_byte(address)
         data = bytes(bytearray([MSB, LSB]))
         return self.INT16.unpack(data)[0]
-
+    
     def read_uint16(self, address):
-        MSB = self.smbus.read_byte(address)
-        LSB = self.smbus.read_byte(address)
+        MSB = self.driver.read_byte(address)
+        LSB = self.driver.read_byte(address)
         data = bytes(bytearray([MSB, LSB]))
         return self.UINT16.unpack(data)[0]
 
