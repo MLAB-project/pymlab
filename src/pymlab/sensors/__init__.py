@@ -182,7 +182,7 @@ class Bus(SimpleBus):
     def __init__(self, **kwargs):
         SimpleBus.__init__(self, None)
         
-        self._driver = None
+        self._driver = kwargs.pop("driver", None)
         self._driver_config = dict(kwargs)
         
         self._named_devices = None

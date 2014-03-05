@@ -6,6 +6,10 @@ Author: Jan Milík <milikjan@fit.cvut.cz>
 """
 
 
+import logging
+logging.basicConfig(level = logging.DEBUG)
+
+
 import unittest
 import cStringIO as StringIO
 
@@ -20,16 +24,20 @@ class ConfigTestCase(unittest.TestCase):
     def test_load_python_00(self):
         cfg = config.Config()
         cfg.load_python("""
-port = 5
+i2c = {
+    "port": 5,
+}
 
 bus = [
 ]
         """)
-
+    
     def test_load_python_01(self):
         cfg = config.Config()
         cfg.load_python("""
-port = 5
+i2c = {
+    "port": 5,
+}
 
 bus = [
     { "type": "mag01", "address": 0x68 },
@@ -40,7 +48,9 @@ bus = [
     def test_load_python_02(self):
         cfg = config.Config()
         cfg.load_python("""
-port = 5
+i2c = {
+    "port": 5,
+}
 
 bus = [
     { "type": "i2chub", "address": 0x70, "children": [ {"type": "mag01", "channel": 0}, {"type": "mag01", "channel": 1}, ] },
@@ -51,7 +61,9 @@ bus = [
     def test_load_python_03(self):
         cfg = config.Config()
         cfg.load_python("""
-port = 1
+i2c = {
+    "port": 5,
+}
 
 bus = [
     {
@@ -78,7 +90,9 @@ bus = [
     def test_load_python_04(self):
         cfg = config.Config()
         cfg.load_python("""
-port = 1
+i2c = {
+    "port": 1,
+}
 
 bus = [
     {
