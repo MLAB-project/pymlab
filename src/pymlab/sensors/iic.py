@@ -6,6 +6,12 @@ Author: Jan Milik <milikjan@fit.cvut.cz>
 """
 
 
+import logging
+
+
+LOGGER = logging.getLogger(__name__)
+
+
 class Driver(object):
     def write_byte(self, address, value):
         raise NotImplementedError()
@@ -73,21 +79,30 @@ class HIDDriver(Driver):
 DRIVER = None
 
 
-def load_driver(port):
+def load_driver(**kwargs):
+    port = kwargs.get("port", None)
+    if port is not None:
+        try:
+            import smbus
+            LOGGER.info("Loading SMBus driver...")
+            return SMBusDriver(port, smbus.SMBus(port))
+        except ImportError:
+            LOGGER.warning("Failed to import 'smbus' module. SMBus driver cannot be loaded.")
+    else:
+        LOGGER.warning("SMBus port not specified, skipping trying to load smbus driver.")
+    
     try:
-        import smbus
-        driver = SMBusDriver(smbus.SMBus(port))
-    except ImportError:
-        # NOTE: neznam presne jmeno toho HID modulu, ktery chcete pouzivate
         import hid
-        # Sem doplnit inicializaci driver. Neco jako:
-        # driver = HIDDriver(hid.Bus(port))
-        raise NotImplementedError()
-    return driver
+        LOGGER.info("Loading HID driver...")
+        raise NotImplementedError("HID driver is not implemented yet.")
+    except ImportError:
+        LOGGER.warning("Failed to import 'hid' module. HID driver cannot be loaded.")
+    
+    raise RuntimeError("Failed to load I2C driver.")
+    
 
-
-def init(port):
-    DRIVER = load_driver(port)
+def init(**kwargs):
+    DRIVER = load_driver(**kwargs)
 
 
 def write_byte(address, value):
