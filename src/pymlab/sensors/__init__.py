@@ -8,7 +8,6 @@ Author: Jan Milík <milikjan@fit.cvut.cz>
 
 import logging
 import struct
-import smbus
 
 #from pymlab import config
 from pymlab.utils import obj_repr
