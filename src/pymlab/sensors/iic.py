@@ -4,7 +4,7 @@
 
 Author: Jan Milik <milikjan@fit.cvut.cz>
 """
-
+import time
 
 class Driver(object):
     def write_byte(self, address, value):
@@ -50,7 +50,19 @@ class SMBusDriver(Driver):
         self.smbus.read_block_data(address, register)
 
 
+h = None
+
 class HIDDriver(Driver):
+    def __init__(self,Driver):
+        h = hid.device(0x10C4, 0xEA90)
+        h.write([0x02, 0xFF, 0x00, 0x00, 0x00])    
+        time.sleep(0.1)
+        for k in range(3):
+            h.write([0x04, 0x00, 0xFF])
+            time.sleep(0.1)
+            h.write([0x04, 0xFF, 0xFF])
+            time.sleep(0.1)
+
     def write_byte(self, address, value):
         raise NotImplementedError()
     
@@ -58,10 +70,14 @@ class HIDDriver(Driver):
         raise NotImplementedError()
     
     def write_byte_data(self, address, register, value):
-        raise NotImplementedError()
+        h.write([0x04, 0x01, 0xFF])
+        time.sleep(0.1)
+        h.write([0x04, 0xFF, 0xFF])
     
     def read_byte_data(self, address, register):
-        raise NotImplementedError()
+        h.write([0x04, 0x02, 0xFF])
+        time.sleep(0.1)
+        h.write([0x04, 0xFF, 0xFF])
     
     def write_block_data(self, address, register, value):
         raise NotImplementedError()
@@ -72,22 +88,21 @@ class HIDDriver(Driver):
 
 DRIVER = None
 
-
 def load_driver(port):
     try:
-        import smbus
-        driver = SMBusDriver(smbus.SMBus(port))
-    except ImportError:
-        # NOTE: neznam presne jmeno toho HID modulu, ktery chcete pouzivate
         import hid
         # Sem doplnit inicializaci driver. Neco jako:
-        # driver = HIDDriver(hid.Bus(port))
+#        ble = hid.device(0x10C4, 0xEA90)
+        driver = HIDDriver([0])
+    except ImportError:
+        import smbus
+#!!!KAKL        driver = SMBusDriver(smbus.SMBus(port))
         raise NotImplementedError()
     return driver
 
 
 def init(port):
-    DRIVER = load_driver(port)
+    DRIVER = load_driver([0])
 
 
 def write_byte(address, value):
