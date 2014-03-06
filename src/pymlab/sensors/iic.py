@@ -41,7 +41,7 @@ class SMBusDriver(Driver):
         return self.smbus.write_byte(address, value)
     
     def read_byte(self, address):
-        return self.smbus.read_byte(address, value)
+        return self.smbus.read_byte(address)
     
     def write_byte_data(self, address, register, value):
         return self.smbus.write_byte_data(address, register, value)
