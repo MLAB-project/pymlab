@@ -108,7 +108,8 @@ def load_driver(**kwargs):
         try:
             h = hid.device(0x10C4, 0xEA90) # Try Connect HID
             h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
-            return HIDDriver(h) # We can use this connection
+            h.close()
+            return HIDDriver(0) # We can use this connection
         except IOError:
             LOGGER.info("HID device does not exist, we will try SMBus directly...")
 
