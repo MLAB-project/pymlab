@@ -72,10 +72,19 @@ class HIDDriver(Driver):
         self.h.write([0x06, 0x00, 0x01, 0x86, 0xA0, 0x02, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0x00, 0x01])  
 
     def write_byte(self, address, value):
-        raise NotImplementedError()
+        raise self.h.write([0x14, address<<1, 0x01, value]) # Data Write Request
     
     def read_byte(self, address):
-        raise NotImplementedError()
+        self.h.write([0x10, address<<1, 0x00, 0x01]) # Data Read Request
+        for k in range(10):
+            self.h.write([0x15, 0x01]) # Transfer Status Request
+            response = self.h.read(7)
+            if (response[0] == 0x16) and (response[2] == 5):  # Polling a data
+                self.h.write([0x12, 0x00, 0x01]) # Data Read Force
+                response = self.h.read(4)
+                return response[3]
+        LOGGER.warning("CP2112 Byte Read Error...")
+        return 0xFF
     
     def write_byte_data(self, address, register, value):
         return self.h.write([0x14, address<<1, 0x02, register, value]) # Data Write Request
