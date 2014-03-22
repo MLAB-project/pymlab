@@ -69,7 +69,7 @@ class HIDDriver(Driver):
             time.sleep(0.1)
         self.h.write([0x02, 0xFF, 0x00, 0xFF, 0x00])  # Set GPIO to RX/TX LED  
         # Set SMB Configuration (AN 495)
-        self.h.write([0x06, 0x00, 0x01, 0x86, 0xA0, 0x02, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0x00, 0x01])  
+        self.h.write([0x06, 0x00, 0x01, 0x86, 0xA0, 0x02, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0x00, 0x0F])  
 
     def write_byte(self, address, value):
         raise self.h.write([0x14, address<<1, 0x01, value]) # Data Write Request
@@ -112,8 +112,9 @@ DRIVER = None
 
 def load_driver(**kwargs):
     try:
-        import hid
         LOGGER.info("Loading HID driver...")
+        import hid
+        LOGGER.info("Initiating HID driver...")
         try:
             h = hid.device(0x10C4, 0xEA90) # Try Connect HID
             h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
