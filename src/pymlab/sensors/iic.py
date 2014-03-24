@@ -11,7 +11,6 @@ import logging
 
 LOGGER = logging.getLogger(__name__)
 
-
 class Driver(object):
     def write_byte(self, address, value):
         raise NotImplementedError()
@@ -72,7 +71,7 @@ class HIDDriver(Driver):
         self.h.write([0x06, 0x00, 0x01, 0x86, 0xA0, 0x02, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0x00, 0x0F])  
 
     def write_byte(self, address, value):
-        raise self.h.write([0x14, address<<1, 0x01, value]) # Data Write Request
+        return self.h.write([0x14, address<<1, 0x01, value]) # Data Write Request
     
     def read_byte(self, address):
         self.h.write([0x10, address<<1, 0x00, 0x01]) # Data Read Request
@@ -137,7 +136,7 @@ def load_driver(**kwargs):
     else:
         LOGGER.warning("SMBus port not specified, skipping trying to load smbus driver.")
     
-    raise RuntimeError("Failed to load I2C driver.")
+    raise RuntimeError("Failed to load I2C driver. Are you privileget user?")
     
 
 def init(**kwargs):

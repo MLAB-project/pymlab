@@ -41,7 +41,6 @@ class CLKGEN01(Device):
         rfreq |= (self.bus.read_byte_data(self.address,self.R_RFREQ3)<<24)
         rfreq |= ((self.bus.read_byte_data(self.address,self.R_RFREQ4) & self.RFREQ4_MASK)<<32)
         return rfreq/2.0**28
-#        return (rfreq>>28)+((rfreq & 0x0FFFFFFF)/2.0**28)
 
     def get_n1_div(self):
         n1 = ((self.bus.read_byte_data(self.address, self.R_HS) & self.N1_H_MASK)<<2)
@@ -72,15 +71,12 @@ class CLKGEN01(Device):
         self.bus.write_byte_data(self.address, self.R_RFREQ4, (((div<<6) & self.N1_L_MASK) | (reg & self.RFREQ4_MASK)))
 
     def freeze_m(self):
-#        reg = self.bus.read_byte_data(self.address, self.R_RFMC) | self.RFMC_FREEZE_M
         self.bus.write_byte_data(self.address, self.R_RFMC, self.RFMC_FREEZE_M)
 
     def unfreeze_m(self):
-#        reg = self.bus.read_byte_data(self.address, self.R_RFMC) & ~(self.RFMC_FREEZE_M)
         self.bus.write_byte_data(self.address, self.R_RFMC, 0)
 
     def new_freq(self):
-#        reg = self.bus.read_byte_data(self.address, self.R_RFMC) | self.RFMC_NEW_FREQ
         self.bus.write_byte_data(self.address, self.R_RFMC, self.RFMC_NEW_FREQ)
 
     def reset(self):
