@@ -32,6 +32,7 @@ cfg = config.Config(
 )
 cfg.initialize()
 
+sys.stdout.write(" MLAB magnetometer sensor module example \r\n")
 mag = cfg.get_device("mag")
 
 
