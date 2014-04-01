@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Python driver for MLAB MAG01A module with HMC5888L Magnetometer sensor wrapper class
+# Python test script for MLAB ALTIMET01A sensor
 
 import time
 import datetime
@@ -13,48 +13,46 @@ from pymlab import config
 
 if len(sys.argv) != 2:
     sys.stderr.write("Invalid number of arguments.\n")
-    sys.stderr.write("Usage: %s #I2CPORT \n" % (sys.argv[0], ))
+    sys.stderr.write("Usage: %s #I2CPORT\n" % (sys.argv[0], ))
     sys.exit(1)
 
 port    = eval(sys.argv[1])
 
-
 #### Sensor Configuration ###########################################
 
 cfg = config.Config(
-    port = port,
+    i2c = {
+        "port": port,
+    },
+
     bus = [
         {
-	    	"type": "i2chub",
-	    	"address": 0x72,
-	   	"children": [
-            		{"name": "altimet", "type": "altimet01" , "channel": 6, },
-		],
+            "type": "i2chub",
+            "address": 0x72,
+            
+            "children": [
+                {"name": "altimet", "type": "altimet01" , "channel": 7, },   
+            ],
         },
-#        {
-#            "name":          "altimet",
-#            "type":        "altimet01",
-#        },
- 
     ],
 )
 cfg.initialize()
 gauge = cfg.get_device("altimet")
 time.sleep(0.5)
 
-
 #### Data Logging ###################################################
 
-gauge.route()
+sys.stdout.write("ALTIMET data acquisition system started \n")
 
 try:
-    with open("temperature.log", "a") as f:
         while True:
-            (t, p) = gauge.get_tp()
-            sys.stdout.write(" Temperature: %.2f  Pressure: %d\n" % (t, p, ))
-            f.write("%d\t%s\t%.2f\t%d\n" % (time.time(), datetime.datetime.now().isoformat(), t, p, ))
+            gauge.route()
+            (t1, p1) = gauge.get_tp()
+            sys.stdout.write(" Temperature: %.2f  Pressure: %d \n" % (t1, p1))
             sys.stdout.flush()
-            time.sleep(0.5)
+#            time.sleep(0.5)
+            
 except KeyboardInterrupt:
+    ser.close()
     sys.exit(0)
 
