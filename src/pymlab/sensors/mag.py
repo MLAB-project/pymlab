@@ -44,15 +44,9 @@ class MAG01(Device):
         self._gauss = gauss
         (reg, self._scale) = self.SCALES[gauss]
 
-    def twos_complement(self, val, len):
-        # Convert twos compliment to integer
-        if (val & (1 << len - 1)):
-            val = val - (1<<len)
-        return val
 
     def _convert(self, data, offset):
         val = self.twos_complement(data[offset] << 8 | data[offset+1], 16)
-        if val == -4096: return Over
         return round(val * self._scale, 4)
 
     def initialize(self):
@@ -63,11 +57,20 @@ class MAG01(Device):
         self.bus.write_byte_data(self.address, 0x02, 0x00) # Continuous measurement
 
     def axes(self):
-        data = self.bus.read_block_data(self.address, 0x00)
-        #print map(hex, data)
-        x = self._convert(data, 3)
-        y = self._convert(data, 7)
-        z = self._convert(data, 5)
+#        self.bus.write_byte(self.address, 0x03)
+        print self.bus.read_byte(self.address)
+        print self.bus.read_byte(self.address)
+        print self.bus.read_byte(self.address)
+        print self.bus.read_byte(self.address)
+        print self.bus.read_byte(self.address)
+        print self.bus.read_byte(self.address)
+
+        x = self.bus.read_int16(self.address)
+#        if x == -4096: x = Over
+        y = self.bus.read_int16(self.address)
+#        if y == -4096: y = Over
+        z = self.bus.read_int16(self.address)
+#        if z == -4096: z = Over
         return (x,y,z)
 
     def __str__(self):

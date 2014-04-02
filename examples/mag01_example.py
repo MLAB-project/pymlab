@@ -31,7 +31,7 @@ cfg = config.Config(
             "address": 0x72,
             
             "children": [
-                {"name": "mag", "type": "mag01", "gauss": 8.1, "channel": 6, }
+                {"name": "mag", "type": "mag01", "gauss": 1.3, "channel": 6, }
             ],
 		},
 	],

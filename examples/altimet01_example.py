@@ -53,6 +53,5 @@ try:
 #            time.sleep(0.5)
             
 except KeyboardInterrupt:
-    ser.close()
     sys.exit(0)
 

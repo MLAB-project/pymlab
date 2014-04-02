@@ -70,7 +70,7 @@ class ALTIMET01(Device):
             sign = -1
         else:
                 sign = 1
-
+        # conversion of register values to measured values according to sensor datasheet
         t = sign * float(t_MSB + (t_LSB >> 4)/16.0)    
         p = float((p_MSB << 10)|(p_CSB << 2)|(p_LSB >> 6)) + float((p_LSB >> 4)/4.0)
         return (t, p);
