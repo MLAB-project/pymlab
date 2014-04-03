@@ -11,7 +11,7 @@ Installation
 
     $ sudo apt-get install python-setuptools python-smbus
 
-#### Cython USBI2C01A intefrace API
+#### Cython USBI2C01A intefrace API (Optional)
 
   sudo apt-get instal libusb-1.0 git cython
    
@@ -23,7 +23,7 @@ Installation
 Compile and install HIDAPI and CYTHON-HIDAPI according to instruction in repositories mentioned above.
 
 
-### Install in to system
+### Install in to Ubuntu python system
 
     $ sudo python setup.py develop
 
@@ -37,35 +37,28 @@ Usage
 ```python
 from pymlab import config
 
-
 cfg = config.Config(
-	port = 1,
-	
-	bus = [
-		{
-		    "type": "i2chub",
-		    "address": 0x72,
-		    
-		    "children": [
-				{
-					"type": "i2chub",
-					"address": 0x70,
-					"channel": 1,
-					
-					"children": [
-						{ "name": "temp", "type": "sht25", "channel": 2, },
-						{ "name": "mag",  "type": "mag01", "channel": 2, },
-					],
-				},
-		    		],
-		},
-	],
+    i2c = {
+        "port": port,
+    },
+
+    bus = [
+        {
+            "type": "i2chub",
+            "address": 0x72,
+            
+            "children": [
+                {"name": "altimet", "type": "altimet01" , "channel": 7, },   
+            ],
+        },
+    ],
 )
 cfg.initialize()
+gauge = cfg.get_device("altimet")
+time.sleep(0.5)
 
-
-mag = cfg.get_device("mag")
-print "Magnetometer axes: %d, %d, %d" % mag.axes()
+gauge.route()
+(t1, p1) = gauge.get_tp()
 
 ```
 
