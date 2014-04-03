@@ -3,6 +3,7 @@
 # Python driver for MLAB MAG01A module with HMC5888L Magnetometer sensor wrapper class
 
 import time
+import datetime
 import sys
 
 from pymlab import config
@@ -12,7 +13,7 @@ from pymlab import config
 
 if len(sys.argv) != 2:
 	sys.stderr.write("Invalid number of arguments.\n")
-	sys.stderr.write("Usage: %s PORT\n" % (sys.argv[0], ))
+	sys.stderr.write("Usage: %s #I2CPORT\n" % (sys.argv[0], ))
 	sys.exit(1)
 
 port    = eval(sys.argv[1])
@@ -20,23 +21,33 @@ port    = eval(sys.argv[1])
 #### Sensor Configuration ###########################################
 
 cfg = config.Config(
-	port = port,
+    i2c = {
+        "port": port,
+    },
+
 	bus = [
 		{
-			"name":          "mag",
-			"type":        "mag01",
-			"gauss":           8.1,
-			"declination": (-2, 5),
+            "type": "i2chub",
+            "address": 0x72,
+            
+            "children": [
+                {"name": "mag", "type": "mag01", "gauss": 1.3, "channel": 6, }
+            ],
 		},
 	],
 )
 cfg.initialize()
+<<<<<<< HEAD
 
 sys.stdout.write(" MLAB magnetometer sensor module example \r\n")
+=======
+>>>>>>> feat/i2c-drivers
 mag = cfg.get_device("mag")
-
+time.sleep(0.5)
 
 #### Data Logging ###################################################
+
+sys.stdout.write("Magnetometer data acquisition system started \n")
 
 try:
 	while True:
