@@ -13,7 +13,7 @@ Installation
 
 #### Cython USBI2C01A intefrace API (Optional)
 
-    $ sudo apt-get instal libusb-1.0 git cython
+    $ sudo apt-get install libusb-1.0 git cython
    
 Do it in a working directory:
 
