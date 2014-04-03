@@ -15,7 +15,7 @@ Installation
 
     $ sudo apt-get instal libusb-1.0 git cython
    
-Do in a working directory:
+Do it in a working directory:
 
     $ git clone https://github.com/signal11/hidapi
     $ git clone https://github.com/gbishop/cython-hidapi
