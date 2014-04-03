@@ -13,12 +13,12 @@ Installation
 
 #### Cython USBI2C01A intefrace API (Optional)
 
-  sudo apt-get instal libusb-1.0 git cython
+    sudo apt-get instal libusb-1.0 git cython
    
-  mkdir hidapi
-  cd hidapi
-  git clone https://github.com/signal11/hidapi
-  git clone https://github.com/gbishop/cython-hidapi
+    mkdir hidapi
+    cd hidapi
+    git clone https://github.com/signal11/hidapi
+    git clone https://github.com/gbishop/cython-hidapi
   
 Compile and install HIDAPI and CYTHON-HIDAPI according to instruction in repositories mentioned above.
 
