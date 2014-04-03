@@ -11,7 +11,19 @@ Installation
 
     $ sudo apt-get install python-setuptools python-smbus
 
-### Install in to Python development system
+#### Cython USBI2C01A intefrace API
+
+  sudo apt-get instal libusb-1.0 git cython
+   
+  mkdir hidapi
+  cd hidapi
+  git clone https://github.com/signal11/hidapi
+  git clone https://github.com/gbishop/cython-hidapi
+  
+Compile and install HIDAPI and CYTHON-HIDAPI according to instruction in repositories mentioned above.
+
+
+### Install in to system
 
     $ sudo python setup.py develop
 
