@@ -25,8 +25,7 @@ Do it in a working directory:
     $ git clone https://github.com/signal11/hidapi
     $ git clone https://github.com/gbishop/cython-hidapi
   
-Compile and install HIDAPI and CYTHON-HIDAPI according to instruction in repositories mentioned above.
-
+Compile and install [HIDAPI](https://github.com/signal11/hidapi) and [CYTHON-HIDAPI](https://github.com/gbishop/cython-hidapi) according to instruction in repositories mentioned above.
 
 Usage
 -----
