@@ -136,7 +136,7 @@ def load_driver(**kwargs):
     else:
         LOGGER.warning("SMBus port not specified, skipping trying to load smbus driver.")
     
-    raise RuntimeError("Failed to load I2C driver. Are you privileged user?")
+    raise RuntimeError("Failed to load I2C driver. Enable logging for more details.")
     
 
 def init(**kwargs):
