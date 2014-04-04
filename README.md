@@ -9,15 +9,16 @@ Installation
 
 ### Dependencies
 
-    $ sudo apt-get install python-setuptools python-smbus
+    $ sudo apt-get install git python-setuptools python-smbus
 
 ### Install in to Ubuntu python system
-
+    
+    $ git clone https://github.com/MLAB-project/MLAB-I2c-modules
     $ sudo python setup.py develop
 
-#### Cython USBI2C01A intefrace API (Optional)
+#### Cython interface for the MLAB module USBI2C01A (Optional)
 
-    $ sudo apt-get install libusb-1.0 git cython
+    $ sudo apt-get install libusb-1.0 cython
    
 Do it in a working directory:
 
