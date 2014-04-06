@@ -44,21 +44,34 @@ class MAG01(Device):
         self._gauss = gauss
         (reg, self._scale) = self.SCALES[gauss]
 
+        self.HMC5883L_CRA    =0x00
+        self.HMC5883L_CRB    =0x01
+        self.HMC5883L_MR     =0x02
+        self.HMC5883L_DXRA   =0x03
+        self.HMC5883L_DXRB   =0x04
+        self.HMC5883L_DYRA   =0x05
+        self.HMC5883L_DYRB   =0x06
+        self.HMC5883L_DZRA   =0x07
+        self.HMC5883L_DZRB   =0x08
+        self.HMC5883L_SR     =0x09
+        self.HMC5883L_IRA    =0x0A
+        self.HMC5883L_IRB    =0x0B
+        self.HMC5883L_IRC    =0x0C
+
+    def initialize(self):
+        reg, self._scale = self.SCALES[self._gauss]
+        
+        self.bus.write_byte_data(self.address, self.HMC5883L_CRA, 0x70) # 8 Average, 15 Hz, normal measurement
+        self.bus.write_byte_data(self.address, self.HMC5883L_CRB, reg << 5) # Scale
+        self.bus.write_byte_data(self.address, self.HMC5883L_MR, 0x00) # Continuous measurement
+        print "magnetometer initialized"
 
     def _convert(self, data, offset):
         val = self.twos_complement(data[offset] << 8 | data[offset+1], 16)
         return round(val * self._scale, 4)
 
-    def initialize(self):
-        reg, self._scale = self.SCALES[self._gauss]
-        
-        self.bus.write_byte_data(self.address, 0x00, 0x70) # 8 Average, 15 Hz, normal measurement
-        self.bus.write_byte_data(self.address, 0x01, reg << 5) # Scale
-        self.bus.write_byte_data(self.address, 0x02, 0x00) # Continuous measurement
-
     def axes(self):
-#        self.bus.write_byte(self.address, 0x03)
-        print self.bus.read_byte(self.address)
+        print self.bus.read_byte_data(self.address, self.HMC5883L_DXRA)
         print self.bus.read_byte(self.address)
         print self.bus.read_byte(self.address)
         print self.bus.read_byte(self.address)

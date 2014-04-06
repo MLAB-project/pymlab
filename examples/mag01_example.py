@@ -37,12 +37,8 @@ cfg = config.Config(
 	],
 )
 cfg.initialize()
-<<<<<<< HEAD
-
-sys.stdout.write(" MLAB magnetometer sensor module example \r\n")
-=======
->>>>>>> feat/i2c-drivers
 mag = cfg.get_device("mag")
+sys.stdout.write(" MLAB magnetometer sensor module example \r\n")
 time.sleep(0.5)
 
 #### Data Logging ###################################################
@@ -50,11 +46,13 @@ time.sleep(0.5)
 sys.stdout.write("Magnetometer data acquisition system started \n")
 
 try:
-	while True:
-		(x, y, z) = mag.axes()
-		#sys.stdout.write("\rHeading: " + magnetometer.degrees(magnetometer.heading()) + " X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " )
-		sys.stdout.write(" X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " + "\r\n")
-		sys.stdout.flush()
-		time.sleep(0.5)
+    while True:
+        mag.route()
+        (x, y, z) = mag.axes()
+        #sys.stdout.write("\rHeading: " + magnetometer.degrees(magnetometer.heading()) + " X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " )
+        sys.stdout.write(" X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " + "\r\n")
+        sys.stdout.flush()
+        time.sleep(0.5)
+        mag.initialize()
 except KeyboardInterrupt:
 	sys.exit(0)
