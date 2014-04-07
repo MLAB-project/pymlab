@@ -6,9 +6,12 @@
 import math
 import time
 import sys
+import logging
 
 from pymlab.sensors import Device
 
+
+LOGGER = logging.getLogger(__name__)
 
 class Overflow(object):
     def __repr__(self):
@@ -60,11 +63,13 @@ class MAG01(Device):
 
     def initialize(self):
         reg, self._scale = self.SCALES[self._gauss]
-        
+        self.bus.read_byte(self.address)
         self.bus.write_byte_data(self.address, self.HMC5883L_CRA, 0x70) # 8 Average, 15 Hz, normal measurement
         self.bus.write_byte_data(self.address, self.HMC5883L_CRB, reg << 5) # Scale
         self.bus.write_byte_data(self.address, self.HMC5883L_MR, 0x00) # Continuous measurement
-        print "magnetometer initialized"
+        LOGGER.debug("Byte data %s to register %s to address %s writen",
+            bin(self.bus.read_byte_data(self.address, self.HMC5883L_MR)), hex(self.HMC5883L_MR), hex(self.address))
+
 
     def _convert(self, data, offset):
         val = self.twos_complement(data[offset] << 8 | data[offset+1], 16)

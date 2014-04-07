@@ -17,9 +17,10 @@ if len(sys.argv) != 2:
 port    = eval(sys.argv[1])
 address = 0x48
 #### Sensor Configuration ###########################################
-
 cfg = config.Config(
-    port = port,
+    i2c = {
+        "port": port,
+    },
     bus = [
         {
             "name":          "lts01",
@@ -30,8 +31,8 @@ cfg = config.Config(
 )
 cfg.initialize()
 
-print "LTS01 temperature sensor module example \r\n"
-print "Temperature  Humidity[%%]  \r\n"
+print "LTS01A temperature sensor module example \r\n"
+print "Temperature [deg C] \r\n"
 sensor = cfg.get_device("lts01")
 
 #### Data Logging ###################################################

@@ -18,7 +18,7 @@ Installation
 
 #### Cython interface for the MLAB module USBI2C01A (Optional)
 
-    $ sudo apt-get install libusb-1.0 cython
+    $ sudo apt-get install libusb-1.0 cython libudev-dev
    
 Do it in a working directory:
 

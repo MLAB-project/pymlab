@@ -205,7 +205,7 @@ class Bus(SimpleBus):
         return self.driver.write_byte(address, value)
     
     def read_byte(self, address):
-        LOGGER.debug("Reading byte from address %r!", address)
+        LOGGER.debug("Reading byte from address %s!", hex(address))
         return self.driver.read_byte(address)
     
     def write_byte_data(self, address, register, value):
@@ -215,6 +215,7 @@ class Bus(SimpleBus):
         return self.driver.write_byte_data(address, register, value)
     
     def read_byte_data(self, address, register):
+        LOGGER.debug("Reading byte from register %s at bus address %s",  hex(register), hex(address))
         return self.driver.read_byte_data(address, register)
     
     def write_block_data(self, address, register, value):

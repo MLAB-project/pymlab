@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
 # Python driver for MLAB MAG01A module with HMC5888L Magnetometer sensor wrapper class
+import logging
+logging.basicConfig(level=logging.DEBUG) 
+
 
 import time
 import datetime
@@ -36,6 +39,22 @@ cfg = config.Config(
 		},
 	],
 )
+
+
+cfg = config.Config(
+    i2c = {
+        "port": port,
+    },
+    bus = [
+        {
+            "name":          "mag",
+            "type":        "mag01",
+            "gauss":        1.3,
+        },
+    ],
+)
+
+
 cfg.initialize()
 mag = cfg.get_device("mag")
 sys.stdout.write(" MLAB magnetometer sensor module example \r\n")
@@ -53,6 +72,5 @@ try:
         sys.stdout.write(" X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " + "\r\n")
         sys.stdout.flush()
         time.sleep(0.5)
-        mag.initialize()
 except KeyboardInterrupt:
 	sys.exit(0)

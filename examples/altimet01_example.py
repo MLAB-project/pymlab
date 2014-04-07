@@ -36,6 +36,19 @@ cfg = config.Config(
         },
     ],
 )
+
+cfg = config.Config(
+    i2c = {
+        "port": port,
+    },
+    bus = [
+        {
+            "name":          "altimet",
+            "type":        "altimet01",
+        },
+    ],
+)
+
 cfg.initialize()
 gauge = cfg.get_device("altimet")
 time.sleep(0.5)
@@ -50,7 +63,7 @@ try:
             (t1, p1) = gauge.get_tp()
             sys.stdout.write(" Temperature: %.2f  Pressure: %d \n" % (t1, p1))
             sys.stdout.flush()
-#            time.sleep(0.5)
+            time.sleep(0.5)
             
 except KeyboardInterrupt:
     sys.exit(0)
