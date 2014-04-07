@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
 # Python driver for MLAB MAG01A module with HMC5888L Magnetometer sensor wrapper class
-import logging
-logging.basicConfig(level=logging.DEBUG) 
+
+#uncomment for debbug purposes
+#import logging
+#logging.basicConfig(level=logging.DEBUG) 
 
 
 import time
@@ -22,7 +24,7 @@ if len(sys.argv) != 2:
 port    = eval(sys.argv[1])
 
 #### Sensor Configuration ###########################################
-
+'''
 cfg = config.Config(
     i2c = {
         "port": port,
@@ -39,7 +41,7 @@ cfg = config.Config(
 		},
 	],
 )
-
+'''
 
 cfg = config.Config(
     i2c = {
@@ -49,7 +51,7 @@ cfg = config.Config(
         {
             "name":          "mag",
             "type":        "mag01",
-            "gauss":        1.3,
+            "gauss":        4.0,
         },
     ],
 )

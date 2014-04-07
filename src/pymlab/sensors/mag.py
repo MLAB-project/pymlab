@@ -76,14 +76,16 @@ class MAG01(Device):
         return round(val * self._scale, 4)
 
     def axes(self):
-        print self.bus.read_byte_data(self.address, self.HMC5883L_DXRA)
-        print self.bus.read_byte(self.address)
-        print self.bus.read_byte(self.address)
-        print self.bus.read_byte(self.address)
-        print self.bus.read_byte(self.address)
-        print self.bus.read_byte(self.address)
+        self.bus.write_byte_data(self.address, self.HMC5883L_MR, 0x01)
+        time.sleep(0.5)
+#        print self.bus.read_byte_data(self.address, self.HMC5883L_DXRA)
+#        print self.bus.read_byte(self.address)
+#        print self.bus.read_byte(self.address)
+#        print self.bus.read_byte(self.address)
+#        print self.bus.read_byte(self.address)
+#        print self.bus.read_byte(self.address)
 
-        x = self.bus.read_int16(self.address)
+        x = self.bus.read_byte_data(self.address, self.HMC5883L_DXRA)
 #        if x == -4096: x = Over
         y = self.bus.read_int16(self.address)
 #        if y == -4096: y = Over
