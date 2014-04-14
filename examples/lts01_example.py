@@ -2,6 +2,10 @@
 
 # Python library for LTS01A MLAB module with MAX31725 i2c Local Temperature Sensor
 
+#uncomment for debbug purposes
+import logging
+logging.basicConfig(level=logging.DEBUG) 
+
 import time
 import datetime
 import sys
@@ -17,6 +21,25 @@ if len(sys.argv) != 2:
 port    = eval(sys.argv[1])
 address = 0x48
 #### Sensor Configuration ###########################################
+
+cfg = config.Config(
+    i2c = {
+        "port": port,
+    },
+
+	bus = [
+		{
+            "type": "i2chub",
+            "address": 0x72,
+            
+            "children": [
+                {"name": "lts01", "type": "lts01", "address": address, "channel": 1, }
+            ],
+		},
+	],
+)
+
+'''
 cfg = config.Config(
     i2c = {
         "port": port,
@@ -29,6 +52,9 @@ cfg = config.Config(
         },
     ],
 )
+'''
+
+
 cfg.initialize()
 
 print "LTS01A temperature sensor module example \r\n"

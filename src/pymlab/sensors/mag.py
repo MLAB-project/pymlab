@@ -41,7 +41,7 @@ class MAG01(Device):
         8.10: [7, 4.35],
     }
 
-    def __init__(self, parent = None, address = 0x1E, gauss = 1.3, **kwargs):
+    def __init__(self, parent = None, address = 0x1E, gauss = 4.0, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
         self._gauss = gauss
@@ -76,21 +76,12 @@ class MAG01(Device):
         return round(val * self._scale, 4)
 
     def axes(self):
-        self.bus.write_byte_data(self.address, self.HMC5883L_MR, 0x01)
-        time.sleep(0.5)
-#        print self.bus.read_byte_data(self.address, self.HMC5883L_DXRA)
-#        print self.bus.read_byte(self.address)
-#        print self.bus.read_byte(self.address)
-#        print self.bus.read_byte(self.address)
-#        print self.bus.read_byte(self.address)
-#        print self.bus.read_byte(self.address)
-
-        x = self.bus.read_byte_data(self.address, self.HMC5883L_DXRA)
-#        if x == -4096: x = Over
-        y = self.bus.read_int16(self.address)
-#        if y == -4096: y = Over
-        z = self.bus.read_int16(self.address)
-#        if z == -4096: z = Over
+        x = self.bus.read_int16(self.address, self.HMC5883L_DXRA)
+        if x == -4096: x = OVERFLOW
+        y = self.bus.read_int16(self.address, self.HMC5883L_DYRA)
+        if y == -4096: y = OVERFLOW
+        z = self.bus.read_int16(self.address, self.HMC5883L_DZRA)
+        if z == -4096: z = OVERFLOW
         return (x,y,z)
 
     def __str__(self):
