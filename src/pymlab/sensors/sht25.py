@@ -11,10 +11,6 @@ from pymlab.sensors import Device
 class SHT25(Device):
     'Python library for SHT25v01A MLAB module with Sensirion SHT25 i2c humidity and temperature sensor.'
 
-    def soft_reset(self):
-        self.bus.write_byte(self.address, 0xFE);
-        return
-
     def __init__(self, parent = None, address = 0x40, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
@@ -35,6 +31,11 @@ class SHT25(Device):
         self.READ_USR_REG = 0b11100111
         self.SOFT_RESET = 0b11111110
 
+    def soft_reset(self):
+        self.bus.write_byte(self.address, self.SOFT_RESET);
+        return
+
+
     def setup(self, setup_reg ):  # writes to status register and returns its value
         reg=self.bus.read_byte_data(self.address, self.READ_USR_REG);    # Read status actual status register
         reg = (reg & 0x3A) | setup_reg;    # modify actual register status leave reserved bits without 
@@ -47,8 +48,8 @@ class SHT25(Device):
         time.sleep(0.1)
 
         data = self.bus.read_int16(self.address)
-#        data &= ~0b11    # trow out status bits
-        print( data)
+        data &= ~0b11    # trow out status bits
+        print(data)
         return(-46.85 + 175.72*(data/65536.0));
 
     def get_hum(self):
@@ -56,8 +57,8 @@ class SHT25(Device):
         time.sleep(0.1)
 
         data = self.bus.read_uint16(self.address)
-#        data &= ~0b11    # trow out status bits
-        print( data)
+        data &= ~0b11    # trow out status bits
+        print(data)
         return(-6.0 + 125.0*(data/65536.0));
 
 
