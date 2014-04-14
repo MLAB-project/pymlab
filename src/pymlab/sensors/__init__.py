@@ -234,11 +234,10 @@ class Bus(SimpleBus):
         data = self.INT16.pack(value)
         return self.driver.write_block_data(address, register, data)
     
-    def read_int16(self, address, register):   ## Reads int16 as two separate bytes, suppose autoincrement of internal register pointer in I2C device. 
+    def read_int16(self, address):   ## Reads int16 as two separate bytes, suppose autoincrement of internal register pointer in I2C device. 
         MSB = self.driver.read_byte(address)
         LSB = self.driver.read_byte(address)
         data = bytes(bytearray([MSB, LSB]))
-        data = struct.pack("<H",self.driver.read_word_data(address, register))
         LOGGER.debug("Reading MSB %s and LSB %s from bus address %s",  hex(MSB), hex(LSB), hex(address))
         return self.INT16.unpack(data)[0]
 
