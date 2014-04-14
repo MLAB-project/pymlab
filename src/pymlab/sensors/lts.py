@@ -62,7 +62,7 @@ class LTS01(Device):
 
     def get_temp(self):
 #        self.bus.write_byte(self.address,0x00)
-        temp = self.bus.read_int16(self.address, self.Reg_temp) / 256.0 
+        temp = self.bus.read_int16_data(self.address, self.Reg_temp) / 256.0 
         #temperature calculation register_value * 0.00390625; (Sensor is a big-endian but SMBus is little-endian by default)
         return temp
 

@@ -234,15 +234,18 @@ class Bus(SimpleBus):
         data = self.INT16.pack(value)
         return self.driver.write_block_data(address, register, data)
     
-    def read_int16(self, address, register):            ## Must be checked, possible bug in byte manipulation (LTS01A sensor sometimes returns wrong values)
-#        MSB = self.driver.read_byte(address)
-#        MSB = 0xff
-#        LSB = self.driver.read_byte(address)
-#        data = bytes(bytearray([MSB, LSB]))
+    def read_int16(self, address, register):   ## Reads int16 as two separate bytes, suppose autoincrement of internal register pointer in I2C device. 
+        MSB = self.driver.read_byte(address)
+        LSB = self.driver.read_byte(address)
+        data = bytes(bytearray([MSB, LSB]))
         data = struct.pack("<H",self.driver.read_word_data(address, register))
-#        LOGGER.debug("Reading MSB %s and LSB %s from bus address %s",  hex(MSB), hex(LSB), hex(address))
-#        LOGGER.debug("Reading word %s from bus address %s",  hex(data), hex(address))
+        LOGGER.debug("Reading MSB %s and LSB %s from bus address %s",  hex(MSB), hex(LSB), hex(address))
         return self.INT16.unpack(data)[0]
+
+    def read_int16_data(self, address, register):            ## Must be checked, possible bug in byte manipulation (LTS01A sensor sometimes returns wrong values)
+        data = struct.pack("<H",self.driver.read_word_data(address, register))
+        return self.INT16.unpack(data)[0]
+
     
     def read_uint16(self, address):
         MSB = self.driver.read_byte(address)

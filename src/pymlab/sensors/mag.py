@@ -76,11 +76,11 @@ class MAG01(Device):
         return round(val * self._scale, 4)
 
     def axes(self):
-        x = self.bus.read_int16(self.address, self.HMC5883L_DXRA)
+        x = self.bus.read_int16_data(self.address, self.HMC5883L_DXRA)
         if x == -4096: x = OVERFLOW
-        y = self.bus.read_int16(self.address, self.HMC5883L_DYRA)
+        y = self.bus.read_int16_data(self.address, self.HMC5883L_DYRA)
         if y == -4096: y = OVERFLOW
-        z = self.bus.read_int16(self.address, self.HMC5883L_DZRA)
+        z = self.bus.read_int16_data(self.address, self.HMC5883L_DZRA)
         if z == -4096: z = OVERFLOW
         return (x,y,z)
 
