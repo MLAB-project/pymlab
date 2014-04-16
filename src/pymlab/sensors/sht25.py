@@ -49,7 +49,6 @@ class SHT25(Device):
 
         data = self.bus.read_int16(self.address)
         data &= ~0b11    # trow out status bits
-        print(data)
         return(-46.85 + 175.72*(data/65536.0));
 
     def get_hum(self):
@@ -58,7 +57,6 @@ class SHT25(Device):
 
         data = self.bus.read_uint16(self.address)
         data &= ~0b11    # trow out status bits
-        print(data)
         return(-6.0 + 125.0*(data/65536.0));
 
 
