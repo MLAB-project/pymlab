@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """pymlab module.
 
-Author: Jan Milík <milikjan@fit.cvut.cz>
+MLAB I2C bus modules binding.
 """
 
 

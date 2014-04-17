@@ -19,7 +19,7 @@ setup(
     author_email     = 'milikjan@fit.cvut.cz',
     description      = 'Personal toolbox for unix programs.',
     long_description = pymlab.__doc__,
-    url              = 'http://pypi.python.org/pypi/nmapps',
+    url              = 'https://github.com/MLAB-project/MLAB-I2c-modules',
     
     #packages    = ['pymlab', 'pymlab.sensors', 'pymlab.tests', ],
     packages    = find_packages("src"),
@@ -44,6 +44,7 @@ setup(
         'Natural Language :: English',
         # 'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
     ]
 )
 
