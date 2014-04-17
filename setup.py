@@ -17,31 +17,24 @@ setup(
     version          = pymlab.__version__,
     author           = 'Jan Milík',
     author_email     = 'milikjan@fit.cvut.cz',
-    description      = 'Personal toolbox for unix programs.',
+    description      = 'Toolbox for interfacing I2C sensors.',
     long_description = pymlab.__doc__,
     url              = 'https://github.com/MLAB-project/MLAB-I2c-modules',
     
     #packages    = ['pymlab', 'pymlab.sensors', 'pymlab.tests', ],
     packages    = find_packages("src"),
     package_dir = {'': 'src'},
-    # py_modules  = ['nmapps'],
     provides    = ['pymlab'],
     keywords    = 'library unix',
     license     = 'Lesser General Public License v3',
-    
-    #scripts     = ['src/scripts/eggimp.py', ],
-    
-    #entry_points = {
-    #    "console_scripts": ["nmapps = nmapps.tool:main", ],
-    #},
     
     test_suite = 'pymlab.tests',
     
     classifiers = [
         'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research',
         'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
-        'Natural Language :: English',
+        'Natural Language :: Czech',
         # 'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',

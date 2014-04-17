@@ -23,9 +23,13 @@ Installation
 Do it in a working directory:
 
     $ git clone https://github.com/signal11/hidapi
-    $ git clone https://github.com/parautenbach/cython-hidapi
   
-Compile and install [HIDAPI](https://github.com/signal11/hidapi) and [CYTHON-HIDAPI](https://github.com/parautenbach/cython-hidapi) according to instruction in repositories mentioned above.
+Compile and install [HIDAPI](https://github.com/signal11/hidapi) according to instruction in repositories mentioned above.
+
+[CYTHON-HIDAPI](https://github.com/parautenbach/cython-hidapi)  can be installed easily from Pypi internet repository by running: 
+
+    $ easy_install hidapi
+
 
 Usage
 -----
