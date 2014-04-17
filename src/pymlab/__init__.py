@@ -1,8 +1,23 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""pymlab module.
+"""
+pymlab I2C modules drivers package 
+==================================
 
-MLAB I2C bus modules binding.
+MLAB's I2C bus modules binding. Should be used for data readout from MLAB (http://wiki.mlab.cz/) electronic modules. 
+
+
+Software Dependencies
+---------------------
+
+* Python-smbus 
+* Cython-hidapi (https://pypi.python.org/pypi/hidapi/) (optional, required with USBI2C module)
+* libusb, hidapi and libudev on Linux (optional, required with USBI2C module)
+
+
+
+Supported devices
+-----------------
 
 Currently supported sensors are:
 
