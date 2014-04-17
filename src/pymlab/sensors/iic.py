@@ -24,6 +24,12 @@ class Driver(object):
     def read_byte_data(address, register):
         raise NotImplementedError()
     
+    def write_word_data(self, address, register, value):
+        raise NotImplementedError()
+    
+    def read_word_data(self, address, register):
+        raise NotImplementedError()
+    
     def write_block_data(address, register, value):
         raise NotImplementedError()
     
@@ -105,6 +111,14 @@ class HIDDriver(Driver):
                 return response[3]
         LOGGER.warning("CP2112 Read Error...")
         return 0xFF
+    
+    def write_word_data(self, address, register, value):
+        # TODO: Implement HIDDrive.write_word_data()
+        raise NotImplementedError()
+    
+    def read_word_data(self, address, register):
+        # TODO: Implement HIDDrive.read_word_data()
+        raise NotImplementedError()
     
     def write_block_data(self, address, register, value):
         raise NotImplementedError()
