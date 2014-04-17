@@ -68,7 +68,7 @@ class SMBusDriver(Driver):
 
 
 class HIDDriver(Driver):
-    def __init__(self,Driver):
+    def __init__(self):
         time.sleep(1)   # give an OS time for remounting the HID device
         import hid
         self.h = hid.device(0x10C4, 0xEA90) # Connect HID again after enumeration
@@ -81,7 +81,7 @@ class HIDDriver(Driver):
         self.h.write([0x02, 0xFF, 0x00, 0xFF, 0x00])  # Set GPIO to RX/TX LED  
         # Set SMB Configuration (AN 495)
         self.h.write([0x06, 0x00, 0x01, 0x86, 0xA0, 0x02, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0x00, 0x0F])  
-
+    
     def write_byte(self, address, value):
         return self.h.write([0x14, address<<1, 0x01, value]) # Data Write Request
     
@@ -129,6 +129,7 @@ class HIDDriver(Driver):
 
 DRIVER = None
 
+
 def load_driver(**kwargs):
     try:
         LOGGER.info("Loading HID driver...")
@@ -138,10 +139,10 @@ def load_driver(**kwargs):
             h = hid.device(0x10C4, 0xEA90) # Try Connect HID
             h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
             h.close()
-            return HIDDriver(0) # We can use this connection
+            return HIDDriver() # We can use this connection
         except IOError:
             LOGGER.info("HID device does not exist, we will try SMBus directly...")
-
+    
     except ImportError:
         LOGGER.info("HID driver does not exist, we will try SMBus driver...")
  
@@ -157,7 +158,7 @@ def load_driver(**kwargs):
         LOGGER.warning("SMBus port not specified, skipping trying to load smbus driver.")
     
     raise RuntimeError("Failed to load I2C driver. Enable logging for more details.")
-    
+
 
 def init(**kwargs):
     DRIVER = load_driver(**kwargs)
