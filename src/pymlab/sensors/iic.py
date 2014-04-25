@@ -71,7 +71,8 @@ class HIDDriver(Driver):
     def __init__(self):
         time.sleep(1)   # give an OS time for remounting the HID device
         import hid
-        self.h = hid.device(0x10C4, 0xEA90) # Connect HID again after enumeration
+        self.h = hid.device()
+        self.h.open(0x10C4, 0xEA90) # Connect HID again after enumeration
         self.h.write([0x02, 0xFF, 0x00, 0x00, 0x00])  # Set GPIO to Open-Drain  
         for k in range(3):      # blinking LED
             self.h.write([0x04, 0x00, 0xFF])
@@ -136,7 +137,8 @@ def load_driver(**kwargs):
         import hid
         LOGGER.info("Initiating HID driver...")
         try:
-            h = hid.device(0x10C4, 0xEA90) # Try Connect HID
+            h = hid.device()
+            h.open(0x10C4, 0xEA90) # Try Connect HID
             h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
             h.close()
             return HIDDriver() # We can use this connection
