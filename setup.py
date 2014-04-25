@@ -28,7 +28,7 @@ setup(
     install_requires = [ 'hidapi' ]
     keywords    = 'TWI IIC I2C USB sensors drivers',
     license     = 'Lesser General Public License v3',
-    download_url = 'https://github.com/MLAB-project/MLAB-I2c-modules/archive/0.1.tar.gz',
+    download_url = 'https://github.com/MLAB-project/MLAB-I2c-modules/archive/0.2.tar.gz',
     
     test_suite = 'pymlab.tests',
     
