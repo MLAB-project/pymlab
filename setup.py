@@ -25,8 +25,9 @@ setup(
     packages    = find_packages("src"),
     package_dir = {'': 'src'},
     provides    = ['pymlab'],
-    keywords    = 'library unix',
+    keywords    = 'TWI IIC I2C USB sensors drivers',
     license     = 'Lesser General Public License v3',
+    download_url = 'https://github.com/MLAB-project/MLAB-I2c-modules/archive/0.1.tar.gz',
     
     test_suite = 'pymlab.tests',
     
