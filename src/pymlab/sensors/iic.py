@@ -143,10 +143,10 @@ def load_driver(**kwargs):
             h.close()
             return HIDDriver() # We can use this connection
         except IOError:
-            LOGGER.info("HID device does not exist, we will try SMBus directly...")
+            LOGGER.warning("HID device does not exist, we will try SMBus directly...")
     
     except ImportError:
-        LOGGER.info("HID driver does not exist, we will try SMBus driver...")
+        LOGGER.warning("HID driver cannot be imported, we will try SMBus driver...")
  
     port = kwargs.get("port", None)
     if port is not None:

@@ -25,7 +25,6 @@ port    = eval(sys.argv[1])
 
 #### Sensor Configuration ###########################################
 
-'''
 cfg = config.Config(
     i2c = {
         "port": port,
@@ -34,10 +33,10 @@ cfg = config.Config(
 	bus = [
 		{
             "type": "i2chub",
-            "address": 0x72,
+            "address": 0x70,
             
             "children": [
-                {"name": "mag", "type": "mag01", "gauss": 1.3, "channel": 6, }
+                {"name": "mag", "type": "mag01", "gauss": 1.3, "channel": 0, }
             ],
 		},
 	],
@@ -56,7 +55,7 @@ cfg = config.Config(
         },
     ],
 )
-
+'''
 
 cfg.initialize()
 mag = cfg.get_device("mag")
