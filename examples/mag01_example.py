@@ -24,7 +24,7 @@ if len(sys.argv) != 2:
 port    = eval(sys.argv[1])
 
 #### Sensor Configuration ###########################################
-
+'''
 cfg = config.Config(
     i2c = {
         "port": port,
@@ -51,11 +51,11 @@ cfg = config.Config(
         {
             "name":          "mag",
             "type":        "mag01",
-            "gauss":        4.0,
+            "gauss":        0.88,
         },
     ],
 )
-'''
+
 
 cfg.initialize()
 mag = cfg.get_device("mag")

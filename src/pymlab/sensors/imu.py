@@ -1,12 +1,13 @@
 #!/usr/bin/python
 
-# Python driver for MLAB MAG01A module with HMC5888L Magnetometer sensor wrapper class
+# Python driver for MLAB IMU01A module with MMA8451Q Freescale accelerometer and A3G4250D gyroscope sensors wrapper class
 # This code is adopted from: 
 
 import math
 import time
 import sys
 import logging
+import time
 
 from pymlab.sensors import Device
 
@@ -30,18 +31,20 @@ class IMU01_ACC(Device):
     
     """
 
-    def __init__(self, parent = None, address = 0x1C, g_range = 4.0, **kwargs):
+    def __init__(self, parent = None, address = 0x1C, sensitivity = 4.0, highres = False,  **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
-        self._gauss = gauss
-        (reg, self._scale) = self.SCALES[gauss]
-
+        self.MMA_845XQ_STATUS    = 0x00
         self.MMA_845XQ_CTRL_REG1    = 0x2A
         self.MMA_845XQ_CTRL_REG1_VALUE_ACTIVE = 0x01
         self.MMA_845XQ_CTRL_REG1_VALUE_F_READ = 0x02
 
         self.MMA_845XQ_CTRL_REG2 = 0x2B
         self.MMA_845XQ_CTRL_REG2_RESET = 0x40
+        self.MMA_845XQ_CTRL_REG3 = 0x2C
+        self.MMA_845XQ_CTRL_REG4 = 0x2D
+        self.MMA_845XQ_CTRL_REG5 = 0x2E
+        self.MMA_845XQ_WHO_AM_I = 0x0D
 
         self.MMA_845XQ_PL_STATUS = 0x10
         self.MMA_845XQ_PL_CFG = 0x11
@@ -80,127 +83,91 @@ class IMU01_ACC(Device):
         # Data ready interrupt
         self.INT_DRDY = (1<<0)
 
+        SCALES = {
+            2.0: self.MMA_845XQ_2G_MODE,
+            4.0: self.MMA_845XQ_4G_MODE,
+            8.0: self.MMA_845XQ_8G_MODE,
+        }
 
-    def initialize(self):
-        reg, self._scale = self.SCALES[self._gauss]
-        self.bus.read_byte(self.address)
-        self.bus.write_byte_data(self.address, self.HMC5883L_CRA, 0x70) # 8 Average, 15 Hz, normal measurement
-        self.bus.write_byte_data(self.address, self.HMC5883L_CRB, reg << 5) # Scale
-        self.bus.write_byte_data(self.address, self.HMC5883L_MR, 0x00) # Continuous measurement
-        LOGGER.debug("Byte data %s to register %s to address %s writen",
-            bin(self.bus.read_byte_data(self.address, self.HMC5883L_MR)), hex(self.HMC5883L_MR), hex(self.address))
-
+        self._sensitivity = sensitivity
+        self._highres = highres
+        self._scale = SCALES[sensitivity]
 
     def standby(self):
-        Wire.beginTransmission(_addr); // Set to status reg
-        Wire.write((uint8_t)MMA_845XQ_CTRL_REG1);
-        Wire.endTransmission();
-  
-        Wire.requestFrom((uint8_t)_addr, (uint8_t)1);
-        if (Wire.available())
-        {
-            reg1 = Wire.read();
-        }
-        Wire.beginTransmission(_addr); // Reset
-        Wire.write((uint8_t)MMA_845XQ_CTRL_REG1);
-        Wire.write(reg1 & ~MMA_845XQ_CTRL_REG1_VALUE_ACTIVE);
+        reg1 = self.bus.read_byte_data(self.address, self.MMA_845XQ_CTRL_REG1)   # Set to status reg
+        self.bus.write_byte_data(self.address, self.MMA_845XQ_CTRL_REG1, (reg1 & ~self.MMA_845XQ_CTRL_REG1_VALUE_ACTIVE))
 
     def active(self):
-        uint8_t reg1 = 0x00;
-        Wire.beginTransmission(_addr); // Set to status reg
-        Wire.write((uint8_t)MMA_845XQ_CTRL_REG1);
-        Wire.endTransmission();
-  
-        Wire.requestFrom((uint8_t)_addr, (uint8_t)1);
-        if (Wire.available())
-        {
-            reg1 = Wire.read();
-        }
-        Wire.beginTransmission(_addr); // Reset
-        Wire.write((uint8_t)MMA_845XQ_CTRL_REG1);
-        Wire.write(reg1 | MMA_845XQ_CTRL_REG1_VALUE_ACTIVE | (_highres ? 0 : MMA_845XQ_CTRL_REG1_VALUE_F_READ) | 0x38);
-        Wire.endTransmission();
+        reg1 = self.bus.read_byte_data(self.address, self.MMA_845XQ_CTRL_REG1)   # Set to status reg
+        self.bus.write_byte_data(self.address, self.MMA_845XQ_CTRL_REG1, (reg1 | self.MMA_845XQ_CTRL_REG1_VALUE_ACTIVE | (0 if (self._highres == True) else self.MMA_845XQ_CTRL_REG1_VALUE_F_READ) | 0x38))
 
-    def begin(bool highres, uint8_t scale):
-          _highres = highres;
+    def initialize(self):
+        if self._scale == self.MMA_845XQ_2G_MODE:
+            self.step_factor = (0.0039 if (self._highres == True) else 0.0156) # Base value at 2g setting
+        elif self._scale == self.MMA_845XQ_4G_MODE:
+            self.step_factor = 2*(0.0039 if (self._highres == True) else 0.0156)
+        elif self._scale == self.MMA_845XQ_8G_MODE:
+            self.step_factor = 4*(0.0039 if (self._highres == True) else 0.0156)
+        else:
+            LOGGER.error("Uknown sensitivity value",)
+
+        whoami = self.bus.read_byte_data(self.address, self.MMA_845XQ_WHO_AM_I); # Get Who Am I from the device.
+        # return value for MMA8543Q is 0x3A
           
-          _scale = scale;
-          _step_factor = (_highres ? 0.0039 : 0.0156); // Base value at 2g setting
-          if( _scale == 4 )
-            _step_factor *= 2;
-          else if (_scale == 8)
-            _step_factor *= 4;
-          uint8_t wai = _read_register(0x0D); // Get Who Am I from the device.
-          // return value for MMA8543Q is 0x3A
-          
-          Wire.beginTransmission(_addr); // Reset
-          Wire.write(MMA_845XQ_CTRL_REG2);
-          Wire.write(MMA_845XQ_CTRL_REG2_RESET);
-          Wire.endTransmission();
-          delay(10); // Give it time to do the reset
-          _standby();
-          Wire.beginTransmission(_addr); // Set Portrait/Landscape mode
-          Wire.write(MMA_845XQ_PL_CFG);
-          Wire.write(0x80 | MMA_845XQ_PL_EN);
-          Wire.endTransmission();
-          Wire.beginTransmission(_addr);
-          Wire.write(MMA_845XQ_XYZ_DATA_CFG);
-          if (_scale == 4 || _scale == 8)
-            Wire.write((_scale == 4) ? MMA_845XQ_4G_MODE : MMA_845XQ_8G_MODE);
-          else // Default to 2g mode
-            Wire.write((uint8_t)MMA_845XQ_2G_MODE);
-          Wire.endTransmission();
-          _active();
+        self.bus.write_byte_data(self.address, self.MMA_845XQ_CTRL_REG2, self.MMA_845XQ_CTRL_REG2_RESET)       # Reset
+        time.sleep(0.1) # Give it time to do the reset
+        self.standby()
+        self.bus.write_byte_data(self.address, self.MMA_845XQ_PL_CFG, (0x80 | self.MMA_845XQ_PL_EN))       # Set Portrait/Landscape mode
+        self.bus.write_byte_data(self.address, self.MMA_845XQ_XYZ_DATA_CFG, self._scale)     #setup sensitivity
+        self.active()
 
     def getPLStatus(self):
-        return _read_register(MMA_845XQ_PL_STATUS);
+        return self.bus.read_byte_data(self.address, self.MMA_845XQ_PL_STATUS)
 
-    def getPulse():
-        _write_register(MMA_845XQ_PULSE_CFG, MMA_845XQ_PULSE_CFG_ELE);
-        return (_read_register(MMA_845XQ_PULSE_SRC) & MMA_845XQ_PULSE_SRC_EA);
+    def getPulse(self):
+        self.bus.write_byte_data(self.address, self.MMA_845XQ_PULSE_CFG, self.MMA_845XQ_PULSE_CFG_ELE)
+        return (self.bus.read_byte_data(self.address, self.MMA_845XQ_PULSE_SRC) & self.MMA_845XQ_PULSE_SRC_EA)
 
 
-    def update():
-        write_byte(self.address, 0x00)
-  
-      Wire.requestFrom((uint8_t)_addr, (uint8_t)(_highres ? 7 : 4));
-      if (Wire.available())
+    def axes(self):
+        self.bus.write_byte(self.address, self.MMA_845XQ_STATUS)     # set internal pointer to status register
 
-        _stat = Wire.read();
-        if(_highres)
+        self._stat = self.bus.read_byte(self.address)       # read status register, data registers follows. 
 
-          rx = (int16_t)((Wire.read() << 8) + Wire.read());
-          _xg = (rx / 64) * _step_factor;
-          ry = (int16_t)((Wire.read() << 8) + Wire.read());
-          _yg = (ry / 64) * _step_factor;
-          rz = (int16_t)((Wire.read() << 8) + Wire.read());
-          _zg = (rz / 64) * _step_factor;
+        if(self._highres):
+            x = ((self.bus.read_byte(self.address) << 8) + self.bus.read_byte(self.address)) / 64.0 * self.step_factor
+            y = ((self.bus.read_byte(self.address) << 8) + self.bus.read_byte(self.address)) / 64.0 * self.step_factor
+            z = (int16_t)((self.bus.read_byte(self.address) << 8) + self.bus.read_byte(self.address)) / 64.0 * self.step_factor
 
-        else
-          _xg = (int8_t)Wire.read()*_step_factor;
-          _yg = (int8_t)Wire.read()*_step_factor;
-          _zg = (int8_t)Wire.read()*_step_factor;
+        else:
+            x = self.bus.read_byte(self.address) * self.step_factor
+            y = self.bus.read_byte(self.address) * self.step_factor
+            z = self.bus.read_byte(self.address) * self.step_factor
 
-    def setInterrupt(uint8_t type, uint8_t pin, bool on)
-        uint8_t current_value = _read_register(0x2D);
+        return (x,y,z)
 
-        if(on)
-        current_value |= type;
-        else
-        current_value &= ~(type);
+    def setInterrupt(self, interrupt_type, pin, on):
+        current_value = self.bus.read_byte_data(self.address, self.MMA_845XQ_CTRL_REG4)
 
-        _write_register(0x2D, current_value);
+        if (on == True):
+            current_value |= interrupt_type
+        else:
+            current_value &= ~(interrupt_type)
 
-        uint8_t current_routing_value = _read_register(0x2E);
+        self.bus.write_byte_data(self.address, self.MMA_845XQ_CTRL_REG4, current_value);
 
-        if (pin == 1)
-        current_routing_value &= ~(type);
+        current_routing_value = self.bus.read_byte_data(self.address, self.MMA_845XQ_CTRL_REG5);
 
-        else if (pin == 2)
-        current_routing_value |= type;
+        if (pin == 1):
+            current_routing_value &= ~(type);
 
-        _write_register(0x2E, current_routing_value);
+        elif (pin == 2):
+            current_routing_value |= type;
+        else:
+            LOGGER.error("Uknown interrupt pin",)
+
+        self.bus.write_byte_data(self.address, self.MMA_845XQ_CTRL_REG5, current_routing_value)
 
     def disableAllInterrupts(self):
-        self.bus.write_byte_data(self.address, 0x2D, 0)
+        self.bus.write_byte_data(self.address, self.MMA_845XQ_CTRL_REG4, 0)
 

@@ -70,11 +70,6 @@ class MAG01(Device):
         LOGGER.debug("Byte data %s to register %s to address %s writen",
             bin(self.bus.read_byte_data(self.address, self.HMC5883L_MR)), hex(self.HMC5883L_MR), hex(self.address))
 
-
-    def _convert(self, data, offset):
-        val = self.twos_complement(data[offset] << 8 | data[offset+1], 16)
-        return round(val * self._scale, 4)
-
     def axes(self):
         x = self.bus.read_int16_data(self.address, self.HMC5883L_DXRA)
         if x == -4096: x = OVERFLOW

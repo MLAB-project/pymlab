@@ -3,6 +3,9 @@
 """pymlab.config module.
 
 Author: Jan Milík <milikjan@fit.cvut.cz>
+
+This file contains reference to symbols which may apear in I2C network config string. 
+
 """
 
 
@@ -81,12 +84,13 @@ class Config(object):
         return self._bus
     
     def init_drivers(self):
-        from pymlab.sensors import lts, mag, sht25, i2chub, altimet, acount, clkgen
+        from pymlab.sensors import lts, mag, sht25, i2chub, altimet, acount, clkgen, imu
         self.drivers = {
             "i2chub": i2chub.I2CHub,
 
             "lts01": lts.LTS01,
             "mag01": mag.MAG01,
+            "imu01_acc": imu.IMU01_ACC,
             "sht25": sht25.SHT25,
             "altimet01": altimet.ALTIMET01,
             "acount02": acount.ACOUNTER02,
