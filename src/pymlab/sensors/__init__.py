@@ -201,21 +201,21 @@ class Bus(SimpleBus):
         return self._named_devices[name]
     
     def write_byte(self, address, value):
-        LOGGER.debug("Writing byte %r to address %s!", value, hex(address))
+        LOGGER.debug("Writing byte %s to device %s!", bin(value), hex(address))
         return self.driver.write_byte(address, value)
     
     def read_byte(self, address):
-        LOGGER.debug("Reading byte from address %s!", hex(address))
+        LOGGER.debug("Reading byte from device %s!", hex(address))
         return self.driver.read_byte(address)
     
     def write_byte_data(self, address, register, value):
         """Write a byte value to a device register."""
-        LOGGER.debug("Writing byte data %r to register %s to address %s",
-            value, hex(register), hex(address))
+        LOGGER.debug("Writing byte data %s to register %s on device %s",
+            bin(value), hex(register), hex(address))
         return self.driver.write_byte_data(address, register, value)
     
     def read_byte_data(self, address, register):
-        LOGGER.debug("Reading byte from register %s at bus address %s",  hex(register), hex(address))
+        LOGGER.debug("Reading byte from register %s in device %s",  hex(register), hex(address))
         return self.driver.read_byte_data(address, register)
     
     def write_block_data(self, address, register, value):
@@ -238,11 +238,12 @@ class Bus(SimpleBus):
         MSB = self.driver.read_byte(address)
         LSB = self.driver.read_byte(address)
         data = bytes(bytearray([MSB, LSB]))
-        LOGGER.debug("Reading MSB %s and LSB %s from bus address %s",  hex(MSB), hex(LSB), hex(address))
+        LOGGER.debug("MSB %s and LSB %s from device %s was read",  hex(MSB), hex(LSB), hex(address))
         return self.INT16.unpack(data)[0]
 
     def read_int16_data(self, address, register):            ## Must be checked, possible bug in byte manipulation (LTS01A sensor sometimes returns wrong values)
         data = struct.pack("<H",self.driver.read_word_data(address, register))
+        LOGGER.debug("MSB and LSB %r was read from device %s",  data, hex(address))
         return self.INT16.unpack(data)[0]
 
     
@@ -250,7 +251,7 @@ class Bus(SimpleBus):
         MSB = self.driver.read_byte(address)
         LSB = self.driver.read_byte(address)
         data = bytes(bytearray([MSB, LSB]))
-        LOGGER.debug("Reading MSB %s and LSB %s from bus address %s",  hex(MSB), hex(LSB), hex(address))
+        LOGGER.debug("Read MSB %s and LSB %s from device %s",  hex(MSB), hex(LSB), hex(address))
         return self.UINT16.unpack(data)[0]
 
     def read_uint16_data(self, address, register):            ## Must be checked, possible bug in byte manipulation (LTS01A sensor sometimes returns wrong values)

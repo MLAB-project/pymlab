@@ -31,10 +31,14 @@ class IMU01_ACC(Device):
     
     """
 
-    def __init__(self, parent = None, address = 0x1C, sensitivity = 4.0, highres = False,  **kwargs):
+    def __init__(self, parent = None, address = 0x1C, sensitivity = 4.0, highres = True,  **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
         self.MMA_845XQ_STATUS    = 0x00
+        self.MMA_845XQ_OUT_X_MSB    = 0x1
+        self.MMA_845XQ_OUT_Y_MSB    = 0x3
+        self.MMA_845XQ_OUT_Z_MSB    = 0x5
+
         self.MMA_845XQ_CTRL_REG1    = 0x2A
         self.MMA_845XQ_CTRL_REG1_VALUE_ACTIVE = 0x01
         self.MMA_845XQ_CTRL_REG1_VALUE_F_READ = 0x02
@@ -99,7 +103,7 @@ class IMU01_ACC(Device):
 
     def active(self):
         reg1 = self.bus.read_byte_data(self.address, self.MMA_845XQ_CTRL_REG1)   # Set to status reg
-        self.bus.write_byte_data(self.address, self.MMA_845XQ_CTRL_REG1, (reg1 | self.MMA_845XQ_CTRL_REG1_VALUE_ACTIVE | (0 if (self._highres == True) else self.MMA_845XQ_CTRL_REG1_VALUE_F_READ) | 0x38))
+        self.bus.write_byte_data(self.address, self.MMA_845XQ_CTRL_REG1, (reg1 | self.MMA_845XQ_CTRL_REG1_VALUE_ACTIVE | (0 if (self._highres == True) else self.MMA_845XQ_CTRL_REG1_VALUE_F_READ) ))
 
     def initialize(self):
         if self._scale == self.MMA_845XQ_2G_MODE:
@@ -115,7 +119,7 @@ class IMU01_ACC(Device):
         # return value for MMA8543Q is 0x3A
           
         self.bus.write_byte_data(self.address, self.MMA_845XQ_CTRL_REG2, self.MMA_845XQ_CTRL_REG2_RESET)       # Reset
-        time.sleep(0.1) # Give it time to do the reset
+        time.sleep(0.5) # Give it time to do the reset
         self.standby()
         self.bus.write_byte_data(self.address, self.MMA_845XQ_PL_CFG, (0x80 | self.MMA_845XQ_PL_EN))       # Set Portrait/Landscape mode
         self.bus.write_byte_data(self.address, self.MMA_845XQ_XYZ_DATA_CFG, self._scale)     #setup sensitivity
@@ -130,14 +134,11 @@ class IMU01_ACC(Device):
 
 
     def axes(self):
-        self.bus.write_byte(self.address, self.MMA_845XQ_STATUS)     # set internal pointer to status register
-
-        self._stat = self.bus.read_byte(self.address)       # read status register, data registers follows. 
-
+        self._stat = self.bus.read_byte_data(self.address, self.MMA_845XQ_STATUS)       # read status register, data registers follows. 
         if(self._highres):
-            x = ((self.bus.read_byte(self.address) << 8) + self.bus.read_byte(self.address)) / 64.0 * self.step_factor
-            y = ((self.bus.read_byte(self.address) << 8) + self.bus.read_byte(self.address)) / 64.0 * self.step_factor
-            z = (int16_t)((self.bus.read_byte(self.address) << 8) + self.bus.read_byte(self.address)) / 64.0 * self.step_factor
+            x = self.bus.read_int16_data(self.address, self.MMA_845XQ_OUT_X_MSB) / 64.0 * self.step_factor
+            y = self.bus.read_int16_data(self.address, self.MMA_845XQ_OUT_Y_MSB) / 64.0 * self.step_factor
+            z = self.bus.read_int16_data(self.address, self.MMA_845XQ_OUT_Z_MSB) / 64.0 * self.step_factor
 
         else:
             x = self.bus.read_byte(self.address) * self.step_factor
