@@ -71,13 +71,15 @@ class MAG01(Device):
             bin(self.bus.read_byte_data(self.address, self.HMC5883L_MR)), hex(self.HMC5883L_MR), hex(self.address))
 
     def axes(self):
-        x = self.bus.read_int16_data(self.address, self.HMC5883L_DXRA)
+        """returns measured value in miligauss"""
+        reg, self._scale = self.SCALES[self._gauss]
+        x = self.bus.read_int16_data(self.address, self.HMC5883L_DXRA) 
         if x == -4096: x = OVERFLOW
         y = self.bus.read_int16_data(self.address, self.HMC5883L_DYRA)
         if y == -4096: y = OVERFLOW
         z = self.bus.read_int16_data(self.address, self.HMC5883L_DZRA)
         if z == -4096: z = OVERFLOW
-        return (x,y,z)
+        return (x*self._scale, y*self._scale, z*self._scale)
 
     def __str__(self):
         (x, y, z) = self.axes()

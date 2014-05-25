@@ -91,6 +91,7 @@ class Config(object):
             "lts01": lts.LTS01,
             "mag01": mag.MAG01,
             "imu01_acc": imu.IMU01_ACC,
+            "imu01_gyro": imu.IMU01_GYRO,
             "sht25": sht25.SHT25,
             "altimet01": altimet.ALTIMET01,
             "acount02": acount.ACOUNTER02,

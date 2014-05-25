@@ -48,17 +48,22 @@ cfg = config.Config(
         "port": port,
     },
     bus = [
+#        {
+#            "name":          "acc",
+#            "type":        "imu01_acc",
+#            "sensitivity":        2.0,
+#        },
         {
-            "name":          "acc",
-            "type":        "imu01_acc",
-            "sensitivity":        2.0,
+            "name":          "gyro",
+            "type":        "imu01_gyro",
         },
     ],
 )
 
 
 cfg.initialize()
-acc = cfg.get_device("acc")
+#acc = cfg.get_device("acc")
+gyro = cfg.get_device("gyro")
 sys.stdout.write(" MLAB accelerometer sensor IMU01A module example \r\n")
 time.sleep(0.5)
 
@@ -68,8 +73,8 @@ sys.stdout.write("Magnetometer data acquisition system started \n")
 
 try:
     while True:
-        acc.route()
-        (x, y, z) = acc.axes()
+        gyro.route()
+        (x, y, z) = gyro.axes()
         #sys.stdout.write("\rHeading: " + magnetometer.degrees(magnetometer.heading()) + " X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " )
         sys.stdout.write(" X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " + "\r\n")
         sys.stdout.flush()

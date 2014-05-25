@@ -27,7 +27,7 @@ OVERFLOW = Overflow()
 
 class IMU01_ACC(Device):
     """
-    Example:
+    MMA8451Q Accelerometer sensor binding
     
     """
 
@@ -172,3 +172,33 @@ class IMU01_ACC(Device):
     def disableAllInterrupts(self):
         self.bus.write_byte_data(self.address, self.MMA_845XQ_CTRL_REG4, 0)
 
+
+class IMU01_GYRO(Device):
+    """
+    A3G4250D Gyroscope sensor binding
+    
+    """
+
+    def __init__(self, parent = None, address = 0x1C, sensitivity = 4.0,  **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+
+        self.A3G4250D_CTRL_REG1    = 0x20
+        self.A3G4250D_FIFO_CTRL_REG    = 0x2e
+        self.A3G4250D_OUT_X_L   = 0x28
+        self.A3G4250D_OUT_Y_L   = 0x2A
+        self.A3G4250D_OUT_Z_L   = 0x2C
+
+    def initialize(self):
+        self.bus.write_byte_data(self.address, self.A3G4250D_CTRL_REG1, 0xff)
+        self.bus.write_byte_data(self.address, self.A3G4250D_FIFO_CTRL_REG, 0x40)
+
+    def axes(self):
+#        self.bus.write_byte(self.address, self.A3G4250D_OUT_X_L)
+#        x = self.bus.read_int16(self.address)
+#        y = self.bus.read_int16(self.address)
+#        z = self.bus.read_int16(self.address)
+
+        x = self.bus.read_int16_data(self.address, self.A3G4250D_OUT_X_L)
+        y = self.bus.read_int16_data(self.address, self.A3G4250D_OUT_Y_L)
+        z = self.bus.read_int16_data(self.address, self.A3G4250D_OUT_Z_L)
+        return (x,y,z)
