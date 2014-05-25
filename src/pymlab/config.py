@@ -84,7 +84,7 @@ class Config(object):
         return self._bus
     
     def init_drivers(self):
-        from pymlab.sensors import lts, mag, sht25, i2chub, altimet, acount, clkgen, imu
+        from pymlab.sensors import lts, mag, sht25, i2chub, altimet, acount, clkgen, imu, motor
         self.drivers = {
             "i2chub": i2chub.I2CHub,
 
@@ -95,6 +95,7 @@ class Config(object):
             "sht25": sht25.SHT25,
             "altimet01": altimet.ALTIMET01,
             "acount02": acount.ACOUNTER02,
+            "motor01": motor.MOTOR01,
             "clkgen01": clkgen.CLKGEN01,
         }
 
