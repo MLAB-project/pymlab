@@ -11,6 +11,7 @@ import time
 
 from pymlab.sensors import Device
 
+import struct
 
 LOGGER = logging.getLogger(__name__)
 
@@ -175,30 +176,116 @@ class IMU01_ACC(Device):
 
 class IMU01_GYRO(Device):
     """
-    A3G4250D Gyroscope sensor binding
+    A3G4250D Gyroscope sensor binding. Needs sensitivity calibration data. This gyroscope is factory calibrated to sensitivity range from 7.4 to 10.1 mdps/digit. The 8.75 mdps/digit is selected as default value. 
     
     """
 
-    def __init__(self, parent = None, address = 0x1C, sensitivity = 4.0,  **kwargs):
+    def __init__(self, parent = None, address = 0x68, sensitivity_corr = (8.75, 8.75, 8.75), datarate = 0b00, bandwidth = 0b00, FIFO = True, HPF = True,   **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
+        self.sensitivity = (sensitivity_corr[0]/1000 , sensitivity_corr[1]/1000, sensitivity_corr[2]/1000)
+        self.data_rate = datarate
+        self.band_width = bandwidth
+        self.FIFO_EN = FIFO
+        self.HPen = HPF
+    
+        self.A3G4250D_WHO_AM_I   = 0x0F
         self.A3G4250D_CTRL_REG1    = 0x20
-        self.A3G4250D_FIFO_CTRL_REG    = 0x2e
+        self.A3G4250D_CTRL_REG2    = 0x21
+        self.A3G4250D_CTRL_REG3    = 0x22
+        self.A3G4250D_CTRL_REG4    = 0x23
+        self.A3G4250D_CTRL_REG5    = 0x24
+        self.A3G4250D_REFERENCE   = 0x25
+        self.A3G4250D_OUT_TEMP   = 0x26
+        self.A3G4250D_STATUS_REG   = 0x27
         self.A3G4250D_OUT_X_L   = 0x28
+        self.A3G4250D_OUT_X_H   = 0x29
         self.A3G4250D_OUT_Y_L   = 0x2A
+        self.A3G4250D_OUT_Y_H   = 0x2B
         self.A3G4250D_OUT_Z_L   = 0x2C
+        self.A3G4250D_OUT_Z_H   = 0x2D
+        self.A3G4250D_FIFO_CTRL_REG    = 0x2e
+        self.A3G4250D_FIFO_SRC_REG    = 0x2F
+        self.A3G4250D_INT1_CFG    = 0x30
+        self.A3G4250D_INT1_SRC    = 0x31
+        self.A3G4250D_INT1_TSH_XH    = 0x32
+        self.A3G4250D_INT1_TSH_XL    = 0x33
+        self.A3G4250D_INT1_TSH_YH    = 0x34
+        self.A3G4250D_INT1_TSH_YL    = 0x35
+        self.A3G4250D_INT1_TSH_ZH    = 0x36
+        self.A3G4250D_INT1_TSH_ZL    = 0x37
+        self.A3G4250D_INT1_DURATION    = 0x38
+        
+        self.A3G4250D_FIFO_BYPASS_MODE  = 0b000
+        self.A3G4250D_FIFO_MODE  = 0b001
+        self.A3G4250D_FIFO_STREAM_MODE  = 0b010
+
 
     def initialize(self):
-        self.bus.write_byte_data(self.address, self.A3G4250D_CTRL_REG1, 0xff)
-        self.bus.write_byte_data(self.address, self.A3G4250D_FIFO_CTRL_REG, 0x40)
+        self.bus.write_byte_data(self.address, self.A3G4250D_CTRL_REG1, ((self.data_rate << 6) | (self.band_width << 4) | 0x0f))  ## setup data rate and bandwidth. All axis are active
+        self.bus.write_byte_data(self.address, self.A3G4250D_CTRL_REG5, ((self.FIFO_EN << 7) | (self.HPen << 4) | 0x0f))  ## setup data rate and bandwidth. All axis are active
+ 
+        self.bus.write_byte_data(self.address, self.A3G4250D_FIFO_CTRL_REG, (self.A3G4250D_FIFO_BYPASS_MODE  << 5))     
+        if (self.bus.read_byte_data(self.address, self.A3G4250D_WHO_AM_I) != 0b11010011):
+            raise NameError('Gyroscope device could not be identified')
 
     def axes(self):
-#        self.bus.write_byte(self.address, self.A3G4250D_OUT_X_L)
+        INT16 = struct.Struct("<h")
+
+        self.bus.write_byte_data(self.address, self.A3G4250D_CTRL_REG1, ((self.data_rate << 6) | (self.band_width << 4) | 0b1000))  ## setup data rate and 
+        self.bus.read_byte_data(self.address, self.A3G4250D_OUT_X_L)
 #        x = self.bus.read_int16(self.address)
 #        y = self.bus.read_int16(self.address)
 #        z = self.bus.read_int16(self.address)
 
-        x = self.bus.read_int16_data(self.address, self.A3G4250D_OUT_X_L)
-        y = self.bus.read_int16_data(self.address, self.A3G4250D_OUT_Y_L)
-        z = self.bus.read_int16_data(self.address, self.A3G4250D_OUT_Z_L)
-        return (x,y,z)
+#        YLSB = self.bus.read_byte(self.address)
+#        YMSB = self.bus.read_byte(self.address)
+
+#        ZLSB = self.bus.read_byte(self.address)
+#        ZMSB = self.bus.read_byte(self.address)
+
+#        XLSB = self.bus.read_byte(self.address)
+#        XMSB = self.bus.read_byte(self.address)
+
+#        y = self.bus.read_wdata(self.address, self.A3G4250D_OUT_Y_L)
+#        z = self.bus.read_wdata(self.address, self.A3G4250D_OUT_Z_L)
+#        x = self.bus.read_wdata(self.address, self.A3G4250D_OUT_X_L)
+
+#        print hex(YLSB),hex(YMSB),hex(ZLSB),hex(ZMSB),hex(XLSB),hex(XMSB)
+
+#        return (x*self.sensitivity[0], y*self.sensitivity[1], z*self.sensitivity[2])
+
+        LSB = self.bus.read_byte_data(self.address,  self.A3G4250D_OUT_X_L)
+        MSB = self.bus.read_byte_data(self.address,  self.A3G4250D_OUT_X_H)
+        x = (MSB << 8) + LSB
+        if (x & 0x1000):
+            x -= 65536
+
+        LSB = self.bus.read_byte_data(self.address,  self.A3G4250D_OUT_Y_L)
+        MSB = self.bus.read_byte_data(self.address,  self.A3G4250D_OUT_Y_H)
+        y = (MSB << 8) + LSB
+        if (y & 0x1000):
+            y -= 65536
+
+        LSB = self.bus.read_byte_data(self.address,  self.A3G4250D_OUT_Z_L)
+        MSB = self.bus.read_byte_data(self.address,  self.A3G4250D_OUT_Z_H)
+        z = (MSB << 8) + LSB
+        if (z & 0x1000):
+            z -= 65536
+
+#        print hex(YLSB),hex(YMSB),hex(ZLSB),hex(ZMSB),hex(XLSB),hex(XMSB)
+
+
+#        return (hex(self.bus.read_byte_data(self.address,  self.A3G4250D_OUT_X_L)), hex(self.bus.read_byte_data(self.address,  self.A3G4250D_OUT_X_H)))
+
+#        self.bus.write_byte_data(self.address, self.A3G4250D_CTRL_REG5, ((self.FIFO_EN << 7) | (self.HPen << 4) | 0x0f))  ## setup data rate and 
+        self.bus.write_byte_data(self.address, self.A3G4250D_CTRL_REG1, ((self.data_rate << 6) | (self.band_width << 4) | 0b1111))  ## setup data rate and 
+        self.bus.write_byte_data(self.address, self.A3G4250D_FIFO_CTRL_REG, (self.A3G4250D_FIFO_BYPASS_MODE  << 5))     
+
+        return (x, y, z)
+
+
+    def temp(self):
+        temp = self.bus.read_byte_data(self.address, self.A3G4250D_OUT_TEMP)
+        return temp
+

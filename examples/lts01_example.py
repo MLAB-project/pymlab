@@ -30,7 +30,7 @@ cfg = config.Config(
 	bus = [
 		{
             "type": "i2chub",
-            "address": 0x70,
+            "address": 0x72,
             
             "children": [
                 {"name": "lts01", "type": "lts01", "address": address, "channel": 1, }

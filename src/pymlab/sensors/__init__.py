@@ -246,6 +246,11 @@ class Bus(SimpleBus):
         LOGGER.debug("MSB and LSB %r was read from device %s",  data, hex(address))
         return self.INT16.unpack(data)[0]
 
+    def read_wdata(self, address, register):            ## Must be checked, possible bug in byte manipulation (LTS01A sensor sometimes returns wrong values)
+        data = self.driver.read_word_data(address, register)
+        return data
+
+
     
     def read_uint16(self, address):         ## Reads uint16 as two separate bytes, suppose autoincrement of internal register pointer in I2C device.
         MSB = self.driver.read_byte(address)

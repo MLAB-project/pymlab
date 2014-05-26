@@ -13,6 +13,33 @@ cfg = config.Config(
         { "name":"motor", "type":"motor01"},
     ],
 )
+
+cfg = config.Config(
+    i2c = {
+        "port": 0,
+    },
+
+	bus = [
+#		{
+#            "type": "i2chub",
+#            "address": 0x71,
+#            
+#            "children": [
+#                {"name": "acc", "type": "imu01_acc", "sensitivity": 4.0, "channel": 0, }
+#            ],
+#		},
+		{
+            "type": "i2chub",
+            "address": 0x71,
+            
+            "children": [
+#                {"name": "gyro", "type": "imu01_gyro", "channel": 0, },
+                {"name":"motor", "type":"motor01", "channel": 1, }
+            ],
+		},
+	],
+)
+
 cfg.initialize()
 
 print "Motor control example \r\n"
@@ -37,8 +64,8 @@ try:
         print -300
         time.sleep(2)
 
-        mot.set_pwm(-800)
-        print -800
+        mot.set_pwm(-1000)
+        print -1000
         time.sleep(2)
 
         mot.set_pwm(0)
