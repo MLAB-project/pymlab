@@ -94,6 +94,8 @@ class Config(object):
             "imu01_gyro": imu.IMU01_GYRO,
             "sht25": sht25.SHT25,
             "altimet01": altimet.ALTIMET01,
+            "SDP600": altimet.SDP6XX,
+            "SDP610": altimet.SDP6XX,
             "acount02": acount.ACOUNTER02,
             "motor01": motor.MOTOR01,
             "clkgen01": clkgen.CLKGEN01,

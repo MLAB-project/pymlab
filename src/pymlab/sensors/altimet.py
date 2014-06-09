@@ -76,6 +76,30 @@ class ALTIMET01(Device):
         return (t, p);
 
 
+class SDP6XX(Device):
+    """
+    Python library for Sensirion SDP6XX/5xx differential preassure sensors.
+    """
+    
+    def __init__(self, parent = None, address = 0x40, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+
+    def get_p(self):
+        self.bus.write_byte(self.address, 0xF1);    # trigger measurement
+        MSB = self.bus.read_byte(self.address)      # read data
+        LSB = self.bus.read_byte(self.address)
+        check = self.bus.read_byte(self.address)    # read CRC
+        print hex(MSB),hex(LSB),hex(check)
+        pressure = (MSB << 8) + LSB
+        if (pressure & 0x1000):
+            pressure -= 65536
+
+        return (pressure/60.0)
+
+    def reset(self):
+        self.bus.write_byte(self.address, 0xFE);    # trigger measurement
+
+
 def main():
     print __doc__
 
