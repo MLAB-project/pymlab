@@ -34,6 +34,8 @@ Compile and install [HIDAPI](https://github.com/signal11/hidapi) according to in
 Usage
 -----
 
+For use of this python library the I²C bus topology and connected devices must be defined.  This is done by the Config object defined at the begining of the script. Exapmle of network bus config follows. 
+
 ### Example
 
 ```python
