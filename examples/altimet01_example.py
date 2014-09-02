@@ -5,8 +5,8 @@
 import time
 import datetime
 import sys
-import logging 
-logging.basicConfig(level=logging.DEBUG) 
+#import logging 
+#logging.basicConfig(level=logging.DEBUG) 
 
 
 from pymlab import config
@@ -39,7 +39,7 @@ cfglist=[
                 "address": 0x72,
                 
                 "children": [
-                    {"name": "altimet", "type": "altimet01" , "channel": 7, },   
+                    {"name": "altimet", "type": "altimet01" , "channel": 1, },   
                 ],
             },
         ],
