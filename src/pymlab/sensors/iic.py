@@ -114,7 +114,7 @@ class HIDDriver(Driver):
                 response = self.h.read(4)
                 #print "data ",map(hex,response)
                 return response[3]
-        LGGER.warning("CP2112 Byte Data Read Error...")
+        LOGGER.warning("CP2112 Byte Data Read Error...")
         raise IOError()
     
     def write_word_data(self, address, register, value):

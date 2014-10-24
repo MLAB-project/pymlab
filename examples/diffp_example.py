@@ -16,7 +16,7 @@ from pymlab import config
 
 if len(sys.argv) not in (2, 3):
     sys.stderr.write("Invalid number of arguments.\n")
-    sys.stderr.write("Usage: %s #I2CPORT\n" % (sys.argv[0], ))
+    sys.stderr.write("Usage: %s #I2CPORT [Config number] \n" % (sys.argv[0], ))
     sys.exit(1)
 
 port       = eval(sys.argv[1])
@@ -39,7 +39,7 @@ cfglist=[
                 "address": 0x72,
                 
                 "children": [
-                    {"name": "pitot_tube", "type": "SDP610" , "channel": 0, },   
+                    {"name": "pitot_tube", "type": "SDP600" , "channel": 0, },   
                 ],
             },
         ],
@@ -60,7 +60,7 @@ cfglist=[
 try:
     cfg = cfglist[cfg_number]
 except IndexError:
-    sys.stdout.write("Invalid configuration number.")
+    sys.stdout.write("Invalid configuration number.\n")
     sys.exit(1)
 
 cfg.initialize()

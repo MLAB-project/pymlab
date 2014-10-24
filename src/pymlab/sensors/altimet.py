@@ -2,6 +2,7 @@
 
 
 from pymlab.sensors import Device
+import time
 
 
 class ALTIMET01(Device):
@@ -84,20 +85,51 @@ class SDP6XX(Device):
     def __init__(self, parent = None, address = 0x40, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
+        self.TRIGGER_MEASUREMENT = 0xF1     # command: trigger differential pressure measurement
+        self.SOFT_RESET          = 0xFE     # command: soft reset
+        self.READ_USER_REGISTER  = 0xE5     # command: read advanced user register
+        self.WRITE_USER_REGISTER = 0xE4     # command: write advanced user register
+
+        self.RESOLUTION_9BIT     = 0x00
+        self.RESOLUTION_10BIT    = 0x01
+        self.RESOLUTION_11BIT    = 0x02
+        self.RESOLUTION_12BIT    = 0x03
+        self.RESOLUTION_13BIT    = 0x04
+        self.RESOLUTION_14BIT    = 0x05
+        self.RESOLUTION_15BIT    = 0x06
+        self.RESOLUTION_16BIT    = 0x07
+
     def get_p(self):
-        self.bus.write_byte(self.address, 0xF1);    # trigger measurement
+        self.bus.write_byte(self.address, self.TRIGGER_MEASUREMENT);    # trigger measurement
         MSB = self.bus.read_byte(self.address)      # read data
         LSB = self.bus.read_byte(self.address)
         check = self.bus.read_byte(self.address)    # read CRC
-        print hex(MSB),hex(LSB),hex(check)
-        pressure = (MSB << 8) + LSB
+        print hex(MSB), hex(LSB), hex(check)
+        pressure = (MSB << 8) | LSB
         if (pressure & 0x1000):
             pressure -= 65536
 
         return (pressure/60.0)
 
+
+# bit;        // bit mask
+# crc = 0x00; // calculated checksum
+# byteCtr;    // byte counter
+  
+#          # calculates 8-Bit checksum with given polynomial
+#          for(byteCtr = 0; byteCtr < nbrOfBytes; byteCtr++)
+#            crc ^= (data[byteCtr]);
+#            for(bit = 8; bit > 0; --bit)
+#              if(crc & 0x80) crc = (crc << 1) ^ POLYNOMIAL;
+#              else           crc = (crc << 1);
+          
+          # verify checksum
+#          if(crc != checksum) return CHECKSUM_ERROR;
+#          else                return NO_ERROR;
+
     def reset(self):
         self.bus.write_byte(self.address, 0xFE);    # trigger measurement
+        time.sleep(0.01)
 
 
 def main():
