@@ -14,11 +14,14 @@ Installation
 ### Install in to Ubuntu python system
     
     $ git clone https://github.com/MLAB-project/MLAB-I2c-modules
+    $ cd MLAB-I2c-modules/
     $ sudo python setup.py develop
 
 #### Cython interface for the MLAB module USBI2C01A (Optional)
 
-    $ sudo apt-get install libusb-1.0 cython libudev-dev
+Required if you want to use the USBI2C01A module to communicate with SMBus deviced via USB. 
+
+    $ sudo apt-get install libudev-dev libusb-1.0-0-dev libhidapi-dev python-setuptools python-smbus cython
    
 Do it in a working directory:
 
