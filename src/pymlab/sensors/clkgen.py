@@ -79,7 +79,7 @@ class CLKGEN01(Device):
     def new_freq(self):
         self.bus.write_byte_data(self.address, self.R_RFMC, self.RFMC_NEW_FREQ)
 
-    def reset(self):
+    def reset(self):			#Will interrupt I2C state machine. It is not reccomended for starting from initial conditions.
         reg = self.bus.read_byte_data(self.address, self.R_RFMC) | self.RFMC_RST
         self.bus.write_byte_data(self.address, self.R_RFMC, reg)
 
@@ -93,7 +93,7 @@ class CLKGEN01(Device):
         reg = self.bus.read_byte_data(self.address, self.R_RFMC) | self.RFMC_RST
         self.bus.write_byte_data(self.address, self.R_RFMC, reg)
 
-    def recall_nvm(self):
+    def recall_nvm(self): # reloads NVM data. It is recommended for starting from initial conditions.
         reg = self.bus.read_byte_data(self.address, self.R_RFMC) | self.RFMC_RECALL
         self.bus.write_byte_data(self.address, self.R_RFMC, reg)
 

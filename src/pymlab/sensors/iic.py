@@ -88,6 +88,7 @@ class HIDDriver(Driver):
     
     def read_byte(self, address):
         self.h.write([0x10, address<<1, 0x00, 0x01]) # Data Read Request
+        
         for k in range(10):
             self.h.write([0x15, 0x01]) # Transfer Status Request
             response = self.h.read(7)
@@ -96,30 +97,44 @@ class HIDDriver(Driver):
                 response = self.h.read(4)
                 return response[3]
         LOGGER.warning("CP2112 Byte Read Error...")
-        return 0xFF
+        raise IOError()
     
     def write_byte_data(self, address, register, value):
         return self.h.write([0x14, address<<1, 0x02, register, value]) # Data Write Request
     
     def read_byte_data(self, address, register):
-        self.h.write([0x11, address<<1, 0x00, 0x01, 0x01, register]) # Data Write Read Request
+        self.h.write([0x11, address<<1, 0x00, 0x01, 0x01, register]) # Data Write Read Request 
+
         for k in range(10):
             self.h.write([0x15, 0x01]) # Transfer Status Request
             response = self.h.read(7)
+            #print "status",map(hex,response)
             if (response[0] == 0x16) and (response[2] == 5):  # Polling a data
                 self.h.write([0x12, 0x00, 0x01]) # Data Read Force
                 response = self.h.read(4)
+                #print "data ",map(hex,response)
                 return response[3]
-        LOGGER.warning("CP2112 Read Error...")
-        return 0xFF
+        LOGGER.warning("CP2112 Byte Data Read Error...")
+        raise IOError()
     
     def write_word_data(self, address, register, value):
-        # TODO: Implement HIDDrive.write_word_data()
-        raise NotImplementedError()
+        return self.h.write([0x14, address<<1, 0x03, register, value>>8, value & 0xFF]) # Word Write Request
     
     def read_word_data(self, address, register):
-        # TODO: Implement HIDDrive.read_word_data()
-        raise NotImplementedError()
+        self.h.write([0x11, address<<1, 0x00, 0x02, 0x01, register]) # Data Write Read Request
+        self.h.write([0x12, 0x00, 0x02]) # Data Read Force
+        
+        for k in range(10):             # Polling a data
+            response = self.h.read(10)
+            #print map(hex,response)
+            #print "status ",response
+            if (response[0] == 0x13) and (response[2] == 2):  
+                return (response[4]<<8)+response[3]           
+            #self.h.write([0x15, 0x01]) # Transfer Status Request
+            self.h.write([0x11, address<<1, 0x00, 0x02, 0x01, register]) # Data Write Read Request
+            self.h.write([0x12, 0x00, 0x02]) # Data Read Force            
+        LOGGER.warning("CP2112 Word Read Error...")
+        raise IOError()
     
     def write_block_data(self, address, register, value):
         raise NotImplementedError()
@@ -143,10 +158,10 @@ def load_driver(**kwargs):
             h.close()
             return HIDDriver() # We can use this connection
         except IOError:
-            LOGGER.info("HID device does not exist, we will try SMBus directly...")
+            LOGGER.warning("HID device does not exist, we will try SMBus directly...")
     
     except ImportError:
-        LOGGER.info("HID driver does not exist, we will try SMBus driver...")
+        LOGGER.warning("HID driver cannot be imported, we will try SMBus driver...")
  
     port = kwargs.get("port", None)
     if port is not None:

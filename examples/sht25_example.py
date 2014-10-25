@@ -17,7 +17,9 @@ port    = eval(sys.argv[1])
 #### Sensor Configuration ###########################################
 
 cfg = config.Config(
-    port = port,
+    i2c = {
+            "port": port,
+    },
     bus = [
         {
             "name":          "sht25",

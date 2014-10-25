@@ -16,7 +16,7 @@ from pymlab import config
 
 if len(sys.argv) not in (2, 3):
     sys.stderr.write("Invalid number of arguments.\n")
-    sys.stderr.write("Usage: %s #I2CPORT\n" % (sys.argv[0], ))
+    sys.stderr.write("Usage: %s #I2CPORT [Config number] \n" % (sys.argv[0], ))
     sys.exit(1)
 
 port       = eval(sys.argv[1])
@@ -39,7 +39,7 @@ cfglist=[
                 "address": 0x72,
                 
                 "children": [
-                    {"name": "altimet", "type": "altimet01" , "channel": 1, },   
+                    {"name": "pitot_tube", "type": "SDP600" , "channel": 0, },   
                 ],
             },
         ],
@@ -50,8 +50,8 @@ cfglist=[
         },
         bus = [
             {
-                "name":          "altimet",
-                "type":        "altimet01",
+                "name":          "pitot_tube",
+                "type":        "SDP610",
             },
         ],
     ),
@@ -60,22 +60,22 @@ cfglist=[
 try:
     cfg = cfglist[cfg_number]
 except IndexError:
-    sys.stdout.write("Invalid configuration number.")
+    sys.stdout.write("Invalid configuration number.\n")
     sys.exit(1)
 
 cfg.initialize()
-gauge = cfg.get_device("altimet")
+gauge = cfg.get_device("pitot_tube")
 time.sleep(0.5)
 
 #### Data Logging ###################################################
 
-sys.stdout.write("ALTIMET data acquisition system started \n")
+sys.stdout.write("MLAB pitot-static tube data acquisition system started \n")
 
 try:
         while True:
             gauge.route()
-            (t1, p1) = gauge.get_tp()
-            sys.stdout.write(" Temperature: %.2f  Pressure: %d \n" % (t1, p1))
+            dp = gauge.get_p()
+            sys.stdout.write("Pressure Diff: %f \n" % dp)
             sys.stdout.flush()
             time.sleep(0.5)
             
