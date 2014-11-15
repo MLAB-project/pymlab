@@ -72,9 +72,11 @@ class Device(object):
         if self.name is not None:
             return obj_repr(self, address = self.address, name = self.name)
         return obj_repr(self, address = self.address)
-
+    
     @property
     def bus(self):
+        if self.parent is None:
+            return None
         if isinstance(self.parent, Bus):
             return self.parent
         return self.parent.bus

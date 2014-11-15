@@ -11,9 +11,13 @@ This file contains reference to symbols which may apear in I2C network config st
 
 import sys
 import json
+import logging
 
 from utils import obj_repr, PrettyPrinter
 from pymlab.sensors import Bus, SimpleBus
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Node(object):
@@ -66,7 +70,8 @@ class Config(object):
         )
     
     """
-
+    
+    
     def __init__(self, **kwargs):
         self.drivers = {}
         
@@ -114,7 +119,7 @@ class Config(object):
             for child in value:
                 result.add_child(self.build_device(child, result))
             return result
-
+        
         if isinstance(value, dict):
             if "type" not in value:
                 raise ValueError("Device dictionary doesn't have a \"type\" item.")
@@ -155,8 +160,17 @@ class Config(object):
         }
         exec source in globals(), local_vars
         #self.port = local_vars.get("port", self.port)
+        
         self.i2c_config = local_vars.get("i2c", {})
-        self._bus = self.build_device(local_vars.get("bus", []))
+        
+        bus = self.build_device(local_vars.get("bus", []))
+        if not isinstance(bus, Bus):
+            LOGGER.warning(
+                "Top-level device in the configuration is a "
+                "%s and not a bus as expected. Use python list to "
+                "denote a bus.",
+                "None" if bus is None else type(bus).__name__)
+        self._bus = bus
     
     def load_file(self, file_name):
         if file_name.endswith(".py"):
