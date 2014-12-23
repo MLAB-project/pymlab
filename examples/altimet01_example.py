@@ -72,13 +72,16 @@ time.sleep(0.5)
 sys.stdout.write("ALTIMET data acquisition system started \n")
 
 try:
+    with open("ALTIMET_log.csv", "a") as f:
         while True:
             gauge.route()
             (t1, p1) = gauge.get_tp()
             sys.stdout.write(" Temperature: %.2f  Pressure: %d \n" % (t1, p1))
             sys.stdout.flush()
             time.sleep(0.5)
-            
+            f.write("%d,%.3f,%d\n" % (time.time(), t1, p1))
 except KeyboardInterrupt:
+    sys.stdout.write("\r\n")
     sys.exit(0)
+    f.close()
 

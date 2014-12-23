@@ -128,6 +128,11 @@ class SDP6XX(Device):
 #          else                return NO_ERROR;
 
     def reset(self):
+        '''
+        Calls the soft reset mechanism that forces the sensor into a well-defined 
+        state without removing the power supply.
+        '''
+
         self.bus.write_byte(self.address, 0xFE);    # trigger measurement
         time.sleep(0.01)
 
