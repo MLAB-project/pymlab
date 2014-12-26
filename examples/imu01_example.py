@@ -82,12 +82,6 @@ sys.stdout.write("Magnetometer data acquisition system started \n")
 try:
     while True:
         gyro.route()
-#        (x, y, z) = gyro.axes()
-#        temp = gyro.temp()
-#        #sys.stdout.write("\rHeading: " + magnetometer.degrees(magnetometer.heading()) + " X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " )
-#        sys.stdout.write(" X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + " Temp: " + str(temp) + "    " + "\r\n")
-#        sys.stdout.flush()
-
         print gyro.axes()
 
 #        time.sleep(0.2)
