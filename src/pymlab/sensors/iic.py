@@ -206,7 +206,7 @@ class SMBusDriver(Driver):
         """
         return self.smbus.block_process_call(address, register, value)
 
-    def write_i2c_block_data(self, address, register, value):
+    def write_i2c_block_data(self, address, value):
         """
         I2C block transactions do not limit the number of bytes transferred
         but the SMBus layer places a limit of 32 bytes.
@@ -296,7 +296,6 @@ class HIDDriver(Driver):
     
     def write_word_data(self, address, register, value):
         return self.h.write([0x14, address<<1, 0x03, register, value>>8, value & 0xFF]) # Word Write Request
-        return 0
     
     def read_word_data(self, address, register):
         self.h.write([0x11, address<<1, 0x00, 0x02, 0x01, register]) # Data Write Read Request
@@ -319,6 +318,62 @@ class HIDDriver(Driver):
     
     def read_block_data(self, address, register):
         raise NotImplementedError()
+
+    def write_i2c_block(self, address, value):
+        if (len(value) > 61):
+            raise IndexError()
+        data = [0x14, address<<1, len(value)]  # Data Write Request (max. 61 bytes)
+        data.extend(value)
+        return self.h.write(data) # Word Write Request
+
+        raise IOError()
+    
+    '''
+    def read_i2c_block(self, address, length):
+
+        for k in range(10):
+            self.h.write([0x12, 0, 60]) # Data Read Force
+            response = self.h.read(60)
+            print "response ",map(hex,response)
+            if (response[0] == 0x13) and (response[1] == 2):  # Polling a data
+                length = response[2]
+                self.h.write([0x12, 0, length]) # Data Read Force
+                response = self.h.read(length)
+                print "response2 ",map(hex,response)
+                #self.h.write([0x12, response[5], response[6]]) # Data Read Force
+                #data = self.h.read(length+3)
+                #print "length ",length
+                #print "data ",map(hex,response)
+                return response[3:length+3]
+        LOGGER.warning("CP2112 Byte Data Read Error...")
+        raise IOError()
+
+    '''
+    def read_i2c_block(self, address, length):
+        self.h.write([0x10, address<<1, 0x00, length]) # Data Read Request (60 bytes)
+
+        for k in range(10):
+            self.h.write([0x15, 0x01]) # Transfer Status Request
+            response = self.h.read(7)
+            #print "response ",map(hex,response)
+            if (response[0] == 0x16) and (response[2] == 5):  # Polling a data
+                #length = (response[5]<<8)+response[6]
+                self.h.write([0x12, response[5], response[6]]) # Data Read Force
+                data = self.h.read(length+3)
+                #print "length ",length
+                #print "data ",map(hex,data)
+                return data[3:]
+        LOGGER.warning("CP2112 Byte Data Read Error...")
+        raise IOError()
+  
+
+    def write_i2c_block_data(self, address, register, value):
+        raise NotImplementedError()
+    
+    def read_i2c_block_data(self, address, register):
+        raise NotImplementedError()
+
+
 
 
 DRIVER = None

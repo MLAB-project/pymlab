@@ -31,13 +31,14 @@ class I2CSPI(Device):
 
 
     def SPI_write(self, chip_select, data):
-        'Writes data to SPI device selected by chipselect bit. ' 
-#        return self.bus.write_i2c_block_data(self.address, chip_select,  data);  # up to 200 bytes may be written. 
-        return self.bus.write_int16(self.address, chip_select,  data);  # up to 200 bytes may be written. 
+        'Writes data to SPI device selected by chipselect bit. '
+        dat = data 
+        dat.insert(0, chip_select)
+        return self.bus.write_i2c_block(self.address, dat);  # up to 61 bytes may be written. 
 
-    def SPI_read(self):
+    def SPI_read(self, length):
         'Reads data from I2CSPI buffer. ' 
-        return self.bus.read_i2c_block_data(self.address, 0x00)
+        return self.bus.read_i2c_block(self.address, length)
 
     def SPI_config(self,config):
         'Configure SPI interface parameters.'
