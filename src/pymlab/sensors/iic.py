@@ -5,7 +5,7 @@
 Author: Jan Milik <milikjan@fit.cvut.cz>
 """
 import time
-
+import struct
 import logging
 
 
@@ -296,6 +296,7 @@ class HIDDriver(Driver):
     
     def write_word_data(self, address, register, value):
         return self.h.write([0x14, address<<1, 0x03, register, value>>8, value & 0xFF]) # Word Write Request
+        return 0
     
     def read_word_data(self, address, register):
         self.h.write([0x11, address<<1, 0x00, 0x02, 0x01, register]) # Data Write Read Request

@@ -24,14 +24,14 @@ try:
     while True:
         gpio.set_ports(0x1234)
         state = gpio.get_ports()
-        print bin(0x1234)
         print bin(state)
-        time.sleep(2)
+        time.sleep(0.5)
 
         gpio.set_ports(0x00)
         state = gpio.get_ports()
         print bin(state)
-        time.sleep(2)
+        time.sleep(0.5)
 
 finally:
     print "stop"
+
