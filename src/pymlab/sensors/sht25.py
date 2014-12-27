@@ -35,13 +35,11 @@ class SHT25(Device):
         self.bus.write_byte(self.address, self.SOFT_RESET);
         return
 
-
     def setup(self, setup_reg ):  # writes to status register and returns its value
         reg=self.bus.read_byte_data(self.address, self.READ_USR_REG);    # Read status actual status register
-        reg = (reg & 0x3A) | setup_reg;    # modify actual register status leave reserved bits without 
+        reg = (reg & 0x3A) | setup_reg;    # modify actual register status leave reserved bits without modification
         self.bus.write_byte_data(self.address, self.WRITE_USR_REG, reg); # write new status register
-        reg=self.bus.read_byte_data(self.address, self.READ_USR_REG);    # Read status actual status register for check purposes
-        return (reg);
+        return self.bus.read_byte_data(self.address, self.READ_USR_REG);    # Return status actual status register for check purposes
 
     def get_temp(self):
         self.bus.write_byte(self.address, self.TRIG_T_noHOLD); # start temperature measurement
@@ -49,7 +47,7 @@ class SHT25(Device):
 
         data = self.bus.read_int16(self.address)
         data &= ~0b11    # trow out status bits
-        return(-46.85 + 175.72*(data/65536.0));
+        return(-46.85 + 175.72*(data/65536.0))
 
     def get_hum(self):
         self.bus.write_byte(self.address, self.TRIG_RH_noHOLD); # start humidity measurement
@@ -57,7 +55,7 @@ class SHT25(Device):
 
         data = self.bus.read_uint16(self.address)
         data &= ~0b11    # trow out status bits
-        return(-6.0 + 125.0*(data/65536.0));
+        return(-6.0 + 125.0*(data/65536.0))
 
 
 def main():
