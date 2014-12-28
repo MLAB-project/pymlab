@@ -26,7 +26,7 @@ spi = cfg.get_device("spi")
 
 try:
     print "SPI configuration.."
-    print bin(spi.SPI_config(spi.I2CSPI_MSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_HIGH_DATA_EDGE_LEADING| spi.I2CSPI_CLK_115kHz))
+    spi.SPI_config(spi.I2CSPI_MSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_LOW_DATA_EDGE_LEADING| spi.I2CSPI_CLK_461kHz)
     time.sleep(2)
 
     init0 = [0x88, 0x00, 0x8A, 0x00, 0x8C, 0x00, 0x8E, 0x00]

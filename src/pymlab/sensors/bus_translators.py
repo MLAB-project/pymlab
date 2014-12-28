@@ -17,7 +17,7 @@ class I2CSPI(Device):
         self.I2CSPI_SS3 = 0b1000
 
         self.I2CSPI_MSB_FIRST = 0b0
-        self.I2CSPI_LSB_FIRST = 0b10000
+        self.I2CSPI_LSB_FIRST = 0b100000
 
         self.I2CSPI_MODE_CLK_IDLE_LOW_DATA_EDGE_LEADING = 0b0000 # SPICLK LOW when idle; data clocked in on leading edge (CPOL = 0, CPHA = 0)
         self.I2CSPI_MODE_CLK_IDLE_LOW_DATA_EDGE_TRAILING = 0b0100 # SPICLK LOW when idle; data clocked in on trailing edge (CPOL = 0, CPHA = 1)
@@ -42,30 +42,30 @@ class I2CSPI(Device):
 
     def SPI_config(self,config):
         'Configure SPI interface parameters.'
-        self.bus.write_byte_data(self.address, 0x00, config)
-        return self.bus.read_byte_data(self.address, 0x00)
+        self.bus.write_byte_data(self.address, 0xF0, config)
+        return self.bus.read_byte_data(self.address, 0xF0)
 
     def SPI_clear_INT(self):
         'Clears an interrupt at INT pin generated after the SPI trnsmission has been completed. ' 
-        return self.bus.write_byte(self.address, 0x01)
+        return self.bus.write_byte(self.address, 0xF1)
 
     def Idle_mode(self):
         'Turns the bridge to low power idle mode.' 
-        return self.bus.write_byte(self.address, 0x02)
+        return self.bus.write_byte(self.address, 0xF2)
 
     def GPIO_write(self, value):
         'Write data to GPIO enabled slave-selects pins.' 
-        return self.bus.write_byte_data(self.address, 0x04, value)
+        return self.bus.write_byte_data(self.address, 0xF4, value)
 
     def GPIO_read(self):
         'Reads logic state on GPIO enabled slave-selects pins.' 
-        self.bus.write_byte_data(self.address, 0x05, 0x0f)
+        self.bus.write_byte_data(self.address, 0xF5, 0x0f)
         return self.bus.read_byte(self.address)
 
     def GPIO_config(self, gpio_enable, gpio_config):
         'Enable or disable slave-select pins as gpio.' 
-        self.bus.write_byte_data(self.address, 0x06, gpio_enable)
-        self.bus.write_byte_data(self.address, 0x07, gpio_config)
+        self.bus.write_byte_data(self.address, 0xF6, gpio_enable)
+        self.bus.write_byte_data(self.address, 0xF7, gpio_config)
         return 
 
 
