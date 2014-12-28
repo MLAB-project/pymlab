@@ -322,7 +322,7 @@ class HIDDriver(Driver):
     def write_i2c_block(self, address, value):
         if (len(value) > 61):
             raise IndexError()
-        data = [0x14, address<<1, len(value)]  # Data Write Request (max. 61 bytes)
+        data = [0x14, address<<1, len(value)]  # Data Write Request (max. 61 bytes, hidapi allows max 8bytes transaction lenght)
         data.extend(value)
         return self.h.write(data) # Word Write Request
 

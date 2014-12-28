@@ -4,7 +4,7 @@ import time
 from pymlab import config
 
 cfg = config.Config(
-    port = 7,
+    port = 8,
     bus = [
         { "name":"gpio", "type":"I2CIO_TCA9535"},
     ],
@@ -13,25 +13,26 @@ cfg = config.Config(
 
 cfg.initialize()
 
-print "Motor control example \r\n"
+print "I2C GPIO example for I2CIO01A MLAB module. \r\n"
 
 gpio = cfg.get_device("gpio")
 
 try:
-        
     gpio.config_ports(0x0000, 0x0000)
+    state = 0b1
 
     while True:
-        gpio.set_ports(0x1234)
-        state = gpio.get_ports()
-        print bin(state)
-        time.sleep(0.5)
+        for i in range(0,7):
+            state = state << 1
+            gpio.set_ports(state)
+            print bin(state)
+            time.sleep(0.1)
 
-        gpio.set_ports(0x00)
-        state = gpio.get_ports()
-        print bin(state)
-        time.sleep(0.5)
-
+        for i in range(0,7):
+            state = state >> 1
+            gpio.set_ports(state)
+            print bin(state)
+            time.sleep(0.1)
 finally:
     print "stop"
 

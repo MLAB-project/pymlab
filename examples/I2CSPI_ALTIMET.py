@@ -4,7 +4,7 @@
 import logging
 logging.basicConfig(level=logging.DEBUG) 
 
-
+import sys
 import time
 from pymlab import config
 
@@ -24,40 +24,39 @@ print "SPI barometer sensor reading example. \r\n"
 
 spi = cfg.get_device("spi")
 
-
-def MPL_init():
-
-    #spi.SPI_write(spi.I2CSPI_SS0, [0x8800, 0x8A00, 0x8C00, 0x8E00, 0x9000, 0x9200, 0x9400, 0x9600])              # get all sensor coeficients in one SPI transaction (uses I2CSPI module buffer)
-    spi.SPI_write(spi.I2CSPI_SS0, [0x88, 0x8A, 0x8C, 0x8E, 0x90, 0x92, 0x94, 0x96])              # get all sensor coeficients in one SPI transaction (uses I2CSPI module buffer)
-    #coefficients = spi.SPI_read();
-
- ## translate to floating point number
-
-    #print coefficients
-    return
-#    a0 = ((unsigned int16) a0_MSB << 5) + (a0_LSB >> 3) + (a0_LSB & 0x07)/8.0;
-#    b1 = ((((b1_MSB & 0x1F) * 0x100) + b1_LSB) / 8192.0) - 3;
-#    b2 = ((((unsigned int16) (b2_MSB - 0x80) << 8) + b2_LSB)/ 16384.0) - 2;
-#    c12 =(((c12_MSB * 0x100) + c12_LSB)/16777216.0);
-
-
-
 try:
     print "SPI configuration.."
-    print bin(spi.SPI_config(spi.I2CSPI_LSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_HIGH_DATA_EDGE_LEADING| spi.I2CSPI_CLK_115kHz))
+    print bin(spi.SPI_config(spi.I2CSPI_MSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_HIGH_DATA_EDGE_LEADING| spi.I2CSPI_CLK_115kHz))
     time.sleep(2)
-    
-    n=0
+
+    init0 = [0x88, 0x00, 0x8A, 0x00, 0x8C, 0x00, 0x8E, 0x00]
+    init1 = [0x90, 0x00, 0x92, 0x00, 0x94, 0x00, 0x96, 0x00]
+    spi.SPI_write(spi.I2CSPI_SS0, init0)              # get all sensor coeficients in one SPI transaction (uses I2CSPI module buffer)
+    coefficients0 = spi.SPI_read(8)
+    spi.SPI_write(spi.I2CSPI_SS0, init1)              # get all sensor coeficients in one SPI transaction (uses I2CSPI module buffer)
+    coefficients1 = spi.SPI_read(8)
+    a0 = (coefficients0[1] << 5) + (coefficients0[3] >> 3) + (coefficients0[3] & 0x07)/8.0;
+    b1 = ((((coefficients0[5] & 0x1F) * 0x100) + coefficients0[7]) / 8192.0) - 3;
+    b2 = ((((coefficients1[1] - 0x80) << 8) + coefficients1[3])/ 16384.0) - 2;
+    c12 =(((coefficients1[5] * 0x100) + coefficients1[7])/16777216.0);
+
     while True:
         print "Sensor inicialization"
-        #MPL_init()
-        #spi.SPI_write(spi.I2CSPI_SS0, [0x55,0xaa,0x55,0xaa,0x55,0xaa,0x55,0xaa])
-        data = [0x51,0x53,0x57,n]
-        length = len(data)
-        spi.SPI_write(spi.I2CSPI_SS0, data)
-        n=n+1
-        response = spi.SPI_read(length)
-        print "read ", map(hex,response)
+        spi.SPI_write(spi.I2CSPI_SS0, [0x24,0x00])
+        time.sleep(0.05)
+        spi.SPI_write(spi.I2CSPI_SS0, [0x80,0x00,0x82,0x00])
+        data = spi.SPI_read(4)
+        
+        ADC_pressure = ((data[1] << 8) + data[3] ) >> 6;  # conversion of 8bit registers to 16bit variable 
+ 
+        spi.SPI_write(spi.I2CSPI_SS0, [0x84,0x00,0x86,0x00])
+        data = spi.SPI_read(4)
+
+        ADC_temperature = ((data[1] << 8) + data[3] ) >> 6;  # conversion of 8bit registers to 16bit variable 
+        Pcomp = a0 + (b1 + c12 * ADC_temperature) * ADC_pressure + b2 * ADC_temperature  # compute relative compensated pressure
+        pressure_kPa = Pcomp * ((115.0 - 50.0)/1023.0) + 50.0
+        sys.stdout.write("Pressure: %.3f kPa \n" % pressure_kPa )
+    
         time.sleep(2)
 
 finally:
