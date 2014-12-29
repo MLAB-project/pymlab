@@ -5,7 +5,7 @@
 Author: Jan Milik <milikjan@fit.cvut.cz>
 """
 import time
-
+import struct
 import logging
 
 
@@ -38,33 +38,210 @@ class Driver(object):
 
 
 class SMBusDriver(Driver):
+
+    """
+    Key to symbols
+    ==============
+
+    S     (1 bit) : Start bit
+    P     (1 bit) : Stop bit
+    Rd/Wr (1 bit) : Read/Write bit. Rd equals 1, Wr equals 0.
+    A, NA (1 bit) : Accept and reverse accept bit. 
+    Addr  (7 bits): I2C 7 bit address. Note that this can be expanded as usual to 
+                    get a 10 bit I2C address.
+    Comm  (8 bits): Command byte, a data byte which often selects a register on
+                    the device.
+    Data  (8 bits): A plain data byte. Sometimes, I write DataLow, DataHigh
+                    for 16 bit data.
+    Count (8 bits): A data byte containing the length of a block operation.
+
+    [..]: Data sent by I2C device, as opposed to data sent by the host adapter.
+    """
+
     def __init__(self, port, smbus):
         self.port = port
         self.smbus = smbus
     
     def write_byte(self, address, value):
+        """
+        SMBus Send Byte:  i2c_smbus_write_byte()
+        ========================================
+
+        This operation is the reverse of Receive Byte: it sends a single byte
+        to a device.  See Receive Byte for more information.
+
+        S Addr Wr [A] Data [A] P
+
+        Functionality flag: I2C_FUNC_SMBUS_WRITE_BYTE
+        """
+
         return self.smbus.write_byte(address, value)
     
     def read_byte(self, address):
+        """
+        SMBus Send Byte:  i2c_smbus_write_byte()
+        ========================================
+
+        This operation is the reverse of Receive Byte: it sends a single byte
+        to a device.  See Receive Byte for more information.
+
+        S Addr Wr [A] Data [A] P
+
+        Functionality flag: I2C_FUNC_SMBUS_WRITE_BYTE
+        """
         return self.smbus.read_byte(address)
     
     def write_byte_data(self, address, register, value):
+        """
+        SMBus Read Byte:  i2c_smbus_read_byte_data()
+        ============================================
+
+        This reads a single byte from a device, from a designated register.
+        The register is specified through the Comm byte.
+
+        S Addr Wr [A] Comm [A] S Addr Rd [A] [Data] NA P
+
+        Functionality flag: I2C_FUNC_SMBUS_READ_BYTE_DATA
+        """
         return self.smbus.write_byte_data(address, register, value)
     
     def read_byte_data(self, address, register):
+        """
+        SMBus Read Byte:  i2c_smbus_read_byte_data()
+        ============================================
+
+        This reads a single byte from a device, from a designated register.
+        The register is specified through the Comm byte.
+
+        S Addr Wr [A] Comm [A] S Addr Rd [A] [Data] NA P
+
+        Functionality flag: I2C_FUNC_SMBUS_READ_BYTE_DATA
+        """
         return self.smbus.read_byte_data(address, register)
 
     def write_word_data(self, address, register, value):
+        """
+        SMBus Write Word:  i2c_smbus_write_word_data()
+        ==============================================
+
+        This is the opposite of the Read Word operation. 16 bits
+        of data is written to a device, to the designated register that is
+        specified through the Comm byte. 
+
+        S Addr Wr [A] Comm [A] DataLow [A] DataHigh [A] P
+
+        Functionality flag: I2C_FUNC_SMBUS_WRITE_WORD_DATA
+
+        Note the convenience function i2c_smbus_write_word_swapped is
+        available for writes where the two data bytes are the other way
+        around (not SMBus compliant, but very popular.)
+        """
         return self.smbus.write_word_data(address, register, value)
     
     def read_word_data(self, address, register):
+        """
+        SMBus Read Word:  i2c_smbus_read_word_data()
+        ============================================
+
+        This operation is very like Read Byte; again, data is read from a
+        device, from a designated register that is specified through the Comm
+        byte. But this time, the data is a complete word (16 bits).
+
+        S Addr Wr [A] Comm [A] S Addr Rd [A] [DataLow] A [DataHigh] NA P
+
+        Functionality flag: I2C_FUNC_SMBUS_READ_WORD_DATA
+
+        Note the convenience function i2c_smbus_read_word_swapped is
+        available for reads where the two data bytes are the other way
+        around (not SMBus compliant, but very popular.)
+        """
         return self.smbus.read_word_data(address, register)
     
     def write_block_data(self, address, register, value):
+        """
+        SMBus Block Write:  i2c_smbus_write_block_data()
+        ================================================
+
+        The opposite of the Block Read command, this writes up to 32 bytes to 
+        a device, to a designated register that is specified through the
+        Comm byte. The amount of data is specified in the Count byte.
+
+        S Addr Wr [A] Comm [A] Count [A] Data [A] Data [A] ... [A] Data [A] P
+
+        Functionality flag: I2C_FUNC_SMBUS_WRITE_BLOCK_DATA
+        """
         return self.smbus.write_block_data(address, register, value)
     
     def read_block_data(self, address, register):
+        """
+        SMBus Block Read:  i2c_smbus_read_block_data()
+        ==============================================
+
+        This command reads a block of up to 32 bytes from a device, from a 
+        designated register that is specified through the Comm byte. The amount
+        of data is specified by the device in the Count byte.
+
+        S Addr Wr [A] Comm [A] 
+                   S Addr Rd [A] [Count] A [Data] A [Data] A ... A [Data] NA P
+
+        Functionality flag: I2C_FUNC_SMBUS_READ_BLOCK_DATA
+        """
         return self.smbus.read_block_data(address, register)
+
+    def block_process_call(self, address, register, value):
+        """
+        SMBus Block Write - Block Read Process Call
+        ===========================================
+
+        SMBus Block Write - Block Read Process Call was introduced in
+        Revision 2.0 of the specification.
+
+        This command selects a device register (through the Comm byte), sends
+        1 to 31 bytes of data to it, and reads 1 to 31 bytes of data in return.
+
+        S Addr Wr [A] Comm [A] Count [A] Data [A] ...
+                                     S Addr Rd [A] [Count] A [Data] ... A P
+
+        Functionality flag: I2C_FUNC_SMBUS_BLOCK_PROC_CALL
+        """
+        return self.smbus.block_process_call(address, register, value)
+
+    def write_i2c_block_data(self, address, value):
+        """
+        I2C block transactions do not limit the number of bytes transferred
+        but the SMBus layer places a limit of 32 bytes.
+
+        I2C Block Write:  i2c_smbus_write_i2c_block_data()
+        ==================================================
+
+        The opposite of the Block Read command, this writes bytes to 
+        a device, to a designated register that is specified through the
+        Comm byte. Note that command lengths of 0, 2, or more bytes are
+        supported as they are indistinguishable from data.
+
+        S Addr Wr [A] Comm [A] Data [A] Data [A] ... [A] Data [A] P
+
+        Functionality flag: I2C_FUNC_SMBUS_WRITE_I2C_BLOCK
+        """
+        return self.smbus.write_i2c_block_data(address, register, value)
+    
+    def read_i2c_block_data(self, address, register):
+        """
+        I2C block transactions do not limit the number of bytes transferred
+        but the SMBus layer places a limit of 32 bytes.
+
+        I2C Block Read:  i2c_smbus_read_i2c_block_data()
+        ================================================
+
+        This command reads a block of bytes from a device, from a 
+        designated register that is specified through the Comm byte.
+
+        S Addr Wr [A] Comm [A] 
+                   S Addr Rd [A] [Data] A [Data] A ... A [Data] NA P
+
+        Functionality flag: I2C_FUNC_SMBUS_READ_I2C_BLOCK
+        """
+        return self.smbus.read_i2c_block_data(address, register)
 
 
 class HIDDriver(Driver):
@@ -141,6 +318,62 @@ class HIDDriver(Driver):
     
     def read_block_data(self, address, register):
         raise NotImplementedError()
+
+    def write_i2c_block(self, address, value):
+        if (len(value) > 61):
+            raise IndexError()
+        data = [0x14, address<<1, len(value)]  # Data Write Request (max. 61 bytes, hidapi allows max 8bytes transaction lenght)
+        data.extend(value)
+        return self.h.write(data) # Word Write Request
+
+        raise IOError()
+    
+    '''
+    def read_i2c_block(self, address, length):
+
+        for k in range(10):
+            self.h.write([0x12, 0, 60]) # Data Read Force
+            response = self.h.read(60)
+            print "response ",map(hex,response)
+            if (response[0] == 0x13) and (response[1] == 2):  # Polling a data
+                length = response[2]
+                self.h.write([0x12, 0, length]) # Data Read Force
+                response = self.h.read(length)
+                print "response2 ",map(hex,response)
+                #self.h.write([0x12, response[5], response[6]]) # Data Read Force
+                #data = self.h.read(length+3)
+                #print "length ",length
+                #print "data ",map(hex,response)
+                return response[3:length+3]
+        LOGGER.warning("CP2112 Byte Data Read Error...")
+        raise IOError()
+
+    '''
+    def read_i2c_block(self, address, length):
+        self.h.write([0x10, address<<1, 0x00, length]) # Data Read Request (60 bytes)
+
+        for k in range(10):
+            self.h.write([0x15, 0x01]) # Transfer Status Request
+            response = self.h.read(7)
+            #print "response ",map(hex,response)
+            if (response[0] == 0x16) and (response[2] == 5):  # Polling a data
+                #length = (response[5]<<8)+response[6]
+                self.h.write([0x12, response[5], response[6]]) # Data Read Force
+                data = self.h.read(length+3)
+                #print "length ",length
+                #print "data ",map(hex,data)
+                return data[3:]
+        LOGGER.warning("CP2112 Byte Data Read Error...")
+        raise IOError()
+  
+
+    def write_i2c_block_data(self, address, register, value):
+        raise NotImplementedError()
+    
+    def read_i2c_block_data(self, address, register):
+        raise NotImplementedError()
+
+
 
 
 DRIVER = None
