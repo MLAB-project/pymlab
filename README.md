@@ -19,20 +19,15 @@ Installation
 #### Cython interface for the MLAB module USBI2C01A (Optional)
 
     $ sudo apt-get install libusb-1.0 cython libudev-dev
-   
-Do it in a working directory:
-
-    $ git clone https://github.com/signal11/hidapi
-  
-Compile and install [HIDAPI](https://github.com/signal11/hidapi) according to instruction in repositories mentioned above.
-
-[CYTHON-HIDAPI](https://github.com/parautenbach/cython-hidapi)  can be installed easily from Pypi internet repository by running: 
+     
+CYTHON-HIDAPI   can be installed easily from Pypi internet repository by running: 
 
     $ easy_install hidapi
 
-
 Usage
 -----
+
+For use of this python library the I²C bus topology and connected devices must be defined.  This is done by the Config object defined at the begining of the script. Exapmle of network bus config follows. 
 
 ### Example
 
