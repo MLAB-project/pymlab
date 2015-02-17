@@ -224,6 +224,18 @@ class Bus(SimpleBus):
         LOGGER.debug("Reading byte %s from register %s in device %s", hex(data),  hex(register), hex(address))
         return data
 
+    def write_word_data(self, address, register, value):
+        """Write a 16-bit value to a device's register. """
+        LOGGER.debug("Writing byte data %s to register %s on device %s",
+            bin(value), hex(register), hex(address))
+        return self.driver.write_word_data(address, register, value)
+    
+    def read_word_data(self, address, register):
+        data = self.driver.read_word_data(address, register)
+        LOGGER.debug("Reading word %s from register %s in device %s", hex(data),  hex(register), hex(address))
+        return data
+ 
+
     def write_wdata(self, address, register, value):
         """Write a word (two bytes) value to a device's register. """
         LOGGER.debug("Writing word data %s to register %s on device %s",
