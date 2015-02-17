@@ -54,7 +54,7 @@ time.sleep(0.5)
 sys.stdout.write("Temperature acquisition system started \n")
 
 try:
-    sensor.setAddress(0x01);
+    sensor.setAddress(0x01); # Default address is 0x5A. Call this function only if your device has different address.
     while True:
        print "Ta ", sensor.getTambient(),  "  To1 ", sensor.getTobject1(), "  To2 ", sensor.getTobject2()
        time.sleep(1)
