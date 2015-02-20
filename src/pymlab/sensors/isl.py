@@ -64,7 +64,7 @@ class ISL01(Device):
         LSB = self.bus.read_byte_data(self.address, self.Data_lsb)
         MSB = self.bus.read_byte_data(self.address, self.Data_lsb)
         DATA = (MSB << 8) + LSB
-        Ecal = * DATA
+        Ecal = 1 * DATA
         return Ecal
 
 

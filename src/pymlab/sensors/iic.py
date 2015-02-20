@@ -260,6 +260,7 @@ class HIDDriver(Driver):
         # Set SMB Configuration (AN 495)
         self.h.write([0x06, 0x00, 0x01, 0x86, 0xA0, 0x02, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0x00, 0x0F])  
     
+    # WARNING ! - CP2112 does not support I2C address 0    
     def write_byte(self, address, value):
         return self.h.write([0x14, address<<1, 0x01, value]) # Data Write Request
     
@@ -428,6 +429,14 @@ def write_byte_data(address, register, value):
 
 def read_byte_data(address, register):
     return DRIVER.read_byte_data(address, register)
+
+
+def write_word_data(address, register, value):
+    return DRIVER.write_word_data(address, register, value)
+
+
+def read_word_data(address, register):
+    return DRIVER.read_word_data(address, register)
 
 
 def write_block_data(address, register, value):
