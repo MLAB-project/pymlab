@@ -19,7 +19,6 @@ Installation
 
 #### Cython interface for the MLAB module USBI2C01A (Optional)
 
-<<<<<<< HEAD
 Required if you want to use the USBI2C01A module to communicate with SMBus deviced via USB. 
 
     $ sudo apt-get install libudev-dev libusb-1.0-0-dev libhidapi-dev python-setuptools python-smbus cython
@@ -31,11 +30,6 @@ Do it in a working directory:
 Compile and install [HIDAPI](https://github.com/signal11/hidapi) according to instruction in repositories mentioned above.
 
 [CYTHON-HIDAPI](https://github.com/parautenbach/cython-hidapi)  can be installed easily from Pypi internet repository by running: 
-=======
-    $ sudo apt-get install libusb-1.0 cython libudev-dev
-     
-CYTHON-HIDAPI   can be installed easily from Pypi internet repository by running: 
->>>>>>> d4dbd330b8c9475e5f6e5fea5e7b2fa54f9dd2f5
 
     $ easy_install hidapi
 
