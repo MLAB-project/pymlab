@@ -3,7 +3,7 @@
 
 import logging
 
-import smbus
+#import smbus
 
 from pymlab.sensors import Device, SimpleBus
 
