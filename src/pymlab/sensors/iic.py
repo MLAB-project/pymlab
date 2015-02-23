@@ -246,19 +246,28 @@ class SMBusDriver(Driver):
 
 class HIDDriver(Driver):
     def __init__(self):
-        time.sleep(1)   # give an OS time for remounting the HID device
+        time.sleep(1)   # give a time to OS for remounting the HID device
         import hid
         self.h = hid.device()
         self.h.open(0x10C4, 0xEA90) # Connect HID again after enumeration
         self.h.write([0x02, 0xFF, 0x00, 0x00, 0x00])  # Set GPIO to Open-Drain  
         for k in range(3):      # blinking LED
             self.h.write([0x04, 0x00, 0xFF])
-            time.sleep(0.1)
+            time.sleep(0.05)
             self.h.write([0x04, 0xFF, 0xFF])
-            time.sleep(0.1)
+            time.sleep(0.05)
         self.h.write([0x02, 0xFF, 0x00, 0xFF, 0x00])  # Set GPIO to RX/TX LED  
         # Set SMB Configuration (AN 495)
         self.h.write([0x06, 0x00, 0x01, 0x86, 0xA0, 0x02, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0x00, 0x0F])  
+
+    def I2CError(self):
+        self.h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
+        self.h.close()
+        time.sleep(3)   # Give a time to OS for release the BUS
+        raise IOError()
+
+    def get_handler(self):
+        return h
     
     # WARNING ! - CP2112 does not support I2C address 0    
     def write_byte(self, address, value):
@@ -275,7 +284,7 @@ class HIDDriver(Driver):
                 response = self.h.read(4)
                 return response[3]
         LOGGER.warning("CP2112 Byte Read Error...")
-        raise IOError()
+        self.I2CError()
     
     def write_byte_data(self, address, register, value):
         return self.h.write([0x14, address<<1, 0x02, register, value]) # Data Write Request
@@ -293,7 +302,7 @@ class HIDDriver(Driver):
                 #print "data ",map(hex,response)
                 return response[3]
         LOGGER.warning("CP2112 Byte Data Read Error...")
-        raise IOError()
+        self.I2CError()
     
     def write_word_data(self, address, register, value):
         return self.h.write([0x14, address<<1, 0x03, register, value>>8, value & 0xFF]) # Word Write Request
@@ -312,7 +321,7 @@ class HIDDriver(Driver):
             self.h.write([0x11, address<<1, 0x00, 0x02, 0x01, register]) # Data Write Read Request
             self.h.write([0x12, 0x00, 0x02]) # Data Read Force            
         LOGGER.warning("CP2112 Word Read Error...")
-        raise IOError()
+        self.I2CError()
     
     def write_block_data(self, address, register, value):
         raise NotImplementedError()
@@ -326,9 +335,8 @@ class HIDDriver(Driver):
         data = [0x14, address<<1, len(value)]  # Data Write Request (max. 61 bytes, hidapi allows max 8bytes transaction lenght)
         data.extend(value)
         return self.h.write(data) # Word Write Request
-
-        raise IOError()
-    
+        self.I2CError()
+  
     '''
     def read_i2c_block(self, address, length):
 
@@ -365,7 +373,7 @@ class HIDDriver(Driver):
                 #print "data ",map(hex,data)
                 return data[3:]
         LOGGER.warning("CP2112 Byte Data Read Error...")
-        raise IOError()
+        self.I2CError()
   
 
     def write_i2c_block_data(self, address, register, value):
