@@ -31,7 +31,7 @@ while True:
 
     try:
         while True:
-
+            # Battery status readout
             print "Temp =", guage.getTemp(), "degC, RemainCapacity =", guage.getRemainingCapacity(), "mAh, cap =", guage.FullChargeCapacity(), "mAh, U =", guage.Voltage(), "mV, I =", guage.AverageCurrent(), "mA, charge =", guage.StateOfCharge(), "%"
             time.sleep(3)
 
