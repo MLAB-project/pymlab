@@ -7,7 +7,7 @@ import sys
 from pymlab import config
 
 while True:
-    #### Sensor Configuration #########################################
+    #### Sensor Configuration ############################################
     cfg = config.Config(
         i2c = {
             "port": 0, # I2C bus number
