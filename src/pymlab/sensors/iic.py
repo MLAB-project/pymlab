@@ -315,7 +315,7 @@ class HIDDriver(Driver):
             response = self.h.read(10)
             #print map(hex,response)
             #print "status ",response
-            if (response[0] == 0x13) and (response[2] == 2):  
+            if (response[0] == 0x13) and (response[2] == 2):
                 return (response[4]<<8)+response[3]           
             #self.h.write([0x15, 0x01]) # Transfer Status Request
             self.h.write([0x11, address<<1, 0x00, 0x02, 0x01, register]) # Data Write Read Request
@@ -383,6 +383,63 @@ class HIDDriver(Driver):
         raise NotImplementedError()
 
 
+class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I2C-bus controller with UART interface
+    def __init__(self, port):
+        import serial
+        self.ser = serial.Serial(port, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=0.01)
+    
+    def I2CError(self):
+        raise NotImplementedError()
+
+    def get_handler(self):
+        raise NotImplementedError()
+
+    def write_byte(self, address, value):
+        data = 'S' + "".join(map(chr, [((address << 1) & 0xfe ), 1, value ])) + 'P'
+        w = self.ser.write(data)
+
+    def read_byte(self, address):
+        data = 'S' + "".join(map(chr, [((address << 1) | 0x01 ), 1])) + 'P'
+        self.ser.flushInput()
+        self.ser.write(data)
+        read = ''
+        while read == '': 
+            read = self.ser.read()
+        return ord(read)
+    
+    def write_byte_data(self, address, register, value):
+        data = 'S' + "".join(map(chr, [((address << 1) & 0xfe ), 2, register, value ])) + 'P'
+        w = self.ser.write(data)
+
+    def read_byte_data(self, address, register):
+        self.write_byte(address, register)
+        return self.read_byte(address)
+
+    def write_word_data(self, address, register, value):
+        raise NotImplementedError()
+    
+    def read_word_data(self, address, register):
+        raise NotImplementedError()
+
+    def write_block_data(self, address, register, value):
+        raise NotImplementedError()
+    
+    def read_block_data(self, address, register):
+        raise NotImplementedError()
+
+    def write_i2c_block(self, address, value):
+        raise NotImplementedError()
+  
+    def read_i2c_block(self, address, length):
+        raise NotImplementedError()
+
+    def write_i2c_block_data(self, address, register, value):
+        raise NotImplementedError()
+    
+    def read_i2c_block_data(self, address, register):
+        raise NotImplementedError()
+
+
 
 
 DRIVER = None
@@ -406,6 +463,17 @@ def load_driver(**kwargs):
         LOGGER.warning("HID driver cannot be imported, we will try SMBus driver...")
  
     port = kwargs.get("port", None)
+
+    if port is 232:
+        try:
+            LOGGER.info("Loading SERIAL driver...")
+            import serial
+            return SerialDriver('/dev/ttyUSB0')
+
+        except ImportError:
+                LOGGER.warning("Failed to import 'SC18IM700' driver. I2C232 driver cannot be loaded.")
+    
+
     if port is not None:
         try:
             import smbus

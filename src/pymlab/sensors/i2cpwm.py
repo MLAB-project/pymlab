@@ -24,14 +24,14 @@ class I2CPWM(Device):
 
     def set_pwm0(self, frequency, duty): # frequency in Hz, Duty in % (0-100)
         period = int((1.0/float(frequency))*152.0)-1
-	duty = int((float(duty)/100.0)*256.0)
+	duty = int((float(duty)/100.0)*255.0)
         self.bus.write_byte_data(self.address, 0x01, period)
         self.bus.write_byte_data(self.address, self.PWM_PWM0, duty)
 
 
     def set_pwm1(self, frequency, duty): # frequency in Hz, Duty in % (0-100)
         period = int((1.0/float(frequency))*152.0)-1
-	duty = int((float(duty)/100.0)*256.0)
+	duty = int((float(duty)/100.0)*255.0)
         self.bus.write_byte_data(self.address, self.PWM_PSC1, period)
         self.bus.write_byte_data(self.address, self.PWM_PWM1, duty)
 
