@@ -37,7 +37,7 @@ while True:
             # Voltage readout
             voltage = adc.readADC()
             temp = (voltage / 0.0000397) + temperature   #temperrature calculation for K type thermocouple
-            print "Voltage =", float("{0:.2f}".format(voltage)), ",  K-type thermocouple Temperature =", float("{0:.2f}".format(temp))
+            print "Voltage =", voltage, ",  K-type thermocouple Temperature =", float("{0:.2f}".format(temp))
 
             time.sleep(3)
 
