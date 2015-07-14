@@ -21,19 +21,34 @@ class I2CADC01(Device):
         Device.__init__(self, parent, address, **kwargs)
 
     # reading internal temperature
-    def readTemp(self, vref):           
-        self.bus.write_byte(self.address, 0x80)             # switch to internal thermometer
-        time.sleep(1)
-        value = self.bus.read_i2c_block(self.address, 4)
-        time.sleep(1)
-        self.bus.write_byte(self.address, 0x00)             # switch to external input   
-        time.sleep(1)
-        return value
+    def readTemp(self):           
+        self.bus.write_byte(self.address, 0x08)             # switch to internal thermometer, start conversion
+        time.sleep(0.2)                                     # wait for conversion
+        value = self.bus.read_i2c_block(self.address, 4)    # read converted value
+        time.sleep(0.2)                                     # wait for dummy conversion
+        v = value[0]<<24 | value[1]<<16 | value[2]<<8 | value[3]
+        v ^= 0x80000000
+        if (value[0] & 0x80)==0:
+            v = v - 0xFFFFFFff 
+        voltage = float(v)
+        voltage = voltage * 1.225 / (2147483648.0)          # calculate voltage against vref and 24bit
+        temperature = (voltage / 0.0014) - 273              # calculate temperature
+        return temperature
 
 
     # reading ADC after conversion and start new conversion
     def readADC(self):           
-        return (self.bus.read_i2c_block(self.address, 4))
+        self.bus.write_byte(self.address, 0x00)             # switch to external input, start conversion 
+        time.sleep(0.2)                                     # wait for conversion
+        value = self.bus.read_i2c_block(self.address, 4)    # read converted value
+        time.sleep(0.2)                                     # wait for dummy conversion
+        v = value[0]<<24 | value[1]<<16 | value[2]<<8 | value[3]
+        v ^= 0x80000000
+        if (value[0] & 0x80)==0:
+            v = v - 0xFFFFFFff 
+        voltage = float(v)
+        voltage = voltage * 1.225 / (2147483648.0)          # calculate voltage against vref and 24bit
+        return voltage
 
    
 

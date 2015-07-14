@@ -28,32 +28,18 @@ while True:
 
     try:
         while True:
-            # Voltage readout
-            x = adc.readADC()
-            v = x[0]<<24 | x[1]<<16 | x[2]<<8 | x[3]
-            v ^= 0x80000000
-            if (x[0] & 0x80)==0:
-                v = v - 0xFFFFFFff 
-            voltage = float(v)
-            voltage = voltage * 1.225 / (2147483648.0)
-            voltage += 2e-6
-            temperature = voltage / 0.0000397
-            print "Voltage =", x, hex(v), voltage, temperature
-            time.sleep(1)
-            x = adc.readTemp(3)
-            v = x[0]<<24 | x[1]<<16 | x[2]<<8 | x[3]
-            v ^= 0x80000000
-            if (x[0] & 0x80)==0:
-                v = v - 0xFFFFFFff 
-            voltage = float(v)
-            voltage = voltage * 1.225 / (2147483648.0)
-            voltage -= 2e-6
-            temperature = voltage / 0.0000397
-            print "Temperature =", x, hex(v), voltage, temperature
-            time.sleep(1)
-            x = adc.readADC()
-            time.sleep(1)
+            # Temperature readout
+            temperature = adc.readTemp()
+            print "Internal Temperature =", float("{0:.2f}".format(temperature))
 
+            time.sleep(3)
+
+            # Voltage readout
+            voltage = adc.readADC()
+            temp = (voltage / 0.0000397) + temperature   #temperrature calculation for K type thermocouple
+            print "Voltage =", float("{0:.2f}".format(voltage)), ",  K-type thermocouple Temperature =", float("{0:.2f}".format(temp))
+
+            time.sleep(3)
 
     except IOError:
         print "IOError"
