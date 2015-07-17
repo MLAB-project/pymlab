@@ -1,0 +1,56 @@
+Metadata-Version: 1.1
+Name: pymlab
+Version: 0.3
+Summary: Toolbox for interfacing I2C sensors.
+Home-page: https://github.com/MLAB-project/MLAB-I2c-modules
+Author: Jan Milík
+Author-email: milikjan@fit.cvut.cz
+License: Lesser General Public License v3
+Download-URL: https://github.com/MLAB-project/MLAB-I2c-modules/archive/0.3.tar.gz
+Description: 
+        pymlab I2C modules drivers package 
+        ==================================
+        
+        MLAB's I2C bus modules binding. Should be used for data readout from MLAB (http://wiki.mlab.cz/) electronic modules. 
+        
+        
+        Software Dependencies
+        ---------------------
+        
+        * Python-smbus 
+        * Cython-hidapi (https://pypi.python.org/pypi/hidapi/) (optional, required with USBI2C module)
+        * libusb, hidapi and libudev on Linux (optional, required with USBI2C module)
+        
+        
+        
+        Supported devices
+        -----------------
+        
+        Currently supported sensors are:
+        
+        - ALTIMET01A (MPL3115A2)
+        - LTS01A    (MAX31725)
+        - MAG01A    (HMC5883L)
+        - SHT25v01A (Sensirion SHT25)
+        
+        Currently supported devices are:
+        
+        - ACOUNTER02A
+        - CLKGEN01B   (Silicon Labs Si570 oscillator)
+        - I2CHUB02A (TCA9548A)
+        
+        Currently supported interfaces are:
+        
+        - Kernel I2C interfacing subsystem 
+        - USBI2C01A (USB HID interface with Silicon Labs cp2112)
+        
+        
+Keywords: TWI,IIC,I2C,USB,sensors,drivers
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)
+Classifier: Natural Language :: Czech
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Provides: pymlab

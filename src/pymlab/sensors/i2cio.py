@@ -1,6 +1,4 @@
 #!/usr/bin/python
-
-import smbus
 import time
 
 from pymlab.sensors import Device

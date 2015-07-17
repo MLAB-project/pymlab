@@ -16,7 +16,10 @@ LOGGER = logging.getLogger(__name__)
 
 
 class I2CADC01(Device):
- 
+    """
+    Driver for the LTC2485 Linear Technology I2C ADC device. 
+    """
+
     def __init__(self, parent = None, address = 0x24, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
@@ -50,6 +53,17 @@ class I2CADC01(Device):
         voltage = voltage * 1.225 / (2147483648.0)          # calculate voltage against vref and 24bit
         return voltage
 
-   
+class LTC2453(Device):
+    """
+    Driver for the LTC2453 Linear Technology I2C ADC device. 
+    """
+    def __init__(self, parent = None, address = 0x14, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+
+    def readADC(self):           
+        value = self.bus.read_i2c_block(self.address, 2)    # read converted value
+        v = value[0]<<8 | value[1] 
+        v = v - 0x8000
+        return v
 
 
