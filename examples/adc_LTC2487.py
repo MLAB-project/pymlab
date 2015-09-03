@@ -46,7 +46,7 @@ while True:
             sys.stdout.flush()
 #            """
 #            print adc_value
-            time.sleep(1)
+            time.sleep(0.1)
 
     except IOError:
         print "IOError"

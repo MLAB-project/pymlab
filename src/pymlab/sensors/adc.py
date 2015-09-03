@@ -74,7 +74,7 @@ class LTC2487(Device):
         Device.__init__(self, parent, address, **kwargs)
 
     def initialize(self):
-        self.bus.write_i2c_block(self.address, [0b10111000,0b10010000])
+        self.bus.write_i2c_block(self.address, [0b10111000,0b10011000])
 #        self.bus.write_i2c_block(self.address, [0b10100001,0b10010000])
         pass
 
