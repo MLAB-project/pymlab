@@ -112,6 +112,7 @@ class Config(object):
             "thermopile01": thermopile.THERMOPILE01,
             "i2cadc01": adc.I2CADC01,
             "LTC2453": adc.LTC2453,
+            "LTC2487": adc.LTC2487,
             "i2cpwm": i2cpwm.I2CPWM,
             "i2cio": i2cio.I2CIO,
             "i2clcd": i2clcd.I2CLCD,
