@@ -102,7 +102,7 @@ class LTC2487(Device):
             value
         elif (data[0] >> 6) == 0b01:
             value = value * -1
-        elif (data[0] >> 6) == 0b10:
+        elif (data[0] >> 6) == 0b00:
             value = "UNDERFLOW"
         
         return value
