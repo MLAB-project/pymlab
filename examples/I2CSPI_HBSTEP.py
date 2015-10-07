@@ -313,7 +313,7 @@ try:
             spi.SPI_write(spi.I2CSPI_SS0, [0x00])
 
             data.extend(spi.SPI_read(1))
-            print map(hex, data)
+            print "L", map(hex, data), data
 
         spi.SPI_write(spi.I2CSPI_SS0, [0xB0])
         spi.SPI_write(spi.I2CSPI_SS0, [0x51])
@@ -330,7 +330,7 @@ try:
             spi.SPI_write(spi.I2CSPI_SS0, [0x00])
 
             data.extend(spi.SPI_read(1))
-            print map(hex, data)
+            print "R", map(hex, data), data
 
         spi.SPI_write(spi.I2CSPI_SS0, [0xB0])
 
