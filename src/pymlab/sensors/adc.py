@@ -70,13 +70,28 @@ class LTC2487(Device):
     """
     Driver for the LTC2487 Linear Technology I2C ADC device. 
     """
-    def __init__(self, parent = None, address = 0x14, **kwargs):
+    def __init__(self, parent = None, address = 0x14, configuration = [0b10111000,0b10011000], **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
+        self.config = configuration
+
     def initialize(self):
-        self.bus.write_i2c_block(self.address, [0b10111000,0b10011000])
-#        self.bus.write_i2c_block(self.address, [0b10100001,0b10010000])
-        pass
+        self.bus.write_i2c_block(self.address, self.config)
+
+    def setADC(self, channel = 0 ):           
+        CHANNEL_CONFIG = {
+            01: 0b00000,
+            23: 0b00001,
+            10: 0b01000,
+            32: 0b01001,
+            0: 0b10000,
+            1: 0b11000,
+            2: 0b10001,
+            3: 0b11000,
+        }
+
+        self.config[0] = 0b10100000 + CHANNEL_CONFIG[channel]
+        self.bus.write_i2c_block(self.address, self.config)
 
     def readADC(self):           
         data = self.bus.read_i2c_block(self.address, 3)    # read converted value
@@ -87,7 +102,7 @@ class LTC2487(Device):
             value
         elif (data[0] >> 6) == 0b01:
             value = value * -1
-        elif (data[0] >> 6) == 0b10:
+        elif (data[0] >> 6) == 0b00:
             value = "UNDERFLOW"
         
         return value
