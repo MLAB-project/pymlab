@@ -29,7 +29,7 @@ while True:
     cfg.initialize()
     adc = cfg.get_device("adc")
 
-    Ra = 100000.0     # Circuit Constants opitmized for PT100 sensor.  
+    Ra = 4700.0     # Circuit Constants optimized for PT100 sensor.  
     Rb = 1500.0
     N = 18
 

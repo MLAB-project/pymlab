@@ -107,7 +107,7 @@ class Config(object):
             "atmega": atmega.ATMEGA,
             "I2CIO_TCA9535": gpio.I2CIO_TCA9535,
             "i2cspi": bus_translators.I2CSPI,
-            "ils01": isl.ISL01,
+            "isl01": light.ISL01,
             "lion1cell01": lion1cell.LION1CELL01,
             "thermopile01": thermopile.THERMOPILE01,
             "i2cadc01": adc.I2CADC01,
