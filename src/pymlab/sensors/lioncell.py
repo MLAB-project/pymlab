@@ -25,7 +25,7 @@ class Overflow(object):
 OVERFLOW = Overflow()
 
 
-class LION1CELL01(Device):
+class LIONCELL(Device):
     """
     Battery Guage binding
     
@@ -67,4 +67,48 @@ class LION1CELL01(Device):
     def SerialNumber(self):
         return (self.bus.read_byte_data(self.address, 0x7E) + self.bus.read_byte_data(self.address, 0x7F) * 256)
 
+    # Pack Configuration
+    def PackConfiguration(self):
+        return (self.bus.read_byte_data(self.address, 0x3A) + self.bus.read_byte_data(self.address, 0x3B) * 256)
+
+
+    # Read Flash Block
+    # return 32 bytes plus checksum
+    def ReadFlashBlock(self, fclass, fblock):
+        ret = []
+        self.bus.write_byte_data(self.address, 0x61, 0x00)
+        time.sleep(0.1)
+        self.bus.write_byte_data(self.address, 0x3E, fclass)
+        time.sleep(0.1)
+        self.bus.write_byte_data(self.address, 0x3F, fblock)
+        time.sleep(0.1)
+        fsum = 0
+        for addr in range(0,32):
+            tmp = self.bus.read_byte_data(self.address, 0x40+addr)
+            ret.append(tmp)
+            fsum = (fsum + tmp) % 256
+        ret.append(self.bus.read_byte_data(self.address, 0x60))        
+        return ret
+
+    # Write Byte to Flash
+    def WriteFlashByte(self, fclass, fblock, foffset, fbyte):
+        self.bus.write_byte_data(self.address, 0x61, 0x00)
+        time.sleep(0.1)
+        self.bus.write_byte_data(self.address, 0x3E, fclass)
+        time.sleep(0.1)
+        self.bus.write_byte_data(self.address, 0x3F, fblock)
+        time.sleep(0.1)
+        self.bus.write_byte_data(self.address, 0x40+foffset, fbyte)
+        time.sleep(0.1)
+        fsum = 0
+        for addr in range(0,32):
+            if(addr != foffset):
+                tmp = self.bus.read_byte_data(self.address, 0x40+addr)
+                fsum = (fsum + tmp) % 256
+        fsum = (fsum + fbyte) % 256
+        fsum = 0xFF-fsum
+        time.sleep(0.1)
+        self.bus.write_byte_data(self.address, 0x60, fsum)        
+        time.sleep(1)
+        
 
