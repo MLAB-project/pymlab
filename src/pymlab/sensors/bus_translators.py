@@ -46,7 +46,7 @@ class I2CSPI(Device):
         return self.bus.read_byte_data(self.address, 0xF0)
 
     def SPI_clear_INT(self):
-        'Clears an interrupt at INT pin generated after the SPI trnsmission has been completed. ' 
+        'Clears an interrupt at INT pin generated after the SPI transmission has been completed. ' 
         return self.bus.write_byte(self.address, 0xF1)
 
     def Idle_mode(self):

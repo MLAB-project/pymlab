@@ -107,3 +107,57 @@ class LTC2487(Device):
         
         return value
 
+class BRIDGEADC01(Device):
+    """
+    Driver for the AD7730/AD7730L bridge ADC device. 
+    """
+
+    def __init__(self, parent = None, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+        
+        #AD7730 register address
+        self.AD7730_COMM_REG            =0b000
+        self.AD7730_STATUS_REG          =0b000
+        self.AD7730_DATA_REG            =0b001
+        self.AD7730_MODE_REG            =0b010
+        self.AD7730_FILTER_REG          =0b011
+        self.AD7730_DAC_REG             =0b100
+        self.AD7730_OFFSET_REG          =0b101
+        self.AD7730_GAIN_REG            =0b110
+        self.AD7730_TEST_REG            =0b111      # do not change state of this register
+
+    def reset(self):
+        spi.SPI_write(spi.I2CSPI_SS0, [0xFF])       # wrinting least 32 serial clock with 1 at data input resets the device. 
+        spi.SPI_write(spi.I2CSPI_SS0, [0xFF])
+        spi.SPI_write(spi.I2CSPI_SS0, [0xFF])
+        spi.SPI_write(spi.I2CSPI_SS0, [0xFF])
+
+    def single_write(self, register, value):
+        comm_reg = 0b00000 << 3 + register
+        spi.SPI_write(spi.I2CSPI_SS0, [comm_reg])
+        spi.SPI_write(spi.I2CSPI_SS0, [value])
+
+    def single_read(self, register, value):
+        comm_reg = 0b00010 << 3 + register
+
+        if register == self.AD7730_STATUS_REG:
+            bytes_num = 1
+        elif register == self.AD7730_DATA_REG:
+            bytes_num = 2
+        elif register == self.AD7730_MODE_REG:
+            bytes_num = 2
+        elif register == self.AD7730_FILTER_REG:
+            bytes_num = 3
+        elif register == self.AD7730_DAC_REG:
+            bytes_num = 1
+        elif register == self.AD7730_OFFSET_REG:
+            bytes_num = 3
+        elif register == self.AD7730_GAIN_REG:
+            bytes_num = 3
+        elif register == self.AD7730_TEST_REG:
+            bytes_num = 3
+
+        spi.SPI_write(spi.I2CSPI_SS0, [comm_reg])
+        
+        return spi.SPI_write(spi.I2CSPI_SS0, bytes_num)
+
