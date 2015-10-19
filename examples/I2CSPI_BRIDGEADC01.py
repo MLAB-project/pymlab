@@ -14,7 +14,7 @@ cfg = config.Config(
     },
 
     bus = [
-        { "name":"spi", "type":"i2cspi"},
+        { "name":"spi", "type":"i2cspi", "address": 0x28},
     ],
 )
 
@@ -27,39 +27,27 @@ spi = cfg.get_device("spi")
 
 try:
     print "SPI configuration.."
-    spi.SPI_config(spi.I2CSPI_MSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_HIGH_DATA_EDGE_TRAILING| spi.I2CSPI_CLK_461kHz)
+    spi.SPI_config(spi.I2CSPI_MSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_LOW_DATA_EDGE_LEADING| spi.I2CSPI_CLK_461kHz)
     spi.GPIO_config(spi.I2CSPI_SS2 | spi.I2CSPI_SS3, 0x50)
     #time.sleep(2)
 
 
-    spi.SPI_write(spi.I2CSPI_SS0, [0x14])       # weight treshold setup 
-    spi.SPI_write(spi.I2CSPI_SS0, [0x15])
+    spi.SPI_write(spi.I2CSPI_SS0, [0b00010101, 0x00, 0x00, 0x00])
+#    spi.SPI_write(spi.I2CSPI_SS0, [])
+#    spi.SPI_write(spi.I2CSPI_SS0, [0x00])
+#    spi.SPI_write(spi.I2CSPI_SS0, [0x00])
 
-    spi.SPI_write(spi.I2CSPI_SS0, [0x07])       # weight speed setup 
-    spi.SPI_write(spi.I2CSPI_SS0, [0x00])
-    spi.SPI_write(spi.I2CSPI_SS0, [0x19])
-
-
-    while weight < 10:
-    
-
-        spi.SPI_write(spi.I2CSPI_SS0, [0x40])       ## wait for desired weight
-        spi.SPI_write(spi.I2CSPI_SS0, [0x00])
-        spi.SPI_write(spi.I2CSPI_SS0, [0xC8])
-        spi.SPI_write(spi.I2CSPI_SS0, [0x00])
-
-        data = spi.SPI_read(1)
-        weight = (~(data[0] >> 3)) & 0xF
-        
-        time.sleep(1)
+    data = spi.SPI_read(4)    
+    time.sleep(1)
+    print data
 
 finally:
     print "weight prepared"
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#Future more usable code. 
+#Future more usable code which uses SPI binding.
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+"""
 cfg = config.Config(
     i2c = {
         "port": 8,
@@ -95,4 +83,4 @@ try:
 
 finally:
     print "stop"
-
+"""
