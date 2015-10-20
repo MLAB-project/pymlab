@@ -20,7 +20,7 @@ cfg = config.Config(
 
 cfg.initialize()
 
-print "SPI barometer sensor reading example. \r\n"
+print "Stepper motor control example. \r\n"
 
 spi = cfg.get_device("spi")
 

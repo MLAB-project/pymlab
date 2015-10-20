@@ -65,8 +65,8 @@ n = 0
 
 try:
     while True:
-       # sys.stdout.write("print on LCD")
-       # sys.stdout.flush()
+        sys.stdout.write("print on LCD")
+        sys.stdout.flush()
         lcd.light(1)
         time.sleep(1)
         lcd.light(0)
