@@ -37,7 +37,7 @@ class LIONCELL(Device):
     # reset
     def reset(self):           
         self.bus.write_byte_data(self.address, 0x00, 0x01)
-        self.bus.write_byte_data(self.address, 0x00, 0x05)
+        self.bus.write_byte_data(self.address, 0x00, 0x41)
 
     # deg C
     def getTemp(self):           
@@ -93,6 +93,14 @@ class LIONCELL(Device):
     def PackConfiguration(self):
         return (self.bus.read_byte_data(self.address, 0x3A) + self.bus.read_byte_data(self.address, 0x3B) * 256)
 
+    def Chemistry(self):
+        ''' Get cells chemistry '''
+        length = self.bus.read_byte_data(self.address, 0x79) 
+        chem = []
+        for n in range(length):
+            chem.append(self.bus.read_byte_data(self.address, 0x7A + n)) 
+        return chem
+            
 
     # Read Flash Block
     # return 32 bytes plus checksum
