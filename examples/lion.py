@@ -56,6 +56,9 @@ while True:
     print " ".join([hex(i) for i in flash])
 
     print "DesCap =", guage.DesignCapacity(), "mAh"
+    flash = guage.Chemistry()
+    print "Chemistry = ",
+    print " ".join([hex(i) for i in flash])
 
     try:
         while True:
