@@ -30,7 +30,11 @@ class BRIDGEADC01:
         self.AD7730_IDLE_MODE           =0b000
         self.AD7730_CCONVERSION_MODE    =0b001
         self.AD7730_SCONVERSION_MODE    =0b010
-        self.AD7730_POWERDOWN_MODE      =0b000
+        self.AD7730_POWERDOWN_MODE      =0b011
+        self.AD7730_INT_ZERO_CALIBRATION=0b100
+        self.AD7730_INT_FULL_CALIBRATION=0b101
+        self.AD7730_SYSTEM_ZERO_CALIBRATION=0b110
+        self.AD7730_SYSTEM_FULL_CALIBRATION=0b111
 
         self.AD7730_BIPOLAR_MODE        =0b0
         self.AD7730_UNIPOLAR_MODE       =0b1
@@ -47,7 +51,7 @@ class BRIDGEADC01:
         self.AD7730_MCLK_ENABLE_MODE    =0b0
         self.AD7730_MCLK_DISABLE_MODE   =0b1
         self.AD7730_BURNOUT_DISABLE     =0b0
-        self.AD7730_BURNOUT_ENABLE         =0b1
+        self.AD7730_BURNOUT_ENABLE      =0b1
         self.AD7730_AIN1P_AIN1N         =0b00
         self.AD7730_AIN2P_AIN2N         =0b01
         self.AD7730_AIN1N_AIN1N         =0b10
@@ -60,10 +64,8 @@ class BRIDGEADC01:
         spi.SPI_write(spi.I2CSPI_SS0, [0xFF])
 
     def single_write(self, register, value):
-        comm_reg = 0b00000 << 3 + register
-        spi.SPI_write(spi.I2CSPI_SS0, [comm_reg])
-        bytes = list(struct.unpack('4B', struct.pack('<I', value)))
-        spi.SPI_write(spi.I2CSPI_SS0, [bytes])
+        comm_reg = (0b00000 << 3) + register
+        spi.SPI_write(spi.I2CSPI_SS0, [comm_reg] + value)
 
     def single_read(self, register):
         comm_reg = (0b00010 << 3) + register
@@ -71,7 +73,7 @@ class BRIDGEADC01:
         if register == self.AD7730_STATUS_REG:
             bytes_num = 1
         elif register == self.AD7730_DATA_REG:
-            bytes_num = 2
+            bytes_num = 3
         elif register == self.AD7730_MODE_REG:
             bytes_num = 2
         elif register == self.AD7730_FILTER_REG:
@@ -120,7 +122,6 @@ NOREF - No Reference Bit. If the voltage between the REF IN(+) and REF IN(-) pin
                             ('STBY',status[0] & 0x20 == 0x20),
                             ('STDY',status[0] & 0x40 == 0x40),
                             ('RDY',status[0] & 0x80 == 0x80)])
-        print bits_values
         return bits_values
 
     def IsBusy(self):
@@ -134,7 +135,7 @@ NOREF - No Reference Bit. If the voltage between the REF IN(+) and REF IN(-) pin
                     ,polarity 
                     ,den 
                     ,iovalue 
-                    ,data_lenght 
+                    ,data_length 
                     ,reference 
                     ,input_range 
                     ,clock_enable 
@@ -154,8 +155,8 @@ NOREF - No Reference Bit. If the voltage between the REF IN(+) and REF IN(-) pin
                     ,channel = self.AD7730_AIN1P_AIN1N
                ):
         '''
-        mode_MSB = mode << 5 + polarity << 4 + den << 3 + iovalue << 1 + data_lengh
-        mode_LSB = reference << 7 + 0b0 << 6 + input_range << 4 + clock_enable << 3 + burn_out << 2 + channel
+        mode_MSB = (mode << 5) + (polarity << 4) + (den << 3) + (iovalue << 1) + data_length
+        mode_LSB = (reference << 7) + (0b0 << 6) + (input_range << 4) + (clock_enable << 3) + (burn_out << 2) + channel
     
         self.single_write(self.AD7730_MODE_REG, [mode_MSB, mode_LSB])
 
@@ -175,7 +176,6 @@ print "SPI weight scale sensor with SPI interface. The interface is connected to
 
 spi = cfg.get_device("spi")
 
-
 try:
     print "SPI configuration.."
     spi.SPI_config(spi.I2CSPI_MSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_LOW_DATA_EDGE_LEADING| spi.I2CSPI_CLK_461kHz)
@@ -185,39 +185,75 @@ try:
     scale = BRIDGEADC01(spi.I2CSPI_SS0)
     scale.reset()
     print "Current mode status"
-    print scale.single_read(scale.AD7730_DAC_REG)
-    print scale.single_read(scale.AD7730_MODE_REG)
+    mode_status = scale.single_read(scale.AD7730_MODE_REG) 
+    print bin(mode_status[0]), bin(mode_status[1])
+    print "Internal Full scale calibration started"
+#    spi.SPI_write(spi.I2CSPI_SS0, [ 0x02, 0xB1, 0x80])
 
-    spi.SPI_write(spi.I2CSPI_SS0, [0x03, 0x80, 0x00, 0x10, 0x02, 0xB1, 0x80])
-    print "Modified mode status"
-    print scale.single_read(scale.AD7730_MODE_REG)
+    scale.setMode(
+                     mode = scale.AD7730_INT_FULL_CALIBRATION
+                    ,polarity = scale.AD7730_BIPOLAR_MODE
+                    ,den = scale.AD7730_IODISABLE_MODE
+                    ,iovalue = 0b00
+                    ,data_length = scale.AD7730_24bitDATA_MODE
+                    ,reference = scale.AD7730_REFERENCE_5V
+                    ,input_range = scale.AD7730_10mVIR_MODE
+                    ,clock_enable = scale.AD7730_MCLK_ENABLE_MODE
+                    ,burn_out = scale.AD7730_BURNOUT_DISABLE
+                    ,channel = scale.AD7730_AIN1P_AIN1N
+				)
 
-
+    mode_status = scale.single_read(scale.AD7730_MODE_REG) 
+    print bin(mode_status[0]), bin(mode_status[1])
 
     while scale.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
         print scale.single_read(scale.AD7730_MODE_REG)
         time.sleep(0.1)
 
-    spi.SPI_write(spi.I2CSPI_SS0, [0x02, 0x91, 0x80])
+    print "Full scale calibration completed. Start zero scale calibration"
+
+
+#    spi.SPI_write(spi.I2CSPI_SS0, [0x02, 0x91, 0x80])
+    scale.setMode(
+                     mode = scale.AD7730_INT_ZERO_CALIBRATION
+                    ,polarity = scale.AD7730_BIPOLAR_MODE
+                    ,den = scale.AD7730_IODISABLE_MODE
+                    ,iovalue = 0b00
+                    ,data_length = scale.AD7730_24bitDATA_MODE
+                    ,reference = scale.AD7730_REFERENCE_5V
+                    ,input_range = scale.AD7730_10mVIR_MODE
+                    ,clock_enable = scale.AD7730_MCLK_ENABLE_MODE
+                    ,burn_out = scale.AD7730_BURNOUT_DISABLE
+                    ,channel = scale.AD7730_AIN1P_AIN1N
+                )
+    mode_status = scale.single_read(scale.AD7730_MODE_REG) 
+    print bin(mode_status[0]), bin(mode_status[1])
 
     while scale.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
         print scale.getStatus()
         time.sleep(0.1)
 
-    spi.SPI_write(spi.I2CSPI_SS0, [0x02, 0x21, 0x80, 0x21]) ## continuous conversion and continuous read
+    print "Zero scale calibration completed.. Start reading the data.."
+    print scale.single_read(scale.AD7730_DATA_REG)
+    print "DATAREG content"
 
-    while scale.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
-        print scale.getStatus()
-        time.sleep(0.1)
-
-    for i in range(10):
+    for i in range(100):
+        scale.setMode(
+                     mode = scale.AD7730_SCONVERSION_MODE
+                    ,polarity = scale.AD7730_BIPOLAR_MODE
+                    ,den = scale.AD7730_IODISABLE_MODE
+                    ,iovalue = 0b00
+                    ,data_length = scale.AD7730_24bitDATA_MODE
+                    ,reference = scale.AD7730_REFERENCE_5V
+                    ,input_range = scale.AD7730_80mVIR_MODE
+                    ,clock_enable = scale.AD7730_MCLK_ENABLE_MODE
+                    ,burn_out = scale.AD7730_BURNOUT_DISABLE
+                    ,channel = scale.AD7730_AIN1P_AIN1N
+                )
         while scale.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
-            print scale.getStatus()
-            time.sleep(0.1)
-        data = spi.SPI_read(4)    
-        print data
-        time.sleep(0.5)
-    spi.SPI_write(spi.I2CSPI_SS0, [0x30]) ## continuous conversion and continuous read
+            time.sleep(0.05)
+
+        print scale.single_read(scale.AD7730_DATA_REG)
 
 finally:
     print "weight prepared"
