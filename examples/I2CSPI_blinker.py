@@ -1,5 +1,11 @@
 #!/usr/bin/python
 
+'''
+I2C->SPI LED Blinker Example
+
+Connect LEDs to #SS0, #SS1, #SS2 and #SS3
+''' 
+
 #uncomment for debbug purposes
 #import logging
 #logging.basicConfig(level=logging.DEBUG) 
@@ -35,7 +41,6 @@ spi.route()
 
 try:
     print "SPI configuration.."
-    #spi.SPI_config(spi.I2CSPI_MSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_HIGH_DATA_EDGE_TRAILING| spi.I2CSPI_CLK_461kHz)
     spi.GPIO_config(spi.I2CSPI_SS0 | spi.I2CSPI_SS1 |spi.I2CSPI_SS2 | spi.I2CSPI_SS3, 0x50)
 
     print "SPI blinking.."
