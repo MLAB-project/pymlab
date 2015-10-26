@@ -206,7 +206,7 @@ class SMBusDriver(Driver):
         """
         return self.smbus.block_process_call(address, register, value)
 
-    def write_i2c_block_data(self, address, value):
+    def write_i2c_block_data(self, address, register, data):
         """
         I2C block transactions do not limit the number of bytes transferred
         but the SMBus layer places a limit of 32 bytes.
@@ -223,7 +223,7 @@ class SMBusDriver(Driver):
 
         Functionality flag: I2C_FUNC_SMBUS_WRITE_I2C_BLOCK
         """
-        return self.smbus.write_i2c_block_data(address, register, value)
+        return self.smbus.write_i2c_block_data(address, register, data)
     
     def read_i2c_block_data(self, address, register):
         """

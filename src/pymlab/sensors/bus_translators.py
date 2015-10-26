@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-#import smbus
+#import smbus 
 import time
 
 from pymlab.sensors import Device
@@ -15,6 +15,24 @@ class I2CSPI(Device):
         self.I2CSPI_SS1 = 0b0010
         self.I2CSPI_SS2 = 0b0100
         self.I2CSPI_SS3 = 0b1000
+
+        self.SS0_BIDIRECT   = 0b00
+        self.SS0_PUSHPULL   = 0b01
+        self.SS0_INPUT      = 0b10
+        self.SS0_OPENDRAIN  = 0b11
+        self.SS1_BIDIRECT   = 0b0000
+        self.SS1_PUSHPULL   = 0b0100
+        self.SS1_INPUT      = 0b1000
+        self.SS1_OPENDRAIN  = 0b1100
+        self.SS2_BIDIRECT   = 0b000000
+        self.SS2_PUSHPULL   = 0b010000
+        self.SS2_INPUT      = 0b100000
+        self.SS2_OPENDRAIN  = 0b110000
+        self.SS3_BIDIRECT   = 0b00000000
+        self.SS3_PUSHPULL   = 0b01000000
+        self.SS3_INPUT      = 0b10000000
+        self.SS3_OPENDRAIN  = 0b11000000
+
 
         self.I2CSPI_MSB_FIRST = 0b0
         self.I2CSPI_LSB_FIRST = 0b100000
@@ -31,14 +49,14 @@ class I2CSPI(Device):
 
 
     def SPI_write(self, chip_select, data):
-        'Writes data to SPI device selected by chipselect bit. '
+        'Writes a data to a SPI device selected by chipselect bit. '
         dat = list(data) 
-        dat.insert(0, chip_select)
-        return self.bus.write_i2c_block(self.address, dat);  # up to 8 bytes may be written. 
+        dat.insert(0, chip_select)             # add the chip_select at the front of data
+        return self.bus.write_i2c_block_data(self.address, dat):
 
-    def SPI_read(self, length):
-        'Reads data from I2CSPI buffer. ' 
-        return self.bus.read_i2c_block(self.address, length)
+    def SPI_read(self):
+        'Reads a data from I2CSPI buffer. '
+        return self.bus.read_i2c_block_data(self.address, 0xF1): # Clear interrupt and read data
 
     def SPI_config(self,config):
         'Configure SPI interface parameters.'
@@ -60,7 +78,9 @@ class I2CSPI(Device):
     def GPIO_read(self):
         'Reads logic state on GPIO enabled slave-selects pins.' 
         self.bus.write_byte_data(self.address, 0xF5, 0x0f)
-        return self.bus.read_byte(self.address)
+        status = self.bus.read_byte(self.address)
+        bits_values = dict([('SS0',status & 0x01 == 0x01),('SS1',status & 0x02 == 0x02),('SS2',status & 0x04 == 0x04),('SS3',status & 0x08 == 0x08)])
+        return bits_values
 
     def GPIO_config(self, gpio_enable, gpio_config):
         'Enable or disable slave-select pins as gpio.' 
