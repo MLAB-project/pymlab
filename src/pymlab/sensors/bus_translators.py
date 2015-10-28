@@ -48,6 +48,15 @@ class I2CSPI(Device):
         self.I2CSPI_CLK_58kHz = 0b11
 
 
+    def SPI_write_byte(self, chip_select, data):
+        'Writes a data to a SPI device selected by chipselect bit. '
+        self.bus.write_byte_data(self.address, chip_select, data)
+
+    def SPI_read_byte(self):
+        'Reads a data from I2CSPI buffer. '
+        #return self.bus.read_i2c_block_data(self.address, 0xF1) # Clear interrupt and read data
+        return self.bus.read_byte(self.address)
+
     def SPI_write(self, chip_select, data):
         'Writes byte to a SPI device selected by chipselect bit. '
         self.bus.write_word_data(self.address, chip_select, data)
