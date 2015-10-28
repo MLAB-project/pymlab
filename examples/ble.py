@@ -69,7 +69,7 @@ while True:
     #spi.SPI_write_byte(spi.I2CSPI_SS0, [0x40, 0x00, 0xC8, 0x00] )       ## run to defined step position
     #spi.SPI_write_byte(0xF4, [0xF7] )       ## run to defined step position
 
-    for n in range(1600):
+    for n in range(300):
         spi.SPI_write_byte(spi.I2CSPI_SS0, 0x39)
         spi.SPI_write_byte(spi.I2CSPI_SS0, 0)
         spi.SPI_write_byte(spi.I2CSPI_SS0, 0)
@@ -88,7 +88,7 @@ while True:
     #spi.SPI_write_byte(spi.I2CSPI_SS0, [0x40, 0x00, 0xC8, 0x00] )       ## run to defined step position
     #spi.SPI_write_byte(0xF4, [0xF7] )       ## run to defined step position
 
-    for n in range(1600):
+    for n in range(300):
         spi.SPI_write_byte(spi.I2CSPI_SS0, 0x39)
         spi.SPI_write_byte(spi.I2CSPI_SS0, 0)
         spi.SPI_write_byte(spi.I2CSPI_SS0, 0)
