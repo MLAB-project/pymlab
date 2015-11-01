@@ -7,7 +7,7 @@
 import sys
 import time
 from pymlab import config
-
+import logging
 
 """
 Show data from BRIDGEADC01 module. 
@@ -15,8 +15,7 @@ Show data from BRIDGEADC01 module.
 from vispy import app, scene, color
 import numpy as np
 
-
-
+LOGGER = logging.getLogger(__name__)
 
 def update(ev):
     scale.setMode(
@@ -120,6 +119,10 @@ class BRIDGEADC01:
         spi.SPI_write(spi.I2CSPI_SS0, [comm_reg] + value)
 
     def single_read(self, register):
+        '''
+        Reads data from desired register only once. 
+        '''
+        
         comm_reg = (0b00010 << 3) + register
 
         if register == self.AD7730_STATUS_REG:
