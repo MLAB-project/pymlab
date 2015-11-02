@@ -78,6 +78,4 @@ Python library for RGBC01A MLAB module with TCS3771 I2C Light Sensor
         self.bus.write_byte_data(self.address, self.TCS3771_ENABLE, 0x0f)
 
     def get_prox(self):
-
-
-
+        pass
