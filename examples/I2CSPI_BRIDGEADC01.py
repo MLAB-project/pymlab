@@ -55,7 +55,8 @@ def update(ev):
     channel2 = scale.getData()
 
     data = np.array([channel1, channel2])
-    print data
+    filter_setup = scale.setFilter()
+    print data, hex(filter_setup[0]), hex(filter_setup[1]), hex(filter_setup[2])
     lines.roll_data(data)
 
 
@@ -66,7 +67,8 @@ class BRIDGEADC01:
     """
 
     def __init__(self, SPI_CS):
-        
+
+        self.CS = SPI_CS
         #AD7730 register address
         self.AD7730_COMM_REG            =0b000
         self.AD7730_STATUS_REG          =0b000
@@ -109,14 +111,14 @@ class BRIDGEADC01:
         self.AD7730_AIN1N_AIN2N         =0b11      
 
     def reset(self):
-        spi.SPI_write(spi.I2CSPI_SS0, [0xFF])       # wrinting least 32 serial clock with 1 at data input resets the device. 
-        spi.SPI_write(spi.I2CSPI_SS0, [0xFF])
-        spi.SPI_write(spi.I2CSPI_SS0, [0xFF])
-        spi.SPI_write(spi.I2CSPI_SS0, [0xFF])
+        spi.SPI_write(self.CS, [0xFF])       # wrinting least 32 serial clock with 1 at data input resets the device. 
+        spi.SPI_write(self.CS, [0xFF])
+        spi.SPI_write(self.CS, [0xFF])
+        spi.SPI_write(self.CS, [0xFF])
 
     def single_write(self, register, value):
         comm_reg = (0b00000 << 3) + register
-        spi.SPI_write(spi.I2CSPI_SS0, [comm_reg] + value)
+        spi.SPI_write(self.CS, [comm_reg] + value)
 
     def single_read(self, register):
         '''
@@ -143,7 +145,7 @@ class BRIDGEADC01:
             bytes_num = 3
 
         command = [comm_reg] + ([0x00] * bytes_num)
-        spi.SPI_write(spi.I2CSPI_SS0, command)
+        spi.SPI_write(self.CS, command)
         data = spi.SPI_read(bytes_num + 1)        
         return data[1:]
 
@@ -180,7 +182,7 @@ NOREF - No Reference Bit. If the voltage between the REF IN(+) and REF IN(-) pin
         return bits_values
 
     def getData(self):
-        data = scale.single_read(scale.AD7730_DATA_REG)
+        data = self.single_read(scale.AD7730_DATA_REG)
         return (data[0] << 15) + (data[1] << 7) + data[2]  
 
     def IsBusy(self):
@@ -219,6 +221,11 @@ NOREF - No Reference Bit. If the voltage between the REF IN(+) and REF IN(-) pin
     
         self.single_write(self.AD7730_MODE_REG, [mode_MSB, mode_LSB])
 
+    def setFilter(self):
+        data = self.single_read(self.AD7730_FILTER_REG)
+        data[2] = data[2] | 0b00110011
+        self.single_write(self.AD7730_FILTER_REG, data)
+        return data
 
 canvas = scene.SceneCanvas(keys='interactive', show=True, size=(1024, 768))
 grid = canvas.central_widget.add_grid()
@@ -243,7 +250,7 @@ cols = int(N**0.5)
 
 view.camera.rect = (0, 526200, 1, 500)
 
-lines = scene.ScrollingLines(n_lines=N, line_size=M, columns=cols, dx=0.8/M, #color = (1.0, 0.0, 0.0, 1.0),
+lines = scene.ScrollingLines(n_lines=N, line_size=M, columns=cols, dx=0.8/M, #color = 'red',
                              cell_size=(1, 8), parent=view.scene)
 lines.transform = scene.STTransform(scale=(1, 1/8.))
 
@@ -324,7 +331,6 @@ try:
     print "Zero scale calibration completed.. Start reading the data.."
 
 finally:
-
     timer = app.Timer(connect=update, interval=0)
     timer.start()
 
