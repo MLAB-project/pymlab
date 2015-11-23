@@ -107,6 +107,7 @@ class Config(object):
             "clkgen01": clkgen.CLKGEN01,
             "atmega": atmega.ATMEGA,
             "I2CIO_TCA9535": gpio.I2CIO_TCA9535,
+            "DS4520": gpio.DS4520,
             "i2cspi": bus_translators.I2CSPI,
             "isl01": light.ISL01,
             "lioncell": lioncell.LIONCELL, #LION1CELL and LION2CELL

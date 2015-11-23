@@ -20,7 +20,7 @@ LOGGER = logging.getLogger(__name__)
 def update(ev):
     scale1.setMode(
                  mode = scale1.AD7730_SCONVERSION_MODE
-                ,polarity = scale1.AD7730_BIPOLAR_MODE
+                ,polarity = scale1.AD7730_UNIPOLAR_MODE
                 ,den = scale1.AD7730_IODISABLE_MODE
                 ,iovalue = 0b00
                 ,data_length = scale1.AD7730_24bitDATA_MODE
@@ -38,7 +38,7 @@ def update(ev):
 
     scale1.setMode(
                  mode = scale1.AD7730_SCONVERSION_MODE
-                ,polarity = scale1.AD7730_BIPOLAR_MODE
+                ,polarity = scale1.AD7730_UNIPOLAR_MODE
                 ,den = scale1.AD7730_IODISABLE_MODE
                 ,iovalue = 0b00
                 ,data_length = scale1.AD7730_24bitDATA_MODE
@@ -56,7 +56,7 @@ def update(ev):
 
     scale2.setMode(
                  mode = scale2.AD7730_SCONVERSION_MODE
-                ,polarity = scale2.AD7730_BIPOLAR_MODE
+                ,polarity = scale2.AD7730_UNIPOLAR_MODE
                 ,den = scale2.AD7730_IODISABLE_MODE
                 ,iovalue = 0b00
                 ,data_length = scale2.AD7730_24bitDATA_MODE
@@ -75,7 +75,7 @@ def update(ev):
 
     scale2.setMode(
                  mode = scale2.AD7730_SCONVERSION_MODE
-                ,polarity = scale2.AD7730_BIPOLAR_MODE
+                ,polarity = scale2.AD7730_UNIPOLAR_MODE
                 ,den = scale2.AD7730_IODISABLE_MODE
                 ,iovalue = 0b00
                 ,data_length = scale2.AD7730_24bitDATA_MODE
@@ -126,7 +126,7 @@ class BRIDGEADC01:
         self.AD7730_SYSTEM_ZERO_CALIBRATION=0b110
         self.AD7730_SYSTEM_FULL_CALIBRATION=0b111
 
-        self.AD7730_BIPOLAR_MODE        =0b0
+        self.AD7730_UNIPOLAR_MODE        =0b0
         self.AD7730_UNIPOLAR_MODE       =0b1
         self.AD7730_IOENABLE_MODE       =0b1
         self.AD7730_IODISABLE_MODE      =0b0
@@ -220,7 +220,8 @@ NOREF - No Reference Bit. If the voltage between the REF IN(+) and REF IN(-) pin
 
     def getData(self):
         data = self.single_read(self.AD7730_DATA_REG)
-        return (data[0] << 15) + (data[1] << 7) + data[2]  
+        value = (data[0] << 15) + (data[1] << 7) + data[2]
+        return value
 
     def IsBusy(self):
         """ Return True if ADC is busy """
@@ -242,7 +243,7 @@ NOREF - No Reference Bit. If the voltage between the REF IN(+) and REF IN(-) pin
         '''
         def setMode(self
                     ,mode = self.AD7730_IDLE_MODE 
-                    ,polarity = self.AD7730_BIPOLAR_MODE
+                    ,polarity = self.AD7730_UNIPOLAR_MODE
                     ,den = self.AD7730_IODISABLE_MODE
                     ,iovalue = 0b00
                     ,data_lenght = self.AD7730_24bitDATA_MODE
@@ -321,12 +322,12 @@ try:
 
     scale1.setMode(
                      mode = scale1.AD7730_INT_FULL_CALIBRATION
-                    ,polarity = scale1.AD7730_BIPOLAR_MODE
+                    ,polarity = scale1.AD7730_UNIPOLAR_MODE
                     ,den = scale1.AD7730_IODISABLE_MODE
                     ,iovalue = 0b00
                     ,data_length = scale1.AD7730_24bitDATA_MODE
                     ,reference = scale1.AD7730_REFERENCE_5V
-                    ,input_range = scale1.AD7730_10mVIR_MODE
+                    ,input_range = scale1.AD7730_80mVIR_MODE
                     ,clock_enable = scale1.AD7730_MCLK_ENABLE_MODE
                     ,burn_out = scale1.AD7730_BURNOUT_DISABLE
                     ,channel = scale1.AD7730_AIN1P_AIN1N
@@ -341,7 +342,7 @@ try:
 
     scale2.setMode(
                      mode = scale2.AD7730_INT_FULL_CALIBRATION
-                    ,polarity = scale2.AD7730_BIPOLAR_MODE
+                    ,polarity = scale2.AD7730_UNIPOLAR_MODE
                     ,den = scale2.AD7730_IODISABLE_MODE
                     ,iovalue = 0b00
                     ,data_length = scale2.AD7730_24bitDATA_MODE
@@ -364,12 +365,12 @@ try:
 #    spi.SPI_write(spi.I2CSPI_SS0, [0x02, 0x91, 0x80])
     scale1.setMode(
                      mode = scale1.AD7730_INT_ZERO_CALIBRATION
-                    ,polarity = scale1.AD7730_BIPOLAR_MODE
+                    ,polarity = scale1.AD7730_UNIPOLAR_MODE
                     ,den = scale1.AD7730_IODISABLE_MODE
                     ,iovalue = 0b00
                     ,data_length = scale1.AD7730_24bitDATA_MODE
                     ,reference = scale1.AD7730_REFERENCE_5V
-                    ,input_range = scale1.AD7730_10mVIR_MODE
+                    ,input_range = scale1.AD7730_80mVIR_MODE
                     ,clock_enable = scale1.AD7730_MCLK_ENABLE_MODE
                     ,burn_out = scale1.AD7730_BURNOUT_DISABLE
                     ,channel = scale1.AD7730_AIN1P_AIN1N
@@ -381,7 +382,7 @@ try:
 
     scale2.setMode(
                      mode = scale2.AD7730_INT_ZERO_CALIBRATION
-                    ,polarity = scale2.AD7730_BIPOLAR_MODE
+                    ,polarity = scale2.AD7730_UNIPOLAR_MODE
                     ,den = scale2.AD7730_IODISABLE_MODE
                     ,iovalue = 0b00
                     ,data_length = scale2.AD7730_24bitDATA_MODE
