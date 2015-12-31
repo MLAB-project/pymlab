@@ -23,15 +23,18 @@ class axis:
     def Reset(self):
         ' Reset Axis and set default parameters for H-bridge '
         spi.SPI_write_byte(self.CS, 0xC0)      # reset
-        spi.SPI_write_byte(self.CS, 0x14)      # Stall Treshold setup
-        spi.SPI_write_byte(self.CS, 0x7F)  
-        spi.SPI_write_byte(self.CS, 0x14)      # Over Current Treshold setup 
-        spi.SPI_write_byte(self.CS, 0x0F)  
+#        spi.SPI_write_byte(self.CS, 0x14)      # Stall Treshold setup
+#        spi.SPI_write_byte(self.CS, 0xFF)  
+#        spi.SPI_write_byte(self.CS, 0x13)      # Over Current Treshold setup 
+#        spi.SPI_write_byte(self.CS, 0xFF)  
         #spi.SPI_write_byte(self.CS, 0x15)      # Full Step speed 
         #spi.SPI_write_byte(self.CS, 0x00)
         #spi.SPI_write_byte(self.CS, 0x30) 
         #spi.SPI_write_byte(self.CS, 0x0A)      # KVAL_RUN
         #spi.SPI_write_byte(self.CS, 0x50)
+        spi.SPI_write_byte(self.CS, 0x18)      # KVAL_RUN
+        spi.SPI_write_byte(self.CS, 0b11000000)
+        spi.SPI_write_byte(self.CS, 0x88)
       
     def MaxSpeed(self, speed):
         ' Setup of maximum speed '
@@ -139,7 +142,7 @@ try:
 
     print "Axis inicialization"
     X = axis(spi.I2CSPI_SS0, 0, 641)    # set Number of Steps per axis Unit and set Direction of Rotation
-    X.MaxSpeed(20)                      # set maximal motor speed 
+    X.MaxSpeed(2)                      # set maximal motor speed 
 
     print "Axis is running"
 
