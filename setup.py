@@ -19,7 +19,7 @@ setup(
     author_email     = 'milikjan@fit.cvut.cz',
     description      = 'Toolbox for interfacing I2C sensors.',
     long_description = pymlab.__doc__,
-    url              = 'https://github.com/MLAB-project/MLAB-I2c-modules',
+    url              = 'https://github.com/MLAB-project/pymlab',
     
     #packages    = ['pymlab', 'pymlab.sensors', 'pymlab.tests', ],
     packages    = find_packages("src"),
