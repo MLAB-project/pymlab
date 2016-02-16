@@ -31,17 +31,17 @@ class axis:
         spi.SPI_write(self.CS, [0xFF, 0xFF])
         spi.SPI_write(self.CS, [0xFF, 0xFF]) 
         spi.SPI_write(self.CS, [0x05, 0x05])      # ACC 
-        spi.SPI_write(self.CS, [0x00, 0x00])
-        spi.SPI_write(self.CS, [0x75, 0x75]) 
+        spi.SPI_write(self.CS, [0x01, 0x01])
+        spi.SPI_write(self.CS, [0xF5, 0xF5]) 
         spi.SPI_write(self.CS, [0x06, 0x06])      # DEC 
-        spi.SPI_write(self.CS, [0x00, 0x00])
-        spi.SPI_write(self.CS, [0x75, 0x75]) 
+        spi.SPI_write(self.CS, [0x01, 0x01])
+        spi.SPI_write(self.CS, [0xF5, 0xF5]) 
         spi.SPI_write(self.CS, [0x0A, 0x0A])      # KVAL_RUN
         spi.SPI_write(self.CS, [0x10, 0x10])
         spi.SPI_write(self.CS, [0x0B, 0x0B])      # KVAL_ACC
-        spi.SPI_write(self.CS, [0x10, 0x10])
+        spi.SPI_write(self.CS, [0x20, 0x20])
         spi.SPI_write(self.CS, [0x0C, 0x0C])      # KVAL_DEC
-        spi.SPI_write(self.CS, [0x10, 0x10])
+        spi.SPI_write(self.CS, [0x20, 0x20])
         spi.SPI_write(self.CS, [0x18, 0x18])      # CONFIG
         spi.SPI_write(self.CS, [0b00111000, 0b00111000])
         spi.SPI_write(self.CS, [0b00000000, 0b00000000])
@@ -152,17 +152,22 @@ try:
 
     print "Axis inicialization"
     X = axis(spi.I2CSPI_SS0, 0, 641)    # set Number of Steps per axis Unit and set Direction of Rotation
-    X.MaxSpeed(52)                      # set maximal motor speed 
+    X.MaxSpeed(50)                      # set maximal motor speed 
 
     print "Axis is running"
 
-    for i in range(5):
-        X.MoveWait(150)      # move 50 unit forward and wait for motor stop
+#    for i in range(5):
+    while True:
+#        X.MoveWait(150)      # move 50 unit forward and wait for motor stop
+        X.MoveWait(50)      # move 50 unit forward and wait for 
 #        time.sleep(0.5)
-        X.MoveWait(-150)     # move 50 unit backward and wait for motor stop
+#        X.MoveWait(-150)     # move 50 unit backward and wait for motor stop
+        X.MoveWait(-50)     # move 50 unit backward and wait for motor stop
 #        time.sleep(0.5)
 
     X.Float()   # release power
 
 finally:
     print "stop"
+    X.Float()   # release power
+

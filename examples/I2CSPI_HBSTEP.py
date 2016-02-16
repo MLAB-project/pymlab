@@ -2,6 +2,7 @@
 # -------------------------------------------
 # HBSTEP01A Stepper Motor control Example
 # -------------------------------------------
+# Cyclic motor test in infinite loop.
 
 #uncomment for debbug purposes
 #import logging
@@ -32,16 +33,16 @@ class axis:
         spi.SPI_write_byte(self.CS, 0xFF) 
         spi.SPI_write_byte(self.CS, 0x05)      # ACC 
         spi.SPI_write_byte(self.CS, 0x00)
-        spi.SPI_write_byte(self.CS, 0x60) 
+        spi.SPI_write_byte(self.CS, 0x30) 
         spi.SPI_write_byte(self.CS, 0x06)      # DEC 
         spi.SPI_write_byte(self.CS, 0x00)
-        spi.SPI_write_byte(self.CS, 0x60) 
+        spi.SPI_write_byte(self.CS, 0x30) 
         spi.SPI_write_byte(self.CS, 0x0A)      # KVAL_RUN
-        spi.SPI_write_byte(self.CS, 0x10)
+        spi.SPI_write_byte(self.CS, 0xF0)
         spi.SPI_write_byte(self.CS, 0x0B)      # KVAL_ACC
-        spi.SPI_write_byte(self.CS, 0x10)
+        spi.SPI_write_byte(self.CS, 0xF0)
         spi.SPI_write_byte(self.CS, 0x0C)      # KVAL_DEC
-        spi.SPI_write_byte(self.CS, 0x10)
+        spi.SPI_write_byte(self.CS, 0xF0)
         spi.SPI_write_byte(self.CS, 0x18)      # CONFIG
         spi.SPI_write_byte(self.CS, 0b00111000)
         spi.SPI_write_byte(self.CS, 0b00000000)
@@ -120,50 +121,60 @@ class axis:
 
 
 
-cfg = config.Config(
-    i2c = {
-        "port": 1,
-    },
 
-    bus = [
-        {
-            "type": "i2chub",
-            "address": 0x70,
-            "children": [
-                { "name":"spi", "type":"i2cspi", "channel": 1, },
-            ],
+
+while True:
+    cfg = config.Config(
+        i2c = {
+            "port": 1,
         },
-    ],
-)
+
+        bus = [
+            { 
+            "name":"spi", 
+            "type":"i2cspi"
+            },
+        ],
+    )
+    cfg.initialize()
+
+    print "Stepper motor control example. \r\n"
+
+    spi = cfg.get_device("spi")
+
+    spi.route()
 
 
-cfg.initialize()
+    try:
+        print "SPI configuration.."
+        spi.SPI_config(spi.I2CSPI_MSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_HIGH_DATA_EDGE_TRAILING| spi.I2CSPI_CLK_461kHz)
+        time.sleep(1)
 
-print "Stepper motor control example. \r\n"
+        print "Axis inicialization"
+        X = axis(spi.I2CSPI_SS0, 0, 641)    # set Number of Steps per axis Unit and set Direction of Rotation
+        X.Reset()
+        X.MaxSpeed(10)                      # set maximal motor speed 
 
-spi = cfg.get_device("spi")
+        print "Axis is running. Press CTRL+C to finish the test."
 
-spi.route()
+        i = 0
+        while True:
+            X.MoveWait(500)      # move 50 unit forward and wait for motor stop
+    #        time.sleep(0.5)
+            X.MoveWait(-500)     # move 50 unit backward and wait for motor stop
+    #        time.sleep(0.5)
+	    print "Cycle# %d" %i
+	    i +=1
 
-try:
-    print "SPI configuration.."
-    spi.SPI_config(spi.I2CSPI_MSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_HIGH_DATA_EDGE_TRAILING| spi.I2CSPI_CLK_461kHz)
-    time.sleep(1)
+        X.Float()   # release power
 
-    print "Axis inicialization"
-    X = axis(spi.I2CSPI_SS0, 0, 641)    # set Number of Steps per axis Unit and set Direction of Rotation
-    X.MaxSpeed(200)                      # set maximal motor speed 
-
-    print "Axis is running"
-
-    for i in range(5):
-        X.MoveWait(1000)      # move 50 unit forward and wait for motor stop
-#        time.sleep(0.5)
-        X.MoveWait(-1000)     # move 50 unit backward and wait for motor stop
-#        time.sleep(0.5)
-
-    X.Float()   # release power
+    except IOError:
+        sys.stdout.write("\r\nI2C Error\r\n Trying to recover... \r\n")
+        time.sleep(10)
 
 
-finally:
-    print "stop"
+    except KeyboardInterrupt:
+        X.Float()   # release power
+        sys.stdout.write("\r\n Engine Stopped. \r\n")
+        sys.exit(0)
+
