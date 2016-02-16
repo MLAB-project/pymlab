@@ -50,13 +50,23 @@ class SHT25(Device):
         return(-46.85 + 175.72*(data/65536.0))
 
     def get_hum(self):
+        """
+The physical value RH given above corresponds to the
+relative humidity above liquid water according to World
+Meteorological Organization (WMO)
+        """
         self.bus.write_byte(self.address, self.TRIG_RH_noHOLD); # start humidity measurement
         time.sleep(0.1)
 
         data = self.bus.read_uint16(self.address)
         data &= ~0b11    # trow out status bits
-        return(-6.0 + 125.0*(data/65536.0))
-
+        humidity = (-6.0 + 125.0*(data/65536.0))
+        if humidity > 100.0:
+            return 100.0
+        elif humidity < 0.0:
+            return 0.0
+        else: 
+            return humidity
 
 def main():
     print __doc__
