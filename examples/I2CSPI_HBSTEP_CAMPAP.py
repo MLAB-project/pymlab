@@ -11,13 +11,17 @@ import ConfigParser
 if len(sys.argv) < 2:
     print ""
     print "USING:", sys.argv[0], "[ open | close | toggle]"
-    print ""
+    print "-----------"
+    print "[CAMCAP]"
+    print "open = 0"
+    print "-----------"
 
 try:
     cfgfile = ConfigParser.ConfigParser()
     cfgfile.read('CAMCAP.ini')
 except Exception, e:
-    pass
+    print "You need config file 'CAMCAP.ini' with containt:"
+    print ""
 
 
 
