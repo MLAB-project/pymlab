@@ -1,21 +1,25 @@
 #!/usr/bin/python
 # -------------------------------------------
-# HBSTEP01A Stepper Motor control Example
+# CAMCAP device controll software
 # -------------------------------------------
-# Cyclic motor test in infinite loop.
-
-#uncomment for debbug purposes
-#import logging
-#logging.basicConfig(level=logging.DEBUG) 
 
 import sys
 import time
 from pymlab import config
+import ConfigParser
 
 if len(sys.argv) < 2:
     print ""
-    print "USING:", sys.argv[0], "[ open | close ]"
+    print "USING:", sys.argv[0], "[ open | close | toggle]"
     print ""
+
+try:
+    cfgfile = ConfigParser.ConfigParser()
+    cfgfile.read('CAMCAP.ini')
+except Exception, e:
+    pass
+
+
 
 class axis:
     def __init__(self, SPI_CS, Direction, StepsPerUnit):
@@ -146,19 +150,38 @@ spi.route()
 
 try:
     spi.SPI_config(spi.I2CSPI_MSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_HIGH_DATA_EDGE_TRAILING| spi.I2CSPI_CLK_461kHz)
-    time.sleep(1)
+    time.sleep(0.5)
 
-    X = axis(spi.I2CSPI_SS0, 0, 3000)    # set Number of Steps per axis Unit and set Direction of Rotation
+    X = axis(spi.I2CSPI_SS0, 0, 3000)    # set Number of Steps for open/close
     X.Reset()
     X.MaxSpeed(1)                      # set maximal motor speed 
 
     if sys.argv[1] == "open":
-        X.MoveWait(-1)      # move 50 unit forward and wait for motor stop
+        if cfgfile.get("CAMCAP", "open")  == '0':
+            X.MoveWait(-1)
+            cfgfile.set("CAMCAP", "open", '1')
+        else:
+            print "cap was opened"
     elif sys.argv[1] == "close":
-        X.MoveWait(1)     # move 50 unit backward and wait for motor stop
+        if cfgfile.get("CAMCAP", "open")  == '1':
+            X.MoveWait(1) 
+            cfgfile.set("CAMCAP", "open", '0')
+        else:
+            print "cap was closed"
+    elif  sys.argv[1] == "toggle":
+        if cfgfile.get("CAMCAP", "open") == '1':
+            cfgfile.set("CAMCAP", "open", '0')
+            X.MoveWait(1) 
+            print "closed"
+        elif cfgfile.get("CAMCAP", "open") == '0':
+            X.MoveWait(-1) 
+            cfgfile.set("CAMCAP", "open", '1')
+            print "opened"
     else:
         print "USING:", sys.argv[1], "[ open | close ]"
 
+    with open('CAMCAP.ini', 'w') as file:
+        cfgfile.write(file)
     X.Float()   # release power
 
 except KeyboardInterrupt:
