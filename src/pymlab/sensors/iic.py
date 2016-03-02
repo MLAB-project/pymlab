@@ -245,11 +245,11 @@ class SMBusDriver(Driver):
 
 
 class HIDDriver(Driver):
-    def __init__(self):
+    def __init__(self, port = None):
         time.sleep(1)   # give a time to OS for remounting the HID device
         import hid
-        self.h = hid.device()
-        self.h.open(0x10C4, 0xEA90) # Connect HID again after enumeration
+        self.h = hid.device()      
+        self.h.open(0x10C4, 0xEA90, None) # Connect HID again after enumeration
         self.h.write([0x02, 0xFF, 0x00, 0x00, 0x00])  # Set GPIO to Open-Drain  
         for k in range(3):      # blinking LED
             self.h.write([0x04, 0x00, 0xFF])
@@ -383,6 +383,7 @@ class HIDDriver(Driver):
         raise NotImplementedError()
 
 
+
 class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I2C-bus controller with UART interface
     def __init__(self, port):
         import serial
@@ -457,43 +458,52 @@ DRIVER = None
 
 
 def load_driver(**kwargs):
-    try:
-        LOGGER.info("Loading HID driver...")
-        import hid
-        LOGGER.info("Initiating HID driver...")
-        try:
-            h = hid.device()
-            h.open(0x10C4, 0xEA90) # Try Connect HID
-            h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
-            h.close()
-            return HIDDriver() # We can use this connection
-        except IOError:
-            LOGGER.warning("HID device does not exist, we will try SMBus directly...")
-    
-    except ImportError:
-        LOGGER.warning("HID driver cannot be imported, we will try SMBus driver...")
- 
+    device = kwargs.get("device", None)
     port = kwargs.get("port", None)
 
-    if port is 232:
+    if device == "hid" or device == None:
         try:
-            LOGGER.info("Loading SERIAL driver...")
-            import serial
-            return SerialDriver('/dev/ttyUSB0')
-
+            LOGGER.info("Loading HID driver...")
+            import hid
+            LOGGER.info("Initiating HID driver...")
+            try:
+                h = hid.device()
+                h.open(0x10C4, 0xEA90, None) # Try Connect HID # TODO: za none
+                LOGGER.info("Using HID '%s' device with serian number: '%s' from '%s'." %(h.get_product_string(), h.get_serial_number_string(), h.get_manufacturer_string()))
+                h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
+                h.close()
+                return HIDDriver(str(port)) # We can use this connection
+            except IOError:
+                LOGGER.warning("HID device does not exist, we will try SMBus directly...")
+        
         except ImportError:
-                LOGGER.warning("Failed to import 'SC18IM700' driver. I2C232 driver cannot be loaded.")
-    
+            LOGGER.warning("HID driver cannot be imported, we will try SMBus driver...")
 
-    if port is not None:
+
+    if (device == "smbus" or device == None) and (port is not None):
         try:
             import smbus
             LOGGER.info("Loading SMBus driver...")
             return SMBusDriver(port, smbus.SMBus(port))
         except ImportError:
             LOGGER.warning("Failed to import 'smbus' module. SMBus driver cannot be loaded.")
-    else:
-        LOGGER.warning("SMBus port not specified, skipping trying to load smbus driver.")
+    #else:
+    #    LOGGER.warning("SMBus port not specified, skipping trying to load smbus driver.")
+    
+
+    if device == "serial" or device == None:
+            try:
+                if port == None:
+                    serial_port = "/dev/ttyUSB0"
+                else:
+                    serial_port = str(port)
+                LOGGER.info("Loading SERIAL driver...")
+                import serial
+                return SerialDriver(serial_port)
+
+            except ImportError:
+                    LOGGER.warning("Failed to import 'SC18IM700' driver. I2C232 driver cannot be loaded for port %s." %(serial_port))
+       
     
     raise RuntimeError("Failed to load I2C driver. Enable logging for more details.")
 
