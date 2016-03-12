@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Python test script for MLAB ALTIMET01A sensor
+# Python test script for Sensirion SDP610 sensor used as pitot tube sensor for a small UAV. 
 
 import time
 import datetime
