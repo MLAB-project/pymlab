@@ -25,7 +25,7 @@ address = 0x48
 cfg = config.Config(
     i2c = {
         "port": port,
-        "device": None,
+        "device": None,  # here you can explicitly set I2C driver with 'hid', 'smbus', 'serial'
     },
 
 	bus = [
