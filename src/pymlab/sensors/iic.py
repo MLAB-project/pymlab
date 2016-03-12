@@ -468,7 +468,7 @@ def load_driver(**kwargs):
             LOGGER.info("Initiating HID driver...")
             try:
                 h = hid.device()
-                h.open(0x10C4, 0xEA90, None) # Try Connect HID # TODO: za none
+                h.open(0x10C4, 0xEA90) # Try Connect HID # TODO: za none
                 LOGGER.info("Using HID '%s' device with serian number: '%s' from '%s'." %(h.get_product_string(), h.get_serial_number_string(), h.get_manufacturer_string()))
                 h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
                 h.close()
@@ -484,7 +484,7 @@ def load_driver(**kwargs):
         try:
             import smbus
             LOGGER.info("Loading SMBus driver...")
-            return SMBusDriver(port, smbus.SMBus(port))
+            return SMBusDriver(port, smbus.SMBus(int(port)))
         except ImportError:
             LOGGER.warning("Failed to import 'smbus' module. SMBus driver cannot be loaded.")
     #else:
