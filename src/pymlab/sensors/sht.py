@@ -45,7 +45,7 @@ class SHT25(Device):
         self.bus.write_byte(self.address, self.TRIG_T_noHOLD); # start temperature measurement
         time.sleep(0.1)
 
-        data = self.bus.read_i2c_block(self.address, 2)
+        data = self.bus.read_i2c_block(self.address, 2) # Sensirion digital sensors are pure I2C devices, therefore clear I2C trasfers must be used instead of SMBus trasfers.
         value = data[0]<<8 | data[1]
         value &= ~0b11    # trow out status bits
         return(-46.85 + 175.72*(value/65536.0))
@@ -63,7 +63,7 @@ class SHT25(Device):
         value = data[0]<<8 | data[1]
         value &= ~0b11    # trow out status bits
         humidity = (-6.0 + 125.0*(value/65536.0))
-        
+
         if humidity > 100.0:
             return 100.0
         elif humidity < 0.0:
@@ -77,49 +77,56 @@ class SHT31(Device):
     def __init__(self, parent = None, address = 0x44, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
-        self.SOFT_RESET = 0x30a2
-        self.STATUS_REG = 0x30a2
+        self.SOFT_RESET = [0x30, 0xA2]
+        self.STATUS_REG = [0xF3, 0x2D]
+        self.MEASURE_H_CLKSD = [0x24, 0x00]
 
     def soft_reset(self):
-        self.bus.write_word_data(self.address, self.SOFT_RESET);
+        self.bus.write_i2c_block(self.address, self.SOFT_RESET);
         return
 
     def get_status(self):
-        self.bus.write_word_data(self.address, self.SOFT_RESET);
+        self.bus.write_i2c_block(self.address, self.STATUS_REG)
+        status = self.bus.read_i2c_block(self.address, 3)
+        bits_values = dict([('Invalid_checksum',status[0] & 0x01 == 0x01),
+                    ('Invalid_command',status[0] & 0x02 == 0x02),
+                    ('System_reset',status[0] & 0x10 == 0x10),
+                    ('T_alert',status[1] & 0x04 == 0x04),
+                    ('RH_alert',status[1] & 0x08 == 0x08),
+                    ('Heater',status[1] & 0x20 == 0x02),
+                    ('Alert_pending',status[1] & 0x80 == 0x80),
+                    ('Checksum',status[2])])
+        return bits_values
 
-    def setup(self, setup_reg ):  # writes to status register and returns its value
-        reg=self.bus.read_byte_data(self.address, self.READ_USR_REG);    # Read status actual status register
-        reg = (reg & 0x3A) | setup_reg;    # modify actual register status leave reserved bits without modification
-        self.bus.write_byte_data(self.address, self.WRITE_USR_REG, reg); # write new status register
-        return self.bus.read_byte_data(self.address, self.READ_USR_REG);    # Return status actual status register for check purposes
-
-    def get_temp(self):
-        self.bus.write_byte(self.address, self.TRIG_T_noHOLD); # start temperature measurement
+    def get_TempHum(self):
+        self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
         time.sleep(0.1)
 
-        data = self.bus.read_int16(self.address)
-        data &= ~0b11    # trow out status bits
-        return(-46.85 + 175.72*(data/65536.0))
+        data = self.bus.read_i2c_block(self.address, 6)
+        temp_data = data[0]<<8 | data[1]
+        hum_data = data[3]<<8 | data[4]
 
-    def get_hum(self):
-        """
-The physical value RH given above corresponds to the
-relative humidity above liquid water according to World
-Meteorological Organization (WMO)
-        """
-        self.bus.write_byte(self.address, self.TRIG_RH_noHOLD); # start humidity measurement
-        time.sleep(0.1)
+        humidity = 100.0*(hum_data/65535.0)
+        temperature = -45.0 + 175.0*(temp_data/65535.0) 
 
-        data = self.bus.read_uint16(self.address)
-        data &= ~0b11    # trow out status bits
-        humidity = (-6.0 + 125.0*(data/65536.0))
-        if humidity > 100.0:
-            return 100.0
-        elif humidity < 0.0:
-            return 0.0
-        else: 
-            return humidity
+        return temperature, humidity
 
+    @staticmethod
+    def _calculate_checksum(value):
+        """4.12 Checksum Calculation from an unsigned short input"""
+        # CRC
+        polynomial = 0x131  # //P(x)=x^8+x^5+x^4+1 = 100110001
+        crc = 0xFF
+
+        # calculates 8-Bit checksum with given polynomial
+        for byteCtr in [ord(x) for x in struct.pack(">H", value)]:
+            crc ^= byteCtr
+            for bit in range(8, 0, -1):
+                if crc & 0x80:
+                    crc = (crc << 1) ^ polynomial
+                else:
+                    crc = (crc << 1)
+        return crc
 
 def main():
     print __doc__

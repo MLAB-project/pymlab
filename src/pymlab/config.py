@@ -99,6 +99,7 @@ class Config(object):
             "imu01_acc": imu.IMU01_ACC,
             "imu01_gyro": imu.IMU01_GYRO,
             "sht25": sht.SHT25,
+            "sht31": sht.SHT31,
             "altimet01": altimet.ALTIMET01,
             "SDP600": altimet.SDP6XX,
             "SDP610": altimet.SDP6XX,
