@@ -8,6 +8,7 @@ Author: Jan Milík <milikjan@fit.cvut.cz>
 
 import logging
 import struct
+import warnings
 
 #from pymlab import config
 from pymlab.utils import obj_repr
@@ -234,17 +235,6 @@ class Bus(SimpleBus):
         data = self.driver.read_word_data(address, register)
         LOGGER.debug("Reading word %s from register %s in device %s", hex(data),  hex(register), hex(address))
         return data
- 
-
-    def write_wdata(self, address, register, value):
-        """Write a word (two bytes) value to a device's register. """
-        LOGGER.debug("Writing word data %s to register %s on device %s",
-            bin(value), hex(register), hex(address))
-        return self.driver.write_word_data(address, register, value)
-
-    def read_wdata(self, address, register):
-        data = self.driver.read_word_data(address, register)
-        return data
     
     def write_block_data(self, address, register, value):
         return self.driver.write_block_data(address, register, value)
@@ -299,6 +289,20 @@ class Bus(SimpleBus):
         data = struct.pack("<H",self.driver.read_word_data(address, register))
         return self.UINT16.unpack(data)[0]
 
+
+
+
+    def write_wdata(self, address, register, value):
+        """Write a word (two bytes) value to a device's register. """
+        warnings.warn("write_wdata() is deprecated and will be removed in future versions replace with write_word_data()", DeprecationWarning)
+        LOGGER.debug("Writing word data %s to register %s on device %s",
+            bin(value), hex(register), hex(address))
+        return self.driver.write_word_data(address, register, value)
+
+    def read_wdata(self, address, register):
+        warnings.warn("read_wdata() is deprecated and will be removed in future versions replace with read_word_data()", DeprecationWarning)
+        data = self.driver.read_word_data(address, register)
+        return data
 
 def main():
     print __doc__
