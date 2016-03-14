@@ -46,6 +46,15 @@ class SHT25(Device):
         time.sleep(0.1)
 
         data = self.bus.read_i2c_block(self.address, 2) # Sensirion digital sensors are pure I2C devices, therefore clear I2C trasfers must be used instead of SMBus trasfers.
+        
+        '''
+        ## For use with smbus driver 
+        
+        data = [0,0]
+        data[0] = self.bus.read_byte(self.address)
+        data[1] = self.bus.read_byte(self.address)
+        '''
+
         value = data[0]<<8 | data[1]
         value &= ~0b11    # trow out status bits
         return(-46.85 + 175.72*(value/65536.0))
@@ -60,6 +69,15 @@ class SHT25(Device):
         time.sleep(0.1)
 
         data = self.bus.read_i2c_block(self.address, 2)
+
+        '''
+        ## For use with smbus driver 
+        
+        data = [0,0]
+        data[0] = self.bus.read_byte(self.address)
+        data[1] = self.bus.read_byte(self.address)
+        '''
+
         value = data[0]<<8 | data[1]
         value &= ~0b11    # trow out status bits
         humidity = (-6.0 + 125.0*(value/65536.0))
