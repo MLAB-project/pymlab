@@ -46,14 +46,20 @@ class SHT25(Device):
         time.sleep(0.1)
 
         data = self.bus.read_i2c_block(self.address, 2) # Sensirion digital sensors are pure I2C devices, therefore clear I2C trasfers must be used instead of SMBus trasfers.
-        
-        '''
-        ## For use with smbus driver 
-        
+
+        value = data[0]<<8 | data[1]
+        value &= ~0b11    # trow out status bits
+        return(-46.85 + 175.72*(value/65536.0))
+    
+
+    def get_temp_8bit(self):
+        self.bus.write_byte(self.address, self.TRIG_T_noHOLD); # start temperature measurement
+        time.sleep(0.1)
+
         data = [0,0]
         data[0] = self.bus.read_byte(self.address)
         data[1] = self.bus.read_byte(self.address)
-        '''
+        
 
         value = data[0]<<8 | data[1]
         value &= ~0b11    # trow out status bits
@@ -78,6 +84,33 @@ class SHT25(Device):
         data[1] = self.bus.read_byte(self.address)
         '''
 
+        value = data[0]<<8 | data[1]
+        value &= ~0b11    # trow out status bits
+        humidity = (-6.0 + 125.0*(value/65536.0))
+
+        if humidity > 100.0:
+            return 100.0
+        elif humidity < 0.0:
+            return 0.0
+        else: 
+            return humidity
+    
+    
+    def get_hum_8bit(self):
+        """
+                ## For use with smbus driver 
+
+        The physical value RH given above corresponds to the
+        relative humidity above liquid water according to World
+        Meteorological Organization (WMO)
+        """
+        self.bus.write_byte(self.address, self.TRIG_RH_noHOLD); # start humidity measurement
+        time.sleep(0.1)
+                
+        data = [0,0]
+        data[0] = self.bus.read_byte(self.address)
+        data[1] = self.bus.read_byte(self.address)
+        
         value = data[0]<<8 | data[1]
         value &= ~0b11    # trow out status bits
         humidity = (-6.0 + 125.0*(value/65536.0))
