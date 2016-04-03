@@ -441,13 +441,11 @@ class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I
         data = 'S' + "".join(map(chr, [((address << 1) & 0xfe ), 1, register ])) + 'S' + "".join(map(chr, [((address << 1) | 0x01 ), 2 ])) + 'P'
         self.ser.flushInput()
         self.ser.write(data)
-        read0 = ''
-        while read0 == '': 
-            read0 = self.ser.read()
-        read1 = ''
-        while read1 == '': 
-            read1 = self.ser.read()
-        return ((ord(read0)) + (ord(read1)<<8))
+        read = self.ser.read(size=2)
+        if (read == ''):
+            LOGGER.info("Serial to I2C converter is disconnected")
+            self.I2CError()
+        return ((ord(read[0])) + (ord(read[1])<<8))
 
     def write_block_data(self, address, register, value):
         raise NotImplementedError()
