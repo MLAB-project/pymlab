@@ -274,7 +274,7 @@ class Bus(SimpleBus):
 
     def read_int16_data(self, address, register):            ## Must be checked, possible bug in byte manipulation (LTS01A sensor sometimes returns wrong values)
         data = struct.pack("<H",self.driver.read_word_data(address, register))
-        LOGGER.debug("MSB and LSB %r was read from device %s",  data, hex(address))
+        LOGGER.debug("MSB and LSB %r was read from device %s", data, hex(address))
         return self.INT16.unpack(data)[0]
 
     

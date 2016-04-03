@@ -392,12 +392,22 @@ class HIDDriver(Driver):
 
 
 class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I2C-bus controller with UART interface
-    def __init__(self, port):
+    def __init__(self, port, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=1.5):
         import serial
-        self.ser = serial.Serial(port, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=0.01)
+        self.ser = serial.Serial(port, baudrate=baudrate, bytesize=bytesize, parity=parity, stopbits=stopbits, timeout=timeout)
+        LOGGER.debug("Serial port initialized. Testing connectivity")
+        self.ser.flushInput()
+        self.ser.write('IP')
+        if (self.ser.read() == ''):
+            LOGGER.info("Serial to I2C converter is not connected")
+            raise IOError()
+
+        else:
+            LOGGER.info("Serial to I2C converter connected sucessfully")
+
     
     def I2CError(self):
-        raise NotImplementedError()
+        raise IOError()
 
     def get_handler(self):
         raise NotImplementedError()
@@ -410,9 +420,10 @@ class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I
         data = 'S' + "".join(map(chr, [((address << 1) | 0x01 ), 1])) + 'P'
         self.ser.flushInput()
         self.ser.write(data)
-        read = ''
-        while read == '': 
-            read = self.ser.read()
+        read = self.ser.read(size=1)
+        if (read == ''):
+            LOGGER.info("Serial to I2C converter is disconnected")
+            self.I2CError()
         return ord(read)
     
     def write_byte_data(self, address, register, value):
@@ -437,8 +448,6 @@ class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I
         while read1 == '': 
             read1 = self.ser.read()
         return ((ord(read0)) + (ord(read1)<<8))
-        
-        #raise NotImplementedError()
 
     def write_block_data(self, address, register, value):
         raise NotImplementedError()
