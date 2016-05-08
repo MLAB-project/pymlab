@@ -51,6 +51,11 @@ Python library for ISL2902001A MLAB module with ISL29020 I2C Light Sensor
         LOGGER.debug("syncing ILS ADC",)
         return
 
+    
+    def config(self, config):
+        self.bus.write_byte_data(self.address, self.command, config)
+        return
+
 
     def get_lux(self):
         LSB = self.bus.read_byte_data(self.address, self.Data_lsb)
