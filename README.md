@@ -13,8 +13,8 @@ Installation
 
 ### Install in to Ubuntu python system
     
-    $ git clone https://github.com/MLAB-project/MLAB-I2c-modules
-    $ cd MLAB-I2c-modules/
+    $ git clone https://github.com/MLAB-project/pymlab
+    $ cd pymlab/
     $ sudo python setup.py develop
 
 #### Cython interface for the MLAB module USBI2C01A (Optional)
