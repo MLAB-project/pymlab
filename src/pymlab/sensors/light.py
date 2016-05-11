@@ -1,13 +1,5 @@
 #!/usr/bin/python
 
-# Python library for ISL2902001A MLAB module with ISL29020 I2C Light Sensor
-#
-# print "LTS01A status",  bin(get_config(I2C_bus_number, LTS01A_address))
-# Return statust register value
-# print "LTS01A temp", get_temp(I2C_bus_number, LTS01A_address)
-# return temperature.
-
-
 import struct
 import logging
 
@@ -17,7 +9,7 @@ LOGGER = logging.getLogger(__name__)
 
 class ISL01(Device):
     """
-
+Python library for ISL2902001A MLAB module with ISL29020 I2C Light Sensor
     """
 
     RANGE = {
@@ -59,6 +51,11 @@ class ISL01(Device):
         LOGGER.debug("syncing ILS ADC",)
         return
 
+    
+    def config(self, config):
+        self.bus.write_byte_data(self.address, self.command, config)
+        return
+
 
     def get_lux(self):
         LSB = self.bus.read_byte_data(self.address, self.Data_lsb)
@@ -67,4 +64,23 @@ class ISL01(Device):
         Ecal = 1 * DATA
         return Ecal
 
+class RGBC01(Device):
+    """
+Python library for RGBC01A MLAB module with TCS3771 I2C Light Sensor
+    """
 
+    def __init__(self, parent = None, address = 0x29, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+
+        self.TCS3771_ENABLE     =0x00
+        self.TCS3771_ATIME      =0x01
+        self.TCS3771_PTIME      =0x02
+        self.TCS3771_WTIME      =0x03
+        self.TCS3771_PDATA      =0x1C
+        self.TCS3771_PDATAH      =0x1D
+
+    def initialize(self):
+        self.bus.write_byte_data(self.address, self.TCS3771_ENABLE, 0x0f)
+
+    def get_prox(self):
+        pass

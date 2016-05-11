@@ -56,6 +56,8 @@ class SMBusDriver(Driver):
     Count (8 bits): A data byte containing the length of a block operation.
 
     [..]: Data sent by I2C device, as opposed to data sent by the host adapter.
+
+    More detail documentation is at https://www.kernel.org/doc/Documentation/i2c/smbus-protocol
     """
 
     def __init__(self, port, smbus):
@@ -206,6 +208,33 @@ class SMBusDriver(Driver):
         """
         return self.smbus.block_process_call(address, register, value)
 
+    ### I2C transactions not compatible with pure SMBus driver
+    def write_i2c_block(self, address, value):
+        """
+        Simple send transaction
+        ======================
+
+        This corresponds to i2c_master_send.
+
+          S Addr Wr [A] Data [A] Data [A] ... [A] Data [A] P
+
+        More detail documentation is at: https://www.kernel.org/doc/Documentation/i2c/i2c-protocol
+        """
+        raise NotImplementedError()
+  
+    def read_i2c_block(self, address, length):
+        """
+        Simple receive transaction
+        ===========================
+
+        This corresponds to i2c_master_recv
+
+          S Addr Rd [A] [Data] A [Data] A ... A [Data] NA P
+
+        More detail documentation is at: https://www.kernel.org/doc/Documentation/i2c/i2c-protocol
+        """
+        raise NotImplementedError()
+
     def write_i2c_block_data(self, address, value):
         """
         I2C block transactions do not limit the number of bytes transferred
@@ -245,11 +274,11 @@ class SMBusDriver(Driver):
 
 
 class HIDDriver(Driver):
-    def __init__(self):
+    def __init__(self, port = None):
         time.sleep(1)   # give a time to OS for remounting the HID device
         import hid
-        self.h = hid.device()
-        self.h.open(0x10C4, 0xEA90) # Connect HID again after enumeration
+        self.h = hid.device()      
+        self.h.open(0x10C4, 0xEA90, None) # Connect HID again after enumeration
         self.h.write([0x02, 0xFF, 0x00, 0x00, 0x00])  # Set GPIO to Open-Drain  
         for k in range(3):      # blinking LED
             self.h.write([0x04, 0x00, 0xFF])
@@ -337,27 +366,6 @@ class HIDDriver(Driver):
         return self.h.write(data) # Word Write Request
         self.I2CError()
   
-    '''
-    def read_i2c_block(self, address, length):
-
-        for k in range(10):
-            self.h.write([0x12, 0, 60]) # Data Read Force
-            response = self.h.read(60)
-            print "response ",map(hex,response)
-            if (response[0] == 0x13) and (response[1] == 2):  # Polling a data
-                length = response[2]
-                self.h.write([0x12, 0, length]) # Data Read Force
-                response = self.h.read(length)
-                print "response2 ",map(hex,response)
-                #self.h.write([0x12, response[5], response[6]]) # Data Read Force
-                #data = self.h.read(length+3)
-                #print "length ",length
-                #print "data ",map(hex,response)
-                return response[3:length+3]
-        LOGGER.warning("CP2112 Byte Data Read Error...")
-        raise IOError()
-
-    '''
     def read_i2c_block(self, address, length):
         self.h.write([0x10, address<<1, 0x00, length]) # Data Read Request (60 bytes)
 
@@ -374,7 +382,6 @@ class HIDDriver(Driver):
                 return data[3:]
         LOGGER.warning("CP2112 Byte Data Read Error...")
         self.I2CError()
-  
 
     def write_i2c_block_data(self, address, register, value):
         raise NotImplementedError()
@@ -383,13 +390,24 @@ class HIDDriver(Driver):
         raise NotImplementedError()
 
 
+
 class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I2C-bus controller with UART interface
-    def __init__(self, port):
+    def __init__(self, port, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=1.5):
         import serial
-        self.ser = serial.Serial(port, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=0.01)
+        self.ser = serial.Serial(port, baudrate=baudrate, bytesize=bytesize, parity=parity, stopbits=stopbits, timeout=timeout)
+        LOGGER.debug("Serial port initialized. Testing connectivity")
+        self.ser.flushInput()
+        self.ser.write('IP')
+        if (self.ser.read() == ''):
+            LOGGER.info("Serial to I2C converter is not connected")
+            raise IOError()
+
+        else:
+            LOGGER.info("Serial to I2C converter connected sucessfully")
+
     
     def I2CError(self):
-        raise NotImplementedError()
+        raise IOError()
 
     def get_handler(self):
         raise NotImplementedError()
@@ -402,9 +420,10 @@ class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I
         data = 'S' + "".join(map(chr, [((address << 1) | 0x01 ), 1])) + 'P'
         self.ser.flushInput()
         self.ser.write(data)
-        read = ''
-        while read == '': 
-            read = self.ser.read()
+        read = self.ser.read(size=1)
+        if (read == ''):
+            LOGGER.info("Serial to I2C converter is disconnected")
+            self.I2CError()
         return ord(read)
     
     def write_byte_data(self, address, register, value):
@@ -422,15 +441,11 @@ class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I
         data = 'S' + "".join(map(chr, [((address << 1) & 0xfe ), 1, register ])) + 'S' + "".join(map(chr, [((address << 1) | 0x01 ), 2 ])) + 'P'
         self.ser.flushInput()
         self.ser.write(data)
-        read0 = ''
-        while read0 == '': 
-            read0 = self.ser.read()
-        read1 = ''
-        while read1 == '': 
-            read1 = self.ser.read()
-        return ((ord(read0)) + (ord(read1)<<8))
-        
-        #raise NotImplementedError()
+        read = self.ser.read(size=2)
+        if (read == ''):
+            LOGGER.info("Serial to I2C converter is disconnected")
+            self.I2CError()
+        return ((ord(read[0])) + (ord(read[1])<<8))
 
     def write_block_data(self, address, register, value):
         raise NotImplementedError()
@@ -457,43 +472,52 @@ DRIVER = None
 
 
 def load_driver(**kwargs):
-    try:
-        LOGGER.info("Loading HID driver...")
-        import hid
-        LOGGER.info("Initiating HID driver...")
-        try:
-            h = hid.device()
-            h.open(0x10C4, 0xEA90) # Try Connect HID
-            h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
-            h.close()
-            return HIDDriver() # We can use this connection
-        except IOError:
-            LOGGER.warning("HID device does not exist, we will try SMBus directly...")
-    
-    except ImportError:
-        LOGGER.warning("HID driver cannot be imported, we will try SMBus driver...")
- 
+    device = kwargs.get("device", None)
     port = kwargs.get("port", None)
 
-    if port is 232:
+    if device == "hid" or device == None:
         try:
-            LOGGER.info("Loading SERIAL driver...")
-            import serial
-            return SerialDriver('/dev/ttyUSB0')
-
+            LOGGER.info("Loading HID driver...")
+            import hid
+            LOGGER.info("Initiating HID driver...")
+            try:
+                h = hid.device()
+                h.open(0x10C4, 0xEA90) # Try Connect HID # TODO: za none
+                LOGGER.info("Using HID '%s' device with serian number: '%s' from '%s'." %(h.get_product_string(), h.get_serial_number_string(), h.get_manufacturer_string()))
+                h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
+                h.close()
+                return HIDDriver(str(port)) # We can use this connection
+            except IOError:
+                LOGGER.warning("HID device does not exist, we will try SMBus directly...")
+        
         except ImportError:
-                LOGGER.warning("Failed to import 'SC18IM700' driver. I2C232 driver cannot be loaded.")
-    
+            LOGGER.warning("HID driver cannot be imported, we will try SMBus driver...")
 
-    if port is not None:
+
+    if (device == "smbus" or device == None) and (port is not None):
         try:
             import smbus
             LOGGER.info("Loading SMBus driver...")
-            return SMBusDriver(port, smbus.SMBus(port))
+            return SMBusDriver(port, smbus.SMBus(int(port)))
         except ImportError:
             LOGGER.warning("Failed to import 'smbus' module. SMBus driver cannot be loaded.")
-    else:
-        LOGGER.warning("SMBus port not specified, skipping trying to load smbus driver.")
+    #else:
+    #    LOGGER.warning("SMBus port not specified, skipping trying to load smbus driver.")
+    
+
+    if device == "serial" or device == None:
+            try:
+                if port == None:
+                    serial_port = "/dev/ttyUSB0"
+                else:
+                    serial_port = str(port)
+                LOGGER.info("Loading SERIAL driver...")
+                import serial
+                return SerialDriver(serial_port)
+
+            except ImportError:
+                    LOGGER.warning("Failed to import 'SC18IM700' driver. I2C232 driver cannot be loaded for port %s." %(serial_port))
+       
     
     raise RuntimeError("Failed to load I2C driver. Enable logging for more details.")
 

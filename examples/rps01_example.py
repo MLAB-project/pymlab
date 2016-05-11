@@ -3,8 +3,8 @@
 # Python library for RPS01A MLAB module with AS5048B I2C Magnetic position sensor.
 
 #uncomment for debbug purposes
-import logging
-logging.basicConfig(level=logging.DEBUG) 
+#import logging
+#logging.basicConfig(level=logging.DEBUG) 
 
 import time
 import datetime
@@ -21,6 +21,7 @@ if len(sys.argv) != 2:
 port    = eval(sys.argv[1])
 #### Sensor Configuration ###########################################
 
+''''
 cfg = config.Config(
     i2c = {
         "port": port,
@@ -45,27 +46,28 @@ cfg = config.Config(
     },
     bus = [
         {
-            "name":          "lts01",
-            "type":        "lts01",
-            "address":        address,
+            "name":          "encoder",
+            "type":        "rps01",
         },
     ],
 )
-'''
 
 
 cfg.initialize()
 
-print "RPS01A magnetic position sensor module example \r\n"
-print "Angle [deg] \r\n"
+print "RPS01A magnetic position sensor RPS01 readout example \r\n"
 sensor = cfg.get_device("encoder")
+
+print sensor.get_address()
+print sensor.get_zero_position() 
 
 #### Data Logging ###################################################
 
 try:
     while True:
-        sys.stdout.write("RPS01A Angle:" + str(sensor.get_agc()) + "\r\n")
+        sys.stdout.write("RPS01A Angle: " + str(sensor.get_angle(verify = True)) + "\t\tMagnitude: " + str(sensor.get_magnitude()) 
+            + "\tAGC Value: " + str(sensor.get_agc_value()) + "\tDiagnostics: " + str(sensor.get_diagnostics()) + "\r\n")
         sys.stdout.flush()
-        time.sleep(0.5)
+        time.sleep(0.2)
 except KeyboardInterrupt:
     sys.exit(0)

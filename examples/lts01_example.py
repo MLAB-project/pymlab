@@ -18,20 +18,21 @@ if len(sys.argv) != 2:
     sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
     sys.exit(1)
 
-port    = eval(sys.argv[1])
+port    = sys.argv[1]
 address = 0x48
 #### Sensor Configuration ###########################################
 
 cfg = config.Config(
     i2c = {
         "port": port,
+        "device": None,  # here you can explicitly set I2C driver with 'hid', 'smbus', 'serial'
     },
 
 	bus = [
 		{
             "type": "i2chub",
             "address": 0x72,
-            
+
             "children": [
                 {"name": "lts01", "type": "lts01", "address": address, "channel": 1, }
             ],

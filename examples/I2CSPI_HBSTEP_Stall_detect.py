@@ -300,11 +300,11 @@ try:
 
 
     spi.SPI_write(spi.I2CSPI_SS0, [0x14])       # stall treshold setup 
-    spi.SPI_write(spi.I2CSPI_SS0, [0x15])
+    spi.SPI_write(spi.I2CSPI_SS0, [0x15])  
 
     spi.SPI_write(spi.I2CSPI_SS0, [0x07])       # max speed setup 
     spi.SPI_write(spi.I2CSPI_SS0, [0x00])
-    spi.SPI_write(spi.I2CSPI_SS0, [0x19])
+    spi.SPI_write(spi.I2CSPI_SS0, [0x19])  
 
 
     while True:

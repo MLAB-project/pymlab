@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-# Python library for LTS01A MLAB module with MAX31725 i2c Local Temperature Sensor
+# Python library for SHT3101A MLAB module with SHT31 Temperature and relative humidity sensor.
 
 #uncomment for debbug purposes
-import logging
-logging.basicConfig(level=logging.DEBUG) 
+#import logging
+#logging.basicConfig(level=logging.DEBUG) 
 
 import time
 import datetime
@@ -19,24 +19,24 @@ if len(sys.argv) != 2:
     sys.exit(1)
 
 port    = eval(sys.argv[1])
-address = 0x27
 #### Sensor Configuration ###########################################
-'''
+
+''''
 cfg = config.Config(
     i2c = {
         "port": port,
     },
 
-    bus = [
-        {
+	bus = [
+		{
             "type": "i2chub",
             "address": 0x72,
             
             "children": [
-                {"name": "lcd", "type": "i2clcd", "address": address, "channel": 1, }
+                {"name": "sht", "type": "sht31", "channel": 1, }
             ],
-        },
-    ],
+		},
+	],
 )
 
 '''
@@ -46,36 +46,27 @@ cfg = config.Config(
     },
     bus = [
         {
-            "name":          "lcd",
-            "type":        "i2clcd",
-            "address":        address,
+            "name":          "sht",
+            "type":        "sht31",
         },
     ],
 )
 
 
-
 cfg.initialize()
-lcd = cfg.get_device("lcd")
-lcd.reset()
-lcd.init()
-n = 0
+
+print "SHT31 sensor readout example \r\n"
+sensor = cfg.get_device("sht")
+
+sensor.soft_reset()
+time.sleep(0.1)
 
 #### Data Logging ###################################################
 
 try:
     while True:
-        sys.stdout.write("print on LCD")
+        sys.stdout.write("Sensor status: " + str(sensor.get_status()) + " Temperature and Humidity: " + str(sensor.get_TempHum()) + "\r\n")
         sys.stdout.flush()
-        lcd.light(1)
         time.sleep(1)
-        lcd.light(0)
-        time.sleep(1)
-        lcd.puts("ahoj")
-        n = n+1
-        if n == 3:
-        #    lcd.cmd(0x01)
-        #    lcd.cmd(0x80)
-            n = 0
 except KeyboardInterrupt:
     sys.exit(0)

@@ -9,7 +9,7 @@ from pymlab.sensors import Device
 LOGGER = logging.getLogger(__name__)
 
 class I2CIO_TCA9535(Device):
-    'Python library for SC18IS602B chip in I2CSPI MLAB bridge module.'
+    'Python library for I2CIO01A MLAB module with Texas Instruments TCA9535 I/O expander'
 
     def __init__(self, parent = None, address = 0x27, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
@@ -46,6 +46,47 @@ class I2CIO_TCA9535(Device):
         'Reads logical values at pins.' 
         return self.bus.read_wdata(self.address, self.INPUT_PORT0);
         
+
+class DS4520(Device):
+    'Python library for Dallas DS4520 I/O expander'
+
+    def __init__(self, parent = None, address = 0x50, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+        
+        """
+I/O control for I/O_0 to I/O_7. I/O_0 is the LSB and I/O_7 is the MSB. Clearing
+the corresponding bit of the register pulls the selected I/O pin low; setting the
+bit places the pulldown transistor into a high-impedance state. When the
+pulldown is high impedance, the output floats if no pullup/down is connected
+to the pin"""
+        self.CONTROL_PORT0 = 0xF2
+        self.CONTROL_PORT1 = 0xF3
+
+        'Pullup enable for I/O_8. I/O_8 is the LSB. Only the LSB is used. Set the LSB bit to enable the pullup on I/O_8; clear the LSB to disable the pullup'
+        self.PULLUP_PORT0 = 0xF0
+        self.PULLUP_PORT1 = 0xF1
+
+        'I/O status for I/O_0 to I/O_7. I/O_0 is the LSB and I/O_7 is the MSB. Writing to this register has no effect. Read this register to determine the state of the I/O_0 to I/O_7 pins.'
+        self.STATUS_PORT0 = 0xF8
+        self.STATUS_PORT1 = 0xF9
+
+    def set_pullups(self, port0 = 0x00, port1 = 0x00):
+        'Sets INPUT (1) or OUTPUT (0) direction on pins. Inversion setting is applicable for input pins  1-inverted 0-noninverted input polarity.' 
+        self.bus.write_byte_data(self.address, self.PULLUP_PORT0, port0)
+        self.bus.write_byte_data(self.address, self.PULLUP_PORT1, port1)
+        return #self.bus.read_byte_data(self.address, self.PULLUP_PORT0), self.bus.read_byte_data(self.address, self.PULLUP_PORT1)
+
+
+
+    def set_ports(self, port0 = 0x00, port1 = 0x00):
+        'Writes specified value to the pins defined as output by method. Writing to input pins has no effect.' 
+        self.bus.write_byte_data(self.address, self.CONTROL_PORT0, port0)
+        self.bus.write_byte_data(self.address, self.CONTROL_PORT0, port1)
+        return
+
+    def get_ports(self):
+        'Reads logical values at pins.' 
+        return self.bus.read_byte_data(self.address, self.STATUS_PORT0), self.bus.read_byte_data(self.address, self.STATUS_PORT1);
 
 
 def main():

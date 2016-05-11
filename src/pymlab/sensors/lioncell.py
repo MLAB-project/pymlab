@@ -34,6 +34,11 @@ class LIONCELL(Device):
     def __init__(self, parent = None, address = 0x55, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
+    # reset
+    def reset(self):           
+        self.bus.write_byte_data(self.address, 0x00, 0x01)
+        self.bus.write_byte_data(self.address, 0x00, 0x41)
+
     # deg C
     def getTemp(self):           
         return (self.bus.read_byte_data(self.address, 0x0C) + self.bus.read_byte_data(self.address, 0x0D) * 256) * 0.1 - 273.15
@@ -46,12 +51,29 @@ class LIONCELL(Device):
     def FullChargeCapacity(self):
         return (self.bus.read_byte_data(self.address, 0x06) + self.bus.read_byte_data(self.address, 0x07) * 256)
 
+    # mAh
+    def NominalAvailableCapacity(self):
+        return (self.bus.read_byte_data(self.address, 0x14) + self.bus.read_byte_data(self.address, 0x15) * 256)
+ 
+    # mAh
+    def FullAvailabeCapacity(self):
+        return (self.bus.read_byte_data(self.address, 0x16) + self.bus.read_byte_data(self.address, 0x17) * 256)
+
+    # 10 mWhr
+    def AvailableEnergy(self):
+        return (self.bus.read_byte_data(self.address, 0x24) + self.bus.read_byte_data(self.address, 0x25) * 256)
+
+    # mAh
+    def DesignCapacity(self):
+        return (self.bus.read_byte_data(self.address, 0x3c) + self.bus.read_byte_data(self.address, 0x3d) * 256)
+
     # V
     def Voltage(self):
         return (self.bus.read_byte_data(self.address, 0x08) + self.bus.read_byte_data(self.address, 0x09) * 256)
 
     # %
     def StateOfCharge(self):
+        """ % of Full Charge """
         return (self.bus.read_byte_data(self.address, 0x02) + self.bus.read_byte_data(self.address, 0x03) * 256)
 
 
@@ -71,6 +93,14 @@ class LIONCELL(Device):
     def PackConfiguration(self):
         return (self.bus.read_byte_data(self.address, 0x3A) + self.bus.read_byte_data(self.address, 0x3B) * 256)
 
+    def Chemistry(self):
+        ''' Get cells chemistry '''
+        length = self.bus.read_byte_data(self.address, 0x79) 
+        chem = []
+        for n in range(length):
+            chem.append(self.bus.read_byte_data(self.address, 0x7A + n)) 
+        return chem
+            
 
     # Read Flash Block
     # return 32 bytes plus checksum

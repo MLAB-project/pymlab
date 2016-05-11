@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-#import smbus
+#import smbus 
 import time
 
 from pymlab.sensors import Device
@@ -16,6 +16,24 @@ class I2CSPI(Device):
         self.I2CSPI_SS2 = 0b0100
         self.I2CSPI_SS3 = 0b1000
 
+        self.SS0_BIDIRECT   = 0b00
+        self.SS0_PUSHPULL   = 0b01
+        self.SS0_INPUT      = 0b10
+        self.SS0_OPENDRAIN  = 0b11
+        self.SS1_BIDIRECT   = 0b0000
+        self.SS1_PUSHPULL   = 0b0100
+        self.SS1_INPUT      = 0b1000
+        self.SS1_OPENDRAIN  = 0b1100
+        self.SS2_BIDIRECT   = 0b000000
+        self.SS2_PUSHPULL   = 0b010000
+        self.SS2_INPUT      = 0b100000
+        self.SS2_OPENDRAIN  = 0b110000
+        self.SS3_BIDIRECT   = 0b00000000
+        self.SS3_PUSHPULL   = 0b01000000
+        self.SS3_INPUT      = 0b10000000
+        self.SS3_OPENDRAIN  = 0b11000000
+
+
         self.I2CSPI_MSB_FIRST = 0b0
         self.I2CSPI_LSB_FIRST = 0b100000
 
@@ -29,6 +47,15 @@ class I2CSPI(Device):
         self.I2CSPI_CLK_115kHz = 0b10
         self.I2CSPI_CLK_58kHz = 0b11
 
+
+    def SPI_write_byte(self, chip_select, data):
+        'Writes a data to a SPI device selected by chipselect bit. '
+        self.bus.write_byte_data(self.address, chip_select, data)
+
+    def SPI_read_byte(self):
+        'Reads a data from I2CSPI buffer. '
+        #return self.bus.read_i2c_block_data(self.address, 0xF1) # Clear interrupt and read data
+        return self.bus.read_byte(self.address)
 
     def SPI_write(self, chip_select, data):
         'Writes data to SPI device selected by chipselect bit. '
@@ -60,7 +87,9 @@ class I2CSPI(Device):
     def GPIO_read(self):
         'Reads logic state on GPIO enabled slave-selects pins.' 
         self.bus.write_byte_data(self.address, 0xF5, 0x0f)
-        return self.bus.read_byte(self.address)
+        status = self.bus.read_byte(self.address)
+        bits_values = dict([('SS0',status & 0x01 == 0x01),('SS1',status & 0x02 == 0x02),('SS2',status & 0x04 == 0x04),('SS3',status & 0x08 == 0x08)])
+        return bits_values
 
     def GPIO_config(self, gpio_enable, gpio_config):
         'Enable or disable slave-select pins as gpio.' 

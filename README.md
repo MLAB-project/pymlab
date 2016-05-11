@@ -1,7 +1,7 @@
-MLAB-I2c-modules
+Python MLAB control modules
 ================
 
-MLAB I2C bus modules binding. Most of code is writen in Python. 
+MLAB I2C bus, SPI and USB modules binding. The code purpose is easy control as many digital elecronic MLAB modules as possible. 
 
 
 Installation
@@ -17,26 +17,17 @@ Installation
     $ cd pymlab/
     $ sudo python setup.py develop
 
-#### Cython interface for the MLAB module USBI2C01A (Optional)
+#### Cython interface for the USBI2C01A  MLAB module (Optional support)
 
-Required if you want to use the USBI2C01A module to communicate with SMBus deviced via USB. 
+Required if you want to use the [USBI2C01A](http://wiki.mlab.cz/doku.php?id=en:usbi2c) module to communicate with SMBus/I2C devices via USB. 
 
     $ sudo apt-get install libudev-dev libusb-1.0-0-dev libhidapi-dev python-setuptools python-smbus cython
    
-Do it in a working directory:
-
-    $ git clone https://github.com/signal11/hidapi
-  
-Compile and install [HIDAPI](https://github.com/signal11/hidapi) according to instruction in repositories mentioned above.
-
-[CYTHON-HIDAPI](https://github.com/parautenbach/cython-hidapi)  can be installed easily from Pypi internet repository by running: 
-
-    $ easy_install hidapi
 
 Usage
 -----
 
-For use of this python library the I²C bus topology and connected devices must be defined.  This is done by the Config object defined at the begining of the script. Exapmle of network bus config follows. 
+For use of this python library the I²C bus topology and connected devices must be defined.  This is done by the Config object defined at the begining of the script. Exapmle of network bus config follows. Additional documentation is available at [MLAB Wiki](http://wiki.mlab.cz/doku.php?id=en:pymlab).
 
 ### Example
 
