@@ -111,6 +111,7 @@ class Config(object):
             "DS4520": gpio.DS4520,
             "i2cspi": bus_translators.I2CSPI,
             "isl01": light.ISL01,
+	    "isl03": light.ISL03,
             "lioncell": lioncell.LIONCELL, #LION1CELL and LION2CELL
             "thermopile01": thermopile.THERMOPILE01,
             "i2cadc01": adc.I2CADC01,
