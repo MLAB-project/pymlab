@@ -247,8 +247,8 @@ class Bus(SimpleBus):
         LOGGER.debug("Writing I2C data block %s from register %s in device %s",value, hex(register), hex(address))
         return self.driver.write_i2c_block_data(address, register, value)
     
-    def read_i2c_block_data(self, address, register):
-        data = self.driver.read_i2c_block_data(address, register)
+    def read_i2c_block_data(self, address, register, length = 1):
+        data = self.driver.read_i2c_block_data(address, register, length)
         LOGGER.debug("Reading I2C data block %s from register %s in device %s", data, hex(register), hex(address))
         return data
     
@@ -289,7 +289,8 @@ class Bus(SimpleBus):
         data = struct.pack("<H",self.driver.read_word_data(address, register))
         return self.UINT16.unpack(data)[0]
 
-
+    def get_driver(self):
+        return self.driver.get_driver()
 
 
     def write_wdata(self, address, register, value):

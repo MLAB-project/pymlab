@@ -8,6 +8,7 @@ from pymlab.sensors import Device
 
 LOGGER = logging.getLogger(__name__)
 
+
 class I2CIO_TCA9535(Device):
     'Python library for I2CIO01A MLAB module with Texas Instruments TCA9535 I/O expander'
 
@@ -36,7 +37,6 @@ class I2CIO_TCA9535(Device):
         self.bus.write_wdata(self.address, self.CONFIG_INVERSION_PORT0, inversion);
         return
 
-
     def set_ports(self, value):
         'Writes specified value to the pins defined as output by config_ports() method. Writing to input pins has no effect.' 
         self.bus.write_int16(self.address, self.OUTPUT_PORT0, value);
@@ -45,7 +45,46 @@ class I2CIO_TCA9535(Device):
     def get_ports(self):
         'Reads logical values at pins.' 
         return self.bus.read_wdata(self.address, self.INPUT_PORT0);
-        
+
+
+class TCA6416A(Device):
+    'Python library for I2CIO01A MLAB module with Texas Instruments  TCA6416A I/O expander'
+
+    def __init__(self, parent = None, address = 0x21, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+
+        self.STATUS_PORT0 = 0x00
+        self.STATUS_PORT1 = 0x01
+
+        self.OUTPUT_PORT0 = 0x02
+        self.OUTPUT_PORT1 = 0x03
+
+        self.POLARITY_PORT0 = 0x04
+        self.POLARITY_PORT1 = 0x05
+
+        self.CONTROL_PORT0 = 0x06
+        self.CONTROL_PORT1 = 0x07
+
+    def set_polarity(self, port0 = 0x00, port1 = 0x00):
+        self.bus.write_byte_data(self.address, self.POLARITY_PORT0, port0)
+        self.bus.write_byte_data(self.address, self.POLARITY_PORT1, port1)
+        return #self.bus.read_byte_data(self.address, self.POLARITY_PORT0), self.bus.read_byte_data(self.address, self.PULLUP_PORT1)
+
+    def config_ports(self, port0 = 0x00, port1 = 0x00):
+        self.bus.write_byte_data(self.address, self.CONTROL_PORT0, port0)
+        self.bus.write_byte_data(self.address, self.CONTROL_PORT1, port1)
+        return
+
+    def set_ports(self, port0 = 0x00, port1 = 0x00):
+        self.bus.write_byte_data(self.address, self.OUTPUT_PORT0, port0)
+        self.bus.write_byte_data(self.address, self.OUTPUT_PORT1, port1)
+        return
+
+    def get_ports(self):
+        'Reads logical values at pins.' 
+        return (self.bus.read_byte_data(self.address, self.STATUS_PORT0), self.bus.read_byte_data(self.address, self.STATUS_PORT1));
+
+
 
 class DS4520(Device):
     'Python library for Dallas DS4520 I/O expander'
@@ -75,8 +114,6 @@ to the pin"""
         self.bus.write_byte_data(self.address, self.PULLUP_PORT0, port0)
         self.bus.write_byte_data(self.address, self.PULLUP_PORT1, port1)
         return #self.bus.read_byte_data(self.address, self.PULLUP_PORT0), self.bus.read_byte_data(self.address, self.PULLUP_PORT1)
-
-
 
     def set_ports(self, port0 = 0x00, port1 = 0x00):
         'Writes specified value to the pins defined as output by method. Writing to input pins has no effect.' 

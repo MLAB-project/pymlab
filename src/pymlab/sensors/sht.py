@@ -2,6 +2,7 @@
 
 #import smbus
 import time
+import sys
 
 from pymlab.sensors import Device
 
@@ -149,11 +150,28 @@ class SHT31(Device):
                     ('Checksum',status[2])])
         return bits_values
 
-    def get_TempHum(self):
-        self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
-        time.sleep(0.1)
 
-        data = self.bus.read_i2c_block(self.address, 6)
+    def get_TempHum(self):
+        driver = self.bus.get_driver()
+
+        if driver == 'smbus':
+            self.bus.write_i2c_block_data(self.address, 0x2C, [0x06])
+            time.sleep(0.1)
+
+            data = self.bus.read_i2c_block_data(self.address, 0x00, 6)
+        
+        elif driver == 'hid':
+            self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
+            time.sleep(0.1)
+
+            data = self.bus.read_i2c_block(self.address, 6)
+
+        else: # serial
+            self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
+            time.sleep(0.1)
+
+            data = self.bus.read_i2c_block(self.address, 6)
+
         temp_data = data[0]<<8 | data[1]
         hum_data = data[3]<<8 | data[4]
 
@@ -161,6 +179,7 @@ class SHT31(Device):
         temperature = -45.0 + 175.0*(temp_data/65535.0) 
 
         return temperature, humidity
+
 
     @staticmethod
     def _calculate_checksum(value):

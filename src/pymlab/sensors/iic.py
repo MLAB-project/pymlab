@@ -21,7 +21,7 @@ class Driver(object):
     def write_byte_data(self, address, register, value):
         raise NotImplementedError()
     
-    def read_byte_data(address, register):
+    def read_byte_data(self, address, register):
         raise NotImplementedError()
     
     def write_word_data(self, address, register, value):
@@ -30,11 +30,15 @@ class Driver(object):
     def read_word_data(self, address, register):
         raise NotImplementedError()
     
-    def write_block_data(address, register, value):
+    def write_block_data(self, address, register, value):
         raise NotImplementedError()
     
-    def read_block_data(address, register):
+    def read_block_data(self, address, register):
         raise NotImplementedError()
+
+    def get_driver(self):
+        return self.driver_type
+
 
 
 class SMBusDriver(Driver):
@@ -63,6 +67,7 @@ class SMBusDriver(Driver):
     def __init__(self, port, smbus):
         self.port = port
         self.smbus = smbus
+        self.driver_type = 'smbus'
     
     def write_byte(self, address, value):
         """
@@ -235,7 +240,7 @@ class SMBusDriver(Driver):
         """
         raise NotImplementedError()
 
-    def write_i2c_block_data(self, address, value):
+    def write_i2c_block_data(self, address, register, value):
         """
         I2C block transactions do not limit the number of bytes transferred
         but the SMBus layer places a limit of 32 bytes.
@@ -254,7 +259,7 @@ class SMBusDriver(Driver):
         """
         return self.smbus.write_i2c_block_data(address, register, value)
     
-    def read_i2c_block_data(self, address, register):
+    def read_i2c_block_data(self, address, register, length):
         """
         I2C block transactions do not limit the number of bytes transferred
         but the SMBus layer places a limit of 32 bytes.
@@ -270,11 +275,12 @@ class SMBusDriver(Driver):
 
         Functionality flag: I2C_FUNC_SMBUS_READ_I2C_BLOCK
         """
-        return self.smbus.read_i2c_block_data(address, register)
+        return self.smbus.read_i2c_block_data(address, register, length)
 
 
 class HIDDriver(Driver):
     def __init__(self, port = None):
+        self.driver_type = 'hid'
         time.sleep(1)   # give a time to OS for remounting the HID device
         import hid
         self.h = hid.device()      
@@ -386,13 +392,14 @@ class HIDDriver(Driver):
     def write_i2c_block_data(self, address, register, value):
         raise NotImplementedError()
     
-    def read_i2c_block_data(self, address, register):
+    def read_i2c_block_data(self, address, register, length = 1):
         raise NotImplementedError()
 
 
 
 class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I2C-bus controller with UART interface
     def __init__(self, port, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=1.5):
+        self.driver_type = 'serial'
         import serial
         self.ser = serial.Serial(port, baudrate=baudrate, bytesize=bytesize, parity=parity, stopbits=stopbits, timeout=timeout)
         LOGGER.debug("Serial port initialized. Testing connectivity")
@@ -456,15 +463,14 @@ class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I
     def write_i2c_block(self, address, value):
         raise NotImplementedError()
   
-    def read_i2c_block(self, address, length):
+    def read_i2c_block(self, address):
         raise NotImplementedError()
 
     def write_i2c_block_data(self, address, register, value):
         raise NotImplementedError()
     
-    def read_i2c_block_data(self, address, register):
+    def read_i2c_block_data(self, address, register, length = 1):
         raise NotImplementedError()
-
 
 
 
@@ -524,6 +530,7 @@ def load_driver(**kwargs):
 
 def init(**kwargs):
     DRIVER = load_driver(**kwargs)
+    self.driver_type = None
 
 
 def write_byte(address, value):
@@ -557,6 +564,11 @@ def write_block_data(address, register, value):
 def read_block_data(address, register):
     return DRIVER.read_block_data(address, register)
 
+def write_i2c_block_data(self, address, register, value):
+    return DRIVER.write_i2c_block_data(self, address, register, value)
+
+def read_i2c_block_data(self, address, register, length):
+    return DRIVER.read_i2c_block_data(self, address, register, length)
 
 def main():
     print __doc__
