@@ -8,6 +8,70 @@ from pymlab.sensors import Device
 
 LOGGER = logging.getLogger(__name__)
 
+class PCA9635(Device):
+    """
+Python library for PCA9635
+    """
+
+  
+
+    def __init__(self, parent = None, address = 0x01, fault_queue = 1, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+
+## register definitions 
+        self.MODE1 = 0x00
+        self.MODE2 = 0x01
+        self.LEDOUT0 = 0x14
+        self.PWM00 = 0x02
+        self.PWM01 = 0x03
+        self.PWM02 = 0x04
+        self.PWM03 = 0x05
+
+
+## config parameters
+        self.led00_config = (0xAA)
+        self.mode1_config = (0x00)
+        self.mode2_config = (0x01)
+ 
+    def get_mode1(self):
+        DATA = self.bus.read_byte_data(self.address, self.MODE1)
+        Ecal = 1 * DATA
+        return Ecal
+
+    def get_mode2(self):
+        DATA = self.bus.read_byte_data(self.address, self.MODE2)
+        Ecal = 1 * DATA
+        return Ecal
+
+    def get_pwm00 (self):
+        DATA = self.bus.read_byte_data(self.address, self.PWM00 )
+        Ecal = 1 * DATA
+        return Ecal
+
+    def get_ledout0(self):
+        DATA = self.bus.read_byte_data(self.address, self.LEDOUT0)
+        Ecal = 1 * DATA
+        return Ecal
+
+    
+    def config(self):
+        self.bus.write_byte_data(self.address, self.LEDOUT0, self.led00_config)
+        self.bus.write_byte_data(self.address, self.MODE1, self.mode1_config)
+        self.bus.write_byte_data(self.address, self.MODE2, self.mode2_config)
+        return
+
+
+    def pwm00_set(self, value):
+        self.bus.write_byte_data(self.address, self.PWM00, value)
+        return
+
+    def pwm01_set(self, value):
+        self.bus.write_byte_data(self.address, self.PWM01, value)
+        return
+
+     
+
+
 
 class I2CIO_TCA9535(Device):
     'Python library for I2CIO01A MLAB module with Texas Instruments TCA9535 I/O expander'

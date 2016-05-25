@@ -121,6 +121,7 @@ class Config(object):
             "i2cpwm": i2cpwm.I2CPWM,
             "i2cio": i2cio.I2CIO,
             "i2clcd": i2clcd.I2CLCD,
+	    "PCA9635": gpio.PCA9635,
         }
 
     def get_device(self, name):
