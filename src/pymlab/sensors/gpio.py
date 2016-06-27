@@ -22,14 +22,29 @@ Python library for PCA9635
         self.MODE1 = 0x00
         self.MODE2 = 0x01
         self.LEDOUT0 = 0x14
+        self.LEDOUT1 = 0x15
+        self.LEDOUT2 = 0x16
+        self.LEDOUT3 = 0x17
         self.PWM00 = 0x02
         self.PWM01 = 0x03
         self.PWM02 = 0x04
         self.PWM03 = 0x05
-
+	self.PWM04 = 0x06
+	self.PWM05 = 0x07
+	self.PWM06 = 0x08
+	self.PWM07 = 0x09
+	self.PWM08 = 0x0A
+	self.PWM09 = 0x0B
+	self.PWM10 = 0x0C
+	self.PWM11 = 0x0D
+	self.PWM12 = 0x0E
+	self.PWM13 = 0x0F
+	self.PWM14 = 0x10
+	self.PWM15 = 0x11
 
 ## config parameters
         self.led00_config = (0xAA)
+        self.led01_config = (0xAA)
         self.mode1_config = (0x00)
         self.mode2_config = (0x01)
  
@@ -56,6 +71,8 @@ Python library for PCA9635
     
     def config(self):
         self.bus.write_byte_data(self.address, self.LEDOUT0, self.led00_config)
+	self.bus.write_byte_data(self.address, self.LEDOUT1, self.led01_config)
+
         self.bus.write_byte_data(self.address, self.MODE1, self.mode1_config)
         self.bus.write_byte_data(self.address, self.MODE2, self.mode2_config)
         return
@@ -69,7 +86,29 @@ Python library for PCA9635
         self.bus.write_byte_data(self.address, self.PWM01, value)
         return
 
-     
+    def pwm02_set(self, value):
+        self.bus.write_byte_data(self.address, self.PWM02, value)
+        return
+
+    def pwm03_set(self, value):
+        self.bus.write_byte_data(self.address, self.PWM03, value)
+        return
+
+    def pwm04_set(self, value):
+        self.bus.write_byte_data(self.address, self.PWM04, value)
+        return
+
+    def pwm05_set(self, value):
+        self.bus.write_byte_data(self.address, self.PWM05, value)
+        return
+
+    def pwm06_set(self, value):
+        self.bus.write_byte_data(self.address, self.PWM06, value)
+        return
+
+    def pwm07_set(self, value):
+        self.bus.write_byte_data(self.address, self.PWM07, value)
+        return
 
 
 

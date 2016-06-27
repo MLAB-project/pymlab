@@ -29,13 +29,14 @@ cfg = config.Config(
 )
 cfg.initialize()
 
-print "LTS2902001A light sensor example \r\n"
-print "Light [%%]  \r\n"
+print "Test example for LED7SEG01A \r\n"
+
 sensor = cfg.get_device("pca9635")
 time.sleep(0.5)
 
 
 sensor.config()
+print "Settings \r\n"
 sys.stdout.write("MODE1" + str(sensor.get_mode1()) + "\n")
 sys.stdout.write("MODE2" + str(sensor.get_mode2()) + "\n")
 
@@ -45,17 +46,42 @@ i=0
 
 try:
     while True:
+	sensor.pwm02_set(0xF0)
+	sys.stdout.write("A"+"\n")
+	time.sleep(1)
+	sensor.pwm02_set(0x00)
+	sensor.pwm03_set(0xF0)
+	sys.stdout.write("B"+"\n")
+	time.sleep(1)
+	sensor.pwm03_set(0x00)
+	sensor.pwm05_set(0xF0)
+	sys.stdout.write("C"+"\n")
+	time.sleep(1)
+	sensor.pwm05_set(0x00)
+	sensor.pwm06_set(0xF0)
+	sys.stdout.write("D"+"\n")
+	time.sleep(1)
+	sensor.pwm06_set(0x00)
+	sensor.pwm07_set(0xF0)
+	sys.stdout.write("E"+"\n")
+	time.sleep(1)
+	sensor.pwm07_set(0x00)
+	sensor.pwm01_set(0xF0)
+	sys.stdout.write("F"+"\n")
+	time.sleep(1)
+	sensor.pwm01_set(0x00)
 	sensor.pwm00_set(0xF0)
-        sensor.pwm01_set(0xF0)
-       # sensor.pwm01_set(0xF0)
-        sys.stdout.write("Set PWM0:0xF0 " + str(sensor.get_pwm00()) + "\n")
-	time.sleep(10)
+	sys.stdout.write("G"+"\n")
+	time.sleep(1)
 	sensor.pwm00_set(0x00)
-        sensor.pwm01_set(0x00)
-       # sensor.pwm01_set(0x00)
-        sys.stdout.write("Set PWM0:0x00 " +  str(sensor.get_pwm00()) + "\n")
+	sensor.pwm04_set(0xF0)
+	sys.stdout.write("DP"+"\n")
+	time.sleep(1)
+	sensor.pwm04_set(0x00)
+
+
         sys.stdout.flush()
-        time.sleep(10)
+    
 except KeyboardInterrupt:
     sys.exit(0)
 
