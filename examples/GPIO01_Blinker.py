@@ -1,12 +1,30 @@
 #!/usr/bin/python
 
+import sys
 import time
 from pymlab import config
 
+
+### Script Arguments ###############################################
+
+if len(sys.argv) != 2:
+    sys.stderr.write("Invalid number of arguments.\n")
+    sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
+    sys.exit(1)
+
+port    = eval(sys.argv[1])
+#### Sensor Configuration ###########################################
+
+
 cfg = config.Config(
-    port = 8,
+    i2c = {
+        "port": port,
+    },
     bus = [
-        { "name":"gpio", "type":"I2CIO_TCA9535"},
+        {
+            "name":"gpio",
+            "type":"I2CIO_TCA9535"
+        },
     ],
 )
 
@@ -24,13 +42,13 @@ try:
     while True:
         for i in range(0,7):
             state = state << 1
-            gpio.set_ports(state)
+            gpio.set_ports(state, state)
             print bin(state)
             time.sleep(0.1)
 
         for i in range(0,7):
             state = state >> 1
-            gpio.set_ports(state)
+            gpio.set_ports(state, state)
             print bin(state)
             time.sleep(0.1)
 finally:
