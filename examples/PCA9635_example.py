@@ -26,10 +26,10 @@ cfg = config.Config(
             "address": 0x73,
         
             "children": [
-                {"name": "pca9635_1", "type": "pca9635", "channel": 1, }
-                {"name": "pca9635_2", "type": "pca9635", "channel": 2, }
-                {"name": "pca9635_3", "type": "pca9635", "channel": 3, }
-                {"name": "pca9635_4", "type": "pca9635", "channel": 4, }
+                {"name": "pca9635_1", "type": "pca9635", "channel": 1, 
+                "name": "pca9635_2", "type": "pca9635", "channel": 2, 
+                "name": "pca9635_3", "type": "pca9635", "channel": 3, 
+                "name": "pca9635_4", "type": "pca9635", "channel": 4,} 
             ],
         },
     ],
@@ -139,7 +139,7 @@ try:
 	time.sleep(1)
 	sensor2.pwm04_set(0x00)
   
-  sensor3.pwm02_set(0xF0)
+  	sensor3.pwm02_set(0xF0)
 	sys.stdout.write("A"+"\n")
 	time.sleep(1)
 	sensor3.pwm02_set(0x00)
@@ -172,7 +172,7 @@ try:
 	time.sleep(1)
 	sensor3.pwm04_set(0x00)
   
-  sensor4.pwm02_set(0xF0)
+  	sensor4.pwm02_set(0xF0)
 	sys.stdout.write("A"+"\n")
 	time.sleep(1)
 	sensor4.pwm02_set(0x00)
