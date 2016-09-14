@@ -23,13 +23,13 @@ cfg = config.Config(
     bus = [
         {
             "type": "i2chub",
-            "address": 0x73,
+            "address": 0x70,
         
             "children": [
-                {"name": "pca9635_1", "type": "pca9635", "channel": 1, 
-                "name": "pca9635_2", "type": "pca9635", "channel": 2, 
-                "name": "pca9635_3", "type": "pca9635", "channel": 3, 
-                "name": "pca9635_4", "type": "pca9635", "channel": 4,} 
+                {"name": "pca9635_1", "type": "PCA9635", "channel": 1,}, 
+                {"name": "pca9635_2", "type": "PCA9635", "channel": 2,}, 
+                {"name": "pca9635_3", "type": "PCA9635", "channel": 3,}, 
+                {"name": "pca9635_4", "type": "PCA9635", "channel": 4,}, 
             ],
         },
     ],
