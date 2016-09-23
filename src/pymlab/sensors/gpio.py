@@ -190,6 +190,9 @@ class TCA6416A(Device):
         'Reads logical values at pins.' 
         return (self.bus.read_byte_data(self.address, self.STATUS_PORT0), self.bus.read_byte_data(self.address, self.STATUS_PORT1));
 
+    def get_config(self):
+        'Reads logical values at pins.' 
+        return (self.bus.read_byte_data(self.address, self.CONTROL_PORT0), self.bus.read_byte_data(self.address, self.CONTROL_PORT1));
 
 
 class DS4520(Device):
