@@ -23,9 +23,7 @@ OVERFLOW = Overflow()
 
 class ACOUNTER02(Device):
     """
-    Example:
-
-
+    Frequency counting device driver. It counts number of pulses received from oscillator between two 0.1PPS pulses from GPS receiver.
 
     """
 

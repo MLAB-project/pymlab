@@ -9,6 +9,8 @@ from pymlab.sensors import Device
 
 class CLKGEN01(Device):
 
+    """Lilbary for Si571 and Si570 clock generator ICs"""
+
     def __init__(self, parent = None, address = 0x55, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
@@ -98,6 +100,9 @@ class CLKGEN01(Device):
         self.bus.write_byte_data(self.address, self.R_RFMC, reg)
 
     def set_freq(self, fout, freq):
+        """
+        Sets new output frequency, required parameters are real current frequency at output and new required frequency.
+        """
         hsdiv_tuple = (4, 5, 6, 7, 9, 11)           # possible dividers
         n1div_tuple = (1,) + tuple(range(2,129,2))  #
         fdco_min = 5670.0           # set maximum as minimum
