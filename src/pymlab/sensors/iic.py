@@ -238,6 +238,10 @@ class SMBusDriver(Driver):
 
         More detail documentation is at: https://www.kernel.org/doc/Documentation/i2c/i2c-protocol
         """
+	data=[]
+        for k in range(length):
+	    data.append(self.smbus.read_byte(address))
+        return data
         raise NotImplementedError()
 
     def write_i2c_block_data(self, address, register, value):
