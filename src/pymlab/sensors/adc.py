@@ -192,13 +192,5 @@ class VCAI2C01(Device):
     def readADC(self):           
         data = self.bus.read_i2c_block(self.address, 3)    # read converted value
         value = (data[0] & 0x3F)<<10 | data[1] << 2 | data[2] >> 6
-        if (data[0] >> 6) == 0b11:
-            value = "OVERFLOW"
-        elif (data[0] >> 6) == 0b10:
-            value
-        elif (data[0] >> 6) == 0b01:
-            value = value * -1
-        elif (data[0] >> 6) == 0b00:
-            value = "UNDERFLOW"
         
-        return value
+        return data
