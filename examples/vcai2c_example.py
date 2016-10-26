@@ -41,10 +41,11 @@ try:
         
         while True:
 
-            channel1 = sht_sensor.get_temp();
-            sys.stdout.write(" channel1: %d  Humidity: %.1f \n" % (channel1 ))1
+            channel1 = sensor.readADC();
+            print channel1
+            #sys.stdout.write(" channel1: %d  Humidity: %.1f \n" % (channel1 ))
 #            f.write("%d\t%s\t%.2f\t%.1f\t%d\n" % (time.time(), datetime.datetime.now().isoformat(), ))
-            sys.stdout.flush()
+            #sys.stdout.flush()
             time.sleep(1)
 except KeyboardInterrupt:
     sys.exit(0)

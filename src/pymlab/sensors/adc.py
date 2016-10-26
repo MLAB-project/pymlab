@@ -166,7 +166,7 @@ class VCAI2C01(Device):
     """
     Current loop transducer measurement module. 
     """
-    def __init__(self, parent = None, address = 0x14, configuration = [0b10111000], **kwargs):
+    def __init__(self, parent = None, address = 0x68, configuration = [0b10111000], **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
         self.config = configuration
