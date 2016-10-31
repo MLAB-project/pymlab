@@ -166,31 +166,58 @@ class VCAI2C01(Device):
     """
     Current loop transducer measurement module. 
     """
-    def __init__(self, parent = None, address = 0x68, configuration = [0b10111000], **kwargs):
+    def __init__(self, parent = None, address = 0x68, sample_rate = 240, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
-        self.config = configuration
+        self.rate = sample_rate
 
     def initialize(self):
-        self.bus.write_i2c_block(self.address, self.config)
+        self.setADC(sample_rate = self.rate)
 
-    def setADC(self, channel = 0 ):           
+    def setADC(self, channel = 1, gain = 1, continuous = True, sample_rate = 240 ):           
         CHANNEL_CONFIG = {
-            01: 0b00000,
-            23: 0b00001,
-            10: 0b01000,
-            32: 0b01001,
-            0: 0b10000,
-            1: 0b11000,
-            2: 0b10001,
-            3: 0b11000,
+            1: 0b0000000,
+            2: 0b0100000,
+            3: 0b1000000,
+            4: 0b1100000,
         }
 
-        self.config[0] = 0b10100000 + CHANNEL_CONFIG[channel]
-        self.bus.write_i2c_block(self.address, self.config)
+        RATE_CONFIG = {
+            240:  0b0000,
+            60:   0b0100,
+            15:   0b1000,
+            3.75: 0b1100,
+        }
 
-    def readADC(self):           
-        data = self.bus.read_i2c_block(self.address, 3)    # read converted value
-        value = (data[0] & 0x3F)<<10 | data[1] << 2 | data[2] >> 6
+        GAIN_CONFIG = {
+            1: 0b00,
+            2: 0b01,
+            4: 0b10,
+            8: 0b11,
+        }
+
+        config = int(CHANNEL_CONFIG[channel] + (continuous << 4) + RATE_CONFIG[sample_rate] + GAIN_CONFIG[gain])
+        self.bus.write_byte(self.address, config)
+
+    def readADC(self):
+        if self.rate == 240:       
+            data = self.bus.read_i2c_block(self.address, 3)    # read converted value
+            value = (data[0] & 0x0F) << 8 | data[1]
+            self.config = data[2]
+
+        elif self.rate == 60:
+            data = self.bus.read_i2c_block(self.address, 3)    # read converted value
+            value = (data[0] & 0x3F) << 8 | data[1]
+            self.config = data[2]
+
+        elif self.rate == 15:
+            data = self.bus.read_i2c_block(self.address, 3)    # read converted value
+            value = data[0] << 8 | data[1]
+            self.config = data[2]
+
+        elif self.rate == 3.75:
+            data = self.bus.read_i2c_block(self.address, 4)    # read converted value
+            value = (data[0] & 0x03) << 16 | data[1] << 8 | data[2]
+            self.config = data[3]
         
-        return data
+        return value
