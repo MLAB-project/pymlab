@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+#uncomment for debbug purposes
+#import logging
+#logging.basicConfig(level=logging.DEBUG)
+
 import time
 import datetime
 import sys
@@ -41,19 +45,19 @@ try:
     with open(log_file, "a") as f:
         while True:
 
-            sensor.setADC(channel = 1, gain = 2);
+            sensor.setADC(channel = 1, gain = 1, sample_rate = 15);
             time.sleep(0.5)
             channel1 = sensor.readADC();
 
-            sensor.setADC(channel = 2, gain = 2);
+            sensor.setADC(channel = 2, gain = 1, sample_rate = 3.75);
             time.sleep(0.5)
             channel2 = sensor.readADC();
 
-            sensor.setADC(channel = 3, gain = 2);
+            sensor.setADC(channel = 3, gain = 1, sample_rate = 240);
             time.sleep(0.5)
             channel3 = sensor.readADC();
 
-            sensor.setADC(channel = 4, gain = 2);
+            sensor.setADC(channel = 4, gain = 1, sample_rate = 240);
             time.sleep(0.5)
             channel4 = sensor.readADC();
 

@@ -196,6 +196,8 @@ class VCAI2C01(Device):
             8: 0b11,
         }
 
+        self.rate = sample_rate
+
         config = int(CHANNEL_CONFIG[channel] + (continuous << 4) + RATE_CONFIG[sample_rate] + GAIN_CONFIG[gain])
         self.bus.write_byte(self.address, config)
 
@@ -212,7 +214,7 @@ class VCAI2C01(Device):
 
         elif self.rate == 15:
             data = self.bus.read_i2c_block(self.address, 3)    # read converted value
-            value = data[0] << 8 | data[1]
+            value =  data[0] << 8 | data[1]
             self.config = data[2]
 
         elif self.rate == 3.75:
