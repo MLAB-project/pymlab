@@ -166,10 +166,11 @@ class VCAI2C01(Device):
     """
     Current loop transducer measurement module. 
     """
-    def __init__(self, parent = None, address = 0x68, sample_rate = 240, **kwargs):
+    def __init__(self, parent = None, address = 0x68 , gain = 1, sample_rate = 240, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
         self.rate = sample_rate
+        self.gain = gain
 
     def initialize(self):
         self.setADC(sample_rate = self.rate)
@@ -197,6 +198,7 @@ class VCAI2C01(Device):
         }
 
         self.rate = sample_rate
+        self.gain = gain
 
         config = int(CHANNEL_CONFIG[channel] + (continuous << 4) + RATE_CONFIG[sample_rate] + GAIN_CONFIG[gain])
         self.bus.write_byte(self.address, config)
@@ -223,3 +225,10 @@ class VCAI2C01(Device):
             self.config = data[3]
         
         return value
+
+    def readVoltage(self):
+
+        value = self.readADC()
+
+        return value
+

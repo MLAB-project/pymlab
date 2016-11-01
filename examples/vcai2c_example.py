@@ -47,7 +47,7 @@ try:
 
             sensor.setADC(channel = 1, gain = 1, sample_rate = 15);
             time.sleep(0.5)
-            channel1 = sensor.readADC();
+            channel1 = sensor.readVoltage();
 
             sensor.setADC(channel = 2, gain = 1, sample_rate = 3.75);
             time.sleep(0.5)
