@@ -45,23 +45,23 @@ try:
     with open(log_file, "a") as f:
         while True:
 
-            sensor.setADC(channel = 1, gain = 1, sample_rate = 15);
+            sensor.setADC(channel = 1, gain = 2, sample_rate = 3.75);
             time.sleep(0.5)
-            channel1 = sensor.readVoltage();
+            channel1 = sensor.readCurrent();
 
-            sensor.setADC(channel = 2, gain = 1, sample_rate = 3.75);
+            sensor.setADC(channel = 2, gain = 1, sample_rate = 15);
             time.sleep(0.5)
             channel2 = sensor.readADC();
 
-            sensor.setADC(channel = 3, gain = 1, sample_rate = 240);
+            sensor.setADC(channel = 3, gain = 1, sample_rate = 15);
             time.sleep(0.5)
             channel3 = sensor.readADC();
 
-            sensor.setADC(channel = 4, gain = 1, sample_rate = 240);
+            sensor.setADC(channel = 4, gain = 1, sample_rate = 15);
             time.sleep(0.5)
             channel4 = sensor.readADC();
 
-            sys.stdout.write("%s \t %d \t %d \t %d \t %d \n" % (datetime.datetime.now().isoformat(), channel1, channel2, channel3, channel4))
+            sys.stdout.write("%s \t %0.3f \t %0.3f \t %0.3f \t %0.3f \n" % (datetime.datetime.now().isoformat(), channel1, channel2, channel3, channel4))
 
             f.write("%d\t%d\t%d\t%d\t%d\n" % (time.time(), channel1, channel2, channel3, channel4))
             f.flush()

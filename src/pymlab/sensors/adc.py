@@ -228,7 +228,25 @@ class VCAI2C01(Device):
 
     def readVoltage(self):
 
-        value = self.readADC()
+        value = self.readADC()    
+
+        if self.rate == 240:    
+            value = float(value)/self.gain*3/550
+
+        elif self.rate == 60:    
+            value = float(value)/self.gain*3/2200
+
+        elif self.rate == 15:    
+            value = float(value)/self.gain*3/8800
+
+        elif self.rate == 3.75:    
+            value = float(value)/self.gain*3/35200
+
+        return value
+    
+    def readCurrent(self):
+
+        value = float(self.readVoltage())*1000/249
 
         return value
 
