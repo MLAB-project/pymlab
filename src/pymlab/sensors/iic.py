@@ -225,7 +225,7 @@ class SMBusDriver(Driver):
 
         More detail documentation is at: https://www.kernel.org/doc/Documentation/i2c/i2c-protocol
         """
-        return self.smbus.write_i2c_block_data(address, 0, value)
+        return self.smbus.write_i2c_block(address, value)
   
     def read_i2c_block(self, address, length):
         """
@@ -238,7 +238,7 @@ class SMBusDriver(Driver):
 
         More detail documentation is at: https://www.kernel.org/doc/Documentation/i2c/i2c-protocol
         """
-        return self.smbus.read_i2c_block_data(address, 0, length)
+        return self.smbus.read_i2c_block(address, length)
 
     def write_i2c_block_data(self, address, register, value):
         """
