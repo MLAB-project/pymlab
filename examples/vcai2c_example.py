@@ -35,7 +35,7 @@ cfg = config.Config(
 cfg.initialize()
 
 print "Current loop sensor example \r\n"
-print "Time, channel #1,  channel #2,  channel #3 ,  channel #4   \r\n"
+print "Time, channel #1,  channel #2,  channel #3 ,  channel #4,  channel #5   \r\n"
 sensor = cfg.get_device("current_sensor")
 time.sleep(0.5)
 
@@ -45,25 +45,29 @@ try:
     with open(log_file, "a") as f:
         while True:
 
-            sensor.setADC(channel = 1, gain = 2, sample_rate = 3.75);
+            sensor.setADC(address = 0x68, channel = 1, gain = 1, sample_rate = 15);
             time.sleep(0.5)
             channel1 = sensor.readCurrent();
 
-            sensor.setADC(channel = 2, gain = 1, sample_rate = 15);
+            sensor.setADC(address = 0x68, channel = 2, gain = 1, sample_rate = 15);
             time.sleep(0.5)
-            channel2 = sensor.readADC();
+            channel2 = sensor.readCurrent();
 
-            sensor.setADC(channel = 3, gain = 1, sample_rate = 15);
+            sensor.setADC(address = 0x68, channel = 3, gain = 1, sample_rate = 15);
             time.sleep(0.5)
-            channel3 = sensor.readADC();
+            channel3 = sensor.readCurrent();
 
-            sensor.setADC(channel = 4, gain = 1, sample_rate = 15);
+            sensor.setADC(address = 0x68, channel = 4, gain = 1, sample_rate = 15);
             time.sleep(0.5)
-            channel4 = sensor.readADC();
+            channel4 = sensor.readCurrent();
 
-            sys.stdout.write("%s \t %0.3f \t %0.3f \t %0.3f \t %0.3f \n" % (datetime.datetime.now().isoformat(), channel1, channel2, channel3, channel4))
+            sensor.setADC(address = 0x6A, channel = 1, gain = 1, sample_rate = 15);
+            time.sleep(0.5)
+            channel5 = sensor.readCurrent();
 
-            f.write("%d\t%d\t%d\t%d\t%d\n" % (time.time(), channel1, channel2, channel3, channel4))
+            sys.stdout.write("%s \t %0.3f \t %0.3f \t %0.3f \t %0.3f \t %0.3f \n" % (datetime.datetime.now().isoformat(), channel1, channel2, channel3, channel4, channel5))
+
+            f.write("%d\t%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f\n" % (time.time(), channel1, channel2, channel3, channel4, channel5))
             f.flush()
 
             sys.stdout.flush()

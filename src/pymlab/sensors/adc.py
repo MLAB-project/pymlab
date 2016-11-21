@@ -175,7 +175,7 @@ class VCAI2C01(Device):
     def initialize(self):
         self.setADC(sample_rate = self.rate)
 
-    def setADC(self, channel = 1, gain = 1, continuous = True, sample_rate = 240 ):           
+    def setADC(self, address = 0x68, channel = 1, gain = 1, continuous = True, sample_rate = 240 ):           
         CHANNEL_CONFIG = {
             1: 0b0000000,
             2: 0b0100000,
@@ -199,6 +199,7 @@ class VCAI2C01(Device):
 
         self.rate = sample_rate
         self.gain = gain
+        self.address = address
 
         config = int(CHANNEL_CONFIG[channel] + (continuous << 4) + RATE_CONFIG[sample_rate] + GAIN_CONFIG[gain])
         self.bus.write_byte(self.address, config)
