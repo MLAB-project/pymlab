@@ -506,10 +506,7 @@ def load_driver(**kwargs):
             LOGGER.info("Loading SMBus driver...")
             return SMBusDriver(port, smbus.SMBus(int(port)))
         except ImportError:
-            LOGGER.warning("Failed to import 'smbus' module. SMBus driver cannot be loaded.")
-    #else:
-    #    LOGGER.warning("SMBus port not specified, skipping trying to load smbus driver.")
-    
+            LOGGER.warning("Failed to import 'smbus' module. SMBus driver cannot be loaded.")    
 
     if device == "serial" or device == None:
             try:
