@@ -63,14 +63,6 @@ class SHT25(Device):
 
         data = self.bus.read_i2c_block(self.address, 2)
 
-        '''
-        ## For use with smbus driver 
-        
-        data = [0,0]
-        data[0] = self.bus.read_byte(self.address)
-        data[1] = self.bus.read_byte(self.address)
-        '''
-
         value = data[0]<<8 | data[1]
         value &= ~0b11    # trow out status bits
         humidity = (-6.0 + 125.0*(value/65536.0))
@@ -115,11 +107,9 @@ class SHT31(Device):
         return bits_values
 
 
-    def get_TempHum(self):
-        driver = self.bus.get_driver()
-        
+    def get_TempHum(self):        
         self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
-        time.sleep(0.1)
+        time.sleep(0.05)
 
         data = self.bus.read_i2c_block(self.address, 6)
 

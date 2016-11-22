@@ -3,8 +3,8 @@
 # Python library for SHT3101A MLAB module with SHT31 Temperature and relative humidity sensor.
 
 #uncomment for debbug purposes
-import logging
-logging.basicConfig(level=logging.DEBUG) 
+#import logging
+#logging.basicConfig(level=logging.DEBUG) 
 
 import time
 import datetime
