@@ -43,7 +43,7 @@ cfg.initialize()
 print "Current loop sensor example \r\n"
 print "Time, channel #1,  channel #2,  channel #3 ,  channel #4,  channel #5   \r\n"
 sensor1 = cfg.get_device("current_sensor1")
-sensor2 = cfg.get_device("current_sensor1")
+sensor2 = cfg.get_device("current_sensor2")
 time.sleep(0.5)
 
 #### Data Logging ###################################################
@@ -52,23 +52,23 @@ try:
     with open(log_file, "a") as f:
         while True:
 
-            sensor1.setADC(channel = 1, gain = 1, sample_rate = 15);
+            sensor1.setADC(channel = 1, gain = 1, sample_rate = 3.75);
             time.sleep(0.5)
             channel1 = sensor1.readCurrent();
-
-            sensor1.setADC(channel = 2, gain = 1, sample_rate = 15);
+    
+            sensor1.setADC(channel = 2, gain = 1, sample_rate = 3.75);
             time.sleep(0.5)
             channel2 = sensor1.readCurrent();
-
-            sensor1.setADC(channel = 3, gain = 1, sample_rate = 15);
+    
+            sensor1.setADC(channel = 3, gain = 1, sample_rate = 3.75);
             time.sleep(0.5)
             channel3 = sensor1.readCurrent();
-
-            sensor1.setADC(channel = 4, gain = 1, sample_rate = 15);
+    
+            sensor1.setADC(channel = 4, gain = 1, sample_rate = 3.75);
             time.sleep(0.5)
             channel4 = sensor1.readCurrent();
-
-            sensor2.setADC(channel = 1, gain = 1, sample_rate = 15);
+    
+            sensor2.setADC(channel = 1, gain = 1, sample_rate = 3.75);
             time.sleep(0.5)
             channel5 = sensor2.readCurrent();
 
