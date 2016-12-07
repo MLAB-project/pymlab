@@ -66,7 +66,8 @@ time.sleep(0.1)
 
 try:
     while True:
-        sys.stdout.write("Sensor status: " + str(sensor.get_status()) + " Temperature and Humidity: " + str(sensor.get_TempHum()) + "\r\n")
+        temperature, humidity = sensor.get_TempHum()
+        sys.stdout.write("Sensor status: %s, Temperature: %0.2f, Humidity: %0.2f\r\n" % (sensor.get_status(), temperature, humidity))
         sys.stdout.flush()
         time.sleep(1)
 except KeyboardInterrupt:
