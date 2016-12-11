@@ -6,5 +6,5 @@ from pymlab import config
 logging.basicConfig(level = logging.DEBUG)
 
 cfg = config.Config()
-cfg.load_file("tests/bus_config.py")
+cfg.load_file("../config.py")
 
