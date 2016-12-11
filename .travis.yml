@@ -1,0 +1,17 @@
+language: python
+
+branches:
+  except:
+      - dev-spi
+      - driver-registry
+      - new-package
+
+python:
+  - 2.7
+  - 3.4
+
+# Install packages
+install:
+  - sudo python setup.py install
+
+
