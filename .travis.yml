@@ -17,4 +17,5 @@ before_install:
 install:
   - sudo python setup.py install
 
+dist: trusty
 sudo: required
