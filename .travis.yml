@@ -1,0 +1,23 @@
+language: python
+
+branches:
+  except:
+      - dev-spi
+      - driver-registry
+      - new-package
+
+python:
+  - 2.7
+  - 3.4
+
+before_install:
+  - sudo apt-get install libudev-dev libusb-1.0-0-dev libhidapi-dev python-setuptools python-smbus python-numpy cython git
+
+# Install packages
+install:
+  - sudo python setup.py install
+
+script: sudo python setup.py test
+
+dist: trusty
+sudo: required

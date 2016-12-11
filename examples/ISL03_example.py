@@ -19,12 +19,11 @@ port    = eval(sys.argv[1])
 cfg = config.Config(
     i2c = {
             "port": port,
-            "device": 'smbus',
     },
     bus = [
         {
             "name":          "light",
-            "type":        "isl01",
+            "type":        "isl03",
         },
     ],
 )
@@ -36,7 +35,7 @@ sensor = cfg.get_device("light")
 time.sleep(0.5)
 
 
-sensor.config(sensor.SHUTDOWN|sensor.continuous_measurement|sensor.VIS_sense|sensor.clock_INT_16bit|sensor.range_1kLUX)
+sensor.config(0x0000)
 
 i=0
 

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Python library for SHT3101A MLAB module with SHT31 Temperature and relative humidity sensor.
+# Python library for RPS01A MLAB module with AS5048B I2C Magnetic position sensor.
 
 #uncomment for debbug purposes
 #import logging
@@ -31,9 +31,9 @@ cfg = config.Config(
 		{
             "type": "i2chub",
             "address": 0x72,
-            
+
             "children": [
-                {"name": "sht", "type": "sht31", "channel": 1, }
+                {"name": "encoder", "type": "rps01", "channel": 1, }
             ],
 		},
 	],
@@ -43,12 +43,11 @@ cfg = config.Config(
 cfg = config.Config(
     i2c = {
         "port": port,
-        "device": 'smbus',
     },
     bus = [
         {
-            "name":          "sht",
-            "type":        "sht31",
+            "name":          "encoder",
+            "type":        "rps01",
         },
     ],
 )
@@ -56,19 +55,18 @@ cfg = config.Config(
 
 cfg.initialize()
 
-print "SHT31 sensor readout example \r\n"
-sensor = cfg.get_device("sht")
+print "RPS01A magnetic position sensor RPS01 readout example \r\n"
+sensor = cfg.get_device("encoder")
 
-sensor.soft_reset()
-time.sleep(0.1)
+print sensor.get_address()
+print sensor.get_zero_position() 
 
 #### Data Logging ###################################################
 
 try:
     while True:
-        temperature, humidity = sensor.get_TempHum()
-        sys.stdout.write("Sensor status: %s, Temperature: %0.2f, Humidity: %0.2f\r\n" % (sensor.get_status(), temperature, humidity))
+        sys.stdout.write("RPS01A Angle: " + str(sensor.get_angle(verify = False)) + "\tSpeed: " + str(sensor.get_speed()) + "\r\n")
         sys.stdout.flush()
-        time.sleep(1)
+        time.sleep(0.1)
 except KeyboardInterrupt:
     sys.exit(0)

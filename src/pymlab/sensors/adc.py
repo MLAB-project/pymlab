@@ -161,3 +161,93 @@ class BRIDGEADC01(Device):
         
         return spi.SPI_write(spi.I2CSPI_SS0, bytes_num)
 
+
+class VCAI2C01(Device):
+    """
+    Current loop transducer measurement module. 
+    """
+    def __init__(self, parent = None, address = 0x68 , gain = 1, sample_rate = 240, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+
+        self.rate = sample_rate
+        self.gain = gain
+        self.address = address
+
+    def initialize(self):
+        self.setADC(sample_rate = self.rate)
+
+    def setADC(self, channel = 1, gain = 1, continuous = True, sample_rate = 240 ):           
+        CHANNEL_CONFIG = {
+            1: 0b0000000,
+            2: 0b0100000,
+            3: 0b1000000,
+            4: 0b1100000,
+        }
+
+        RATE_CONFIG = {
+            240:  0b0000,
+            60:   0b0100,
+            15:   0b1000,
+            3.75: 0b1100,
+        }
+
+        GAIN_CONFIG = {
+            1: 0b00,
+            2: 0b01,
+            4: 0b10,
+            8: 0b11,
+        }
+
+        self.rate = sample_rate
+        self.gain = gain
+
+        config = int(CHANNEL_CONFIG[channel] + (continuous << 4) + RATE_CONFIG[sample_rate] + GAIN_CONFIG[gain])
+        self.bus.write_byte(self.address, config)
+
+    def readADC(self):
+        if self.rate == 240:       
+            data = self.bus.read_i2c_block(self.address, 3)    # read converted value
+            value = (data[0] & 0x0F) << 8 | data[1]
+            self.config = data[2]
+
+        elif self.rate == 60:
+            data = self.bus.read_i2c_block(self.address, 3)    # read converted value
+            value = (data[0] & 0x3F) << 8 | data[1]
+            self.config = data[2]
+
+        elif self.rate == 15:
+            data = self.bus.read_i2c_block(self.address, 3)    # read converted value
+            value =  data[0] << 8 | data[1]
+            self.config = data[2]
+
+        elif self.rate == 3.75:
+            data = self.bus.read_i2c_block(self.address, 4)    # read converted value
+            value = (data[0] & 0x03) << 16 | data[1] << 8 | data[2]
+            self.config = data[3]
+        
+        return value
+
+    def readVoltage(self):
+
+        value = self.readADC()    
+
+        if self.rate == 240:    
+            value = float(value)/self.gain*3/550
+
+        elif self.rate == 60:    
+            value = float(value)/self.gain*3/2200
+
+        elif self.rate == 15:    
+            value = float(value)/self.gain*3/8800
+
+        elif self.rate == 3.75:    
+            value = float(value)/self.gain*3/35200
+
+        return value
+    
+    def readCurrent(self):
+
+        value = float(self.readVoltage())*1000/249
+
+        return value
+

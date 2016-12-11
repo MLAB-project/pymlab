@@ -109,16 +109,20 @@ class Config(object):
             "atmega": atmega.ATMEGA,
             "I2CIO_TCA9535": gpio.I2CIO_TCA9535,
             "DS4520": gpio.DS4520,
+            "TCA6416A": gpio.TCA6416A,
             "i2cspi": bus_translators.I2CSPI,
             "isl01": light.ISL01,
+	        "isl03": light.ISL03,
             "lioncell": lioncell.LIONCELL, #LION1CELL and LION2CELL
             "thermopile01": thermopile.THERMOPILE01,
             "i2cadc01": adc.I2CADC01,
+            "vcai2c01": adc.VCAI2C01,
             "LTC2453": adc.LTC2453,
             "LTC2487": adc.LTC2487,
             "i2cpwm": i2cpwm.I2CPWM,
             "i2cio": i2cio.I2CIO,
             "i2clcd": i2clcd.I2CLCD,
+	    "PCA9635": gpio.PCA9635,
         }
 
     def get_device(self, name):

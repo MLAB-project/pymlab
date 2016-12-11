@@ -2,6 +2,7 @@
 
 #import smbus
 import time
+import sys
 
 from pymlab.sensors import Device
 
@@ -50,22 +51,8 @@ class SHT25(Device):
         value = data[0]<<8 | data[1]
         value &= ~0b11    # trow out status bits
         return(-46.85 + 175.72*(value/65536.0))
-    
 
-    def get_temp_8bit(self):
-        self.bus.write_byte(self.address, self.TRIG_T_noHOLD); # start temperature measurement
-        time.sleep(0.1)
-
-        data = [0,0]
-        data[0] = self.bus.read_byte(self.address)
-        data[1] = self.bus.read_byte(self.address)
-        
-
-        value = data[0]<<8 | data[1]
-        value &= ~0b11    # trow out status bits
-        return(-46.85 + 175.72*(value/65536.0))
-
-    def get_hum(self):
+    def get_hum(self, raw = False):
         """
         The physical value RH given above corresponds to the
         relative humidity above liquid water according to World
@@ -76,51 +63,21 @@ class SHT25(Device):
 
         data = self.bus.read_i2c_block(self.address, 2)
 
-        '''
-        ## For use with smbus driver 
-        
-        data = [0,0]
-        data[0] = self.bus.read_byte(self.address)
-        data[1] = self.bus.read_byte(self.address)
-        '''
-
         value = data[0]<<8 | data[1]
         value &= ~0b11    # trow out status bits
         humidity = (-6.0 + 125.0*(value/65536.0))
 
-        if humidity > 100.0:
-            return 100.0
-        elif humidity < 0.0:
-            return 0.0
-        else: 
+        if raw:                 # raw sensor output, useful for getting an idea of sensor failure status
             return humidity
-    
-    
-    def get_hum_8bit(self):
-        """
-                ## For use with smbus driver 
 
-        The physical value RH given above corresponds to the
-        relative humidity above liquid water according to World
-        Meteorological Organization (WMO)
-        """
-        self.bus.write_byte(self.address, self.TRIG_RH_noHOLD); # start humidity measurement
-        time.sleep(0.1)
-                
-        data = [0,0]
-        data[0] = self.bus.read_byte(self.address)
-        data[1] = self.bus.read_byte(self.address)
-        
-        value = data[0]<<8 | data[1]
-        value &= ~0b11    # trow out status bits
-        humidity = (-6.0 + 125.0*(value/65536.0))
-
-        if humidity > 100.0:
-            return 100.0
-        elif humidity < 0.0:
-            return 0.0
         else: 
-            return humidity
+
+            if humidity > 100.0:        # limit values to relevant physical variable (values out of that limit is sensor error state and are dependent on specific sensor piece)
+                return 100.0
+            elif humidity < 0.0:
+                return 0.0
+            else: 
+                return humidity
 
 class SHT31(Device):
     'Python library for SHT31v01A MLAB module with Sensirion SHT31 i2c humidity and temperature sensor.'
@@ -149,11 +106,13 @@ class SHT31(Device):
                     ('Checksum',status[2])])
         return bits_values
 
-    def get_TempHum(self):
+
+    def get_TempHum(self):        
         self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
-        time.sleep(0.1)
+        time.sleep(0.05)
 
         data = self.bus.read_i2c_block(self.address, 6)
+
         temp_data = data[0]<<8 | data[1]
         hum_data = data[3]<<8 | data[4]
 
@@ -161,6 +120,7 @@ class SHT31(Device):
         temperature = -45.0 + 175.0*(temp_data/65535.0) 
 
         return temperature, humidity
+
 
     @staticmethod
     def _calculate_checksum(value):

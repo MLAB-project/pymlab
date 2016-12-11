@@ -51,14 +51,15 @@ class I2CLCD(Device):
 
 
     def cmd(self, cmd):
-        self.bus.write_byte(self.address, (cmd & 0xF0)|self.LCD_EN )
-        self.bus.write_byte(self.address, (cmd & 0xF0) )
-        self.bus.write_byte(self.address, ((cmd << 4) & 0xF0)|self.LCD_EN )
-        self.bus.write_byte(self.address, ((cmd << 4) & 0xF0) )
+        self.bus.write_byte(self.address, (cmd & 0xF0)|self.LCD_EN | self.LCD_BL )
+        self.bus.write_byte(self.address, (cmd & 0xF0)  | self.LCD_BL)
+        self.bus.write_byte(self.address, ((cmd << 4) & 0xF0)|self.LCD_EN  | self.LCD_BL)
+        self.bus.write_byte(self.address, ((cmd << 4) & 0xF0) | self.LCD_BL )
         time.sleep(4/1000)
 
     def clear(self):
         self.cmd(0x01)
+        time.sleep(4/1000)
 
 
     def init (self):
@@ -71,16 +72,31 @@ class I2CLCD(Device):
 
     # Function to display single Character
     def lcd_data(self, dat):
-        self.bus.write_byte(self.address, ( ord(dat) & 0xF0)| self.LCD_EN| self.LCD_RS)
-        self.bus.write_byte(self.address, ( ord(dat) & 0xF0)| self.LCD_RS)
-        self.bus.write_byte(self.address, (( ord(dat) << 4) & 0xF0)| self.LCD_EN| self.LCD_RS)
-        self.bus.write_byte(self.address, (( ord(dat) << 4) & 0xF0)| self.LCD_RS)
+        self.bus.write_byte(self.address, ( ord(dat) & 0xF0)| self.LCD_EN | self.LCD_RS | self.LCD_BL)
+        self.bus.write_byte(self.address, ( ord(dat) & 0xF0)| self.LCD_RS | self.LCD_BL)
+        self.bus.write_byte(self.address, (( ord(dat) << 4) & 0xF0)| self.LCD_EN | self.LCD_RS | (self.LCD_BL))
+        self.bus.write_byte(self.address, (( ord(dat) << 4) & 0xF0)| self.LCD_RS | self.LCD_BL)
         time.sleep(4/1000)
+        #time.sleep(0.5)
 
 
     def puts(self, a):
-        for i in list(a):
+        for i in list(str(a)):
             self.lcd_data(i) 
+
+    def putsFull(self, lineA = None, lineB = None):
+        #self.clear()
+        self.home()
+        time.sleep(0.01)
+        self.clear()
+        if lineA:
+            time.sleep(0.01)
+            self.puts(lineA)
+        if lineB:
+            time.sleep(0.01)
+            self.set_row2()
+            time.sleep(0.01)
+            self.puts(lineB)
 
     def set_row2(self):
         self.cmd(0xc0)
@@ -90,6 +106,16 @@ class I2CLCD(Device):
         
     def light(self, on = 0):
         if on:
+            self.LCD_BL = 0b00001000
             self.bus.write_byte(self.address, (0 |(self.LCD_BL) ))
         else:
+            self.LCD_BL = 0b00000000
             self.bus.write_byte(self.address, (0 &(~self.LCD_BL) ))
+        
+    def lightToggle(self):
+        if self.LCD_BL == 0b00001000:
+            self.LCD_BL = 0b00000000
+            self.bus.write_byte(self.address, (0 | self.LCD_BL ))
+        else:
+            self.LCD_BL = 0b00001000
+            self.bus.write_byte(self.address, (0 | self.LCD_BL ))

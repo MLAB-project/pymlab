@@ -4,6 +4,8 @@
 #
 import struct
 import logging
+import numpy as np
+import time
 
 from pymlab.sensors import Device
 
@@ -112,7 +114,7 @@ class RPS01(Device):
         LSB = self.bus.read_byte_data(self.address, self.angle_LSB)
         MSB = self.bus.read_byte_data(self.address, self.angle_MSB)
         DATA = (MSB << 6) + LSB
-        if not verify: 
+        if not verify:
             return  (360.0 / 2**14) * DATA
         else:
             status = self.get_diagnostics()
@@ -122,3 +124,36 @@ class RPS01(Device):
                 return  None
 
 
+    def get_speed(self, multiply = 1, averaging = 50):
+        angles = np.zeros(5)
+        angles[4] = self.get_angle(verify = False)
+        time.sleep(0.01)
+        angles[3] = self.get_angle(verify = False)
+        time.sleep(0.01)
+        angles[2] = self.get_angle(verify = False)
+        time.sleep(0.01)
+        angles[1] = self.get_angle(verify = False)
+        n = 0
+        speed = 0
+        AVERAGING = averaging
+
+        for i in range(AVERAGING):
+            time.sleep(0.01)
+            angles[0] = self.get_angle(verify = False)
+
+            if (angles[0] + n*360 - angles[1]) > 300:
+                n -= 1
+                angles[0] = angles[0] + n*360
+
+            elif (angles[0] + n*360 - angles[1]) < -300:
+                n += 1
+                angles[0] = angles[0] + n*360
+
+            else:
+                angles[0] = angles[0] + n*360
+
+            speed += (-angles[4] + 8*angles[3] - 8*angles[1] + angles[0])/12
+            angles = np.roll(angles, 1)
+
+        speed = speed/AVERAGING
+        return speed*multiply
