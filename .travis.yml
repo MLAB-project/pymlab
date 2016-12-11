@@ -17,5 +17,7 @@ before_install:
 install:
   - sudo python setup.py install
 
+script: python tests/*/*.py
+
 dist: trusty
 sudo: required
