@@ -1,8 +1,9 @@
+[![Build Status](https://travis-ci.org/MLAB-project/pymlab.svg?branch=dev)](https://travis-ci.org/MLAB-project/pymlab)
+
 Python MLAB control modules
 ================
 
-MLAB I2C bus, SPI and USB modules binding. The code purpose is easy control as many digital elecronic MLAB modules as possible. 
-
+I2C bus, SPI, RS232, Ethernet and USB modules binding. The code purpose is easy control as many digital electronic MLAB modules as possible. Initial development of this library was focused on I2C devices but it is suitable for use with another interfaces for now. 
 
 Installation
 ------------
@@ -17,9 +18,9 @@ Installation
     $ cd pymlab/
     $ sudo python setup.py develop
 
-#### Cython interface for the USBI2C01A  MLAB module (Optional support)
+#### HIDAPI interface for the USBI2C01A  MLAB module (Optional support)
 
-Required if you want to use the [USBI2C01A](http://wiki.mlab.cz/doku.php?id=en:usbi2c) module to communicate with SMBus/I2C devices via USB. 
+Required if you want to use the [USBI2C01A](http://wiki.mlab.cz/doku.php?id=en:usbi2c) module to communicate with SMBus/I2C devices via USB HID layer. Very useful in Windows environment where standard hardware interfaces are not accessible directly.
 
     $ sudo apt-get install libudev-dev libusb-1.0-0-dev libhidapi-dev python-setuptools python-smbus cython
    
@@ -27,7 +28,7 @@ Required if you want to use the [USBI2C01A](http://wiki.mlab.cz/doku.php?id=en:u
 Usage
 -----
 
-For use of this python library the I²C bus topology and connected devices must be defined.  This is done by the Config object defined at the begining of the script. Exapmle of network bus config follows. Additional documentation is available at [MLAB Wiki](http://wiki.mlab.cz/doku.php?id=en:pymlab).
+For use of this python library the bus topology (e.g. I²C) and connected devices must be defined. The system is not plug-and-play. Definition is described by the Config object defined at the beginning of the following script. Additional documentation is available at [MLAB Wiki](http://wiki.mlab.cz/doku.php?id=en:pymlab).
 
 ### Example
 
@@ -59,4 +60,4 @@ gauge.route()
 
 ```
 
-
+Some more examples of usage are in 'examples' directory in that repository. If you have some compatible device and interface on your computer you can run an example directly. 
