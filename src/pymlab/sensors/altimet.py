@@ -65,14 +65,15 @@ class ALTIMET01(Device):
         t_MSB = self.bus.read_byte_data(self.address,0x04)
         t_LSB = self.bus.read_byte_data(self.address,0x05)
         
+        # conversion of register values to measured values according to sensor datasheet
         #Determine sign and output
         if (t_MSB > 0x7F):
-            t_MSB = ~t_MSB + 1
-            sign = -1
+            print "minus"
+            t = float(((~(t_MSB << 8 | t_LSB) + 1) >> 4) /256.0)
         else:
-                sign = 1
-        # conversion of register values to measured values according to sensor datasheet
-        t = sign * float(t_MSB + (t_LSB >> 4)/16.0)    
+            print "plus"
+            t = float(t_MSB + (t_LSB >> 4)/16.0)
+    
         p = float((p_MSB << 10)|(p_CSB << 2)|(p_LSB >> 6)) + float((p_LSB >> 4)/4.0)
         return (t, p);
 
