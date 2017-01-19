@@ -50,7 +50,8 @@ class SHT25(Device):
 
         value = data[0]<<8 | data[1]
         value &= ~0b11    # trow out status bits
-        return(-46.85 + 175.72*(value/65536.0))
+
+        return(-46.85 + 175.72/65536.0*value)
 
     def get_hum(self, raw = False):
         """
