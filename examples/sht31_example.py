@@ -43,13 +43,12 @@ cfg = config.Config(
 cfg = config.Config(
     i2c = {
         "port": port,
-
-          },
+        "device": 'smbus',
+    },
     bus = [
         {
             "name":          "sht",
             "type":        "sht31",
-	    "address":        0x45,
         },
     ],
 )
