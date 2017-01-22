@@ -225,7 +225,7 @@ class SMBusDriver(Driver):
 
         More detail documentation is at: https://www.kernel.org/doc/Documentation/i2c/i2c-protocol
         """
-        raise NotImplementedError()
+        return self.smbus.write_i2c_block(address, value)
   
     def read_i2c_block(self, address, length):
         """
@@ -238,7 +238,7 @@ class SMBusDriver(Driver):
 
         More detail documentation is at: https://www.kernel.org/doc/Documentation/i2c/i2c-protocol
         """
-        raise NotImplementedError()
+        return self.smbus.read_i2c_block(address, length)
 
     def write_i2c_block_data(self, address, register, value):
         """
@@ -506,10 +506,7 @@ def load_driver(**kwargs):
             LOGGER.info("Loading SMBus driver...")
             return SMBusDriver(port, smbus.SMBus(int(port)))
         except ImportError:
-            LOGGER.warning("Failed to import 'smbus' module. SMBus driver cannot be loaded.")
-    #else:
-    #    LOGGER.warning("SMBus port not specified, skipping trying to load smbus driver.")
-    
+            LOGGER.warning("Failed to import 'smbus' module. SMBus driver cannot be loaded.")    
 
     if device == "serial" or device == None:
             try:

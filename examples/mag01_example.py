@@ -46,6 +46,7 @@ cfg = config.Config(
 cfg = config.Config(
     i2c = {
         "port": port,
+        "device": 'smbus',
     },
     bus = [
         {

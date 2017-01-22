@@ -59,7 +59,7 @@ Python library for ISL2902001A MLAB module with ISL29020 I2C Light Sensor
 
     def get_lux(self):
         LSB = self.bus.read_byte_data(self.address, self.Data_lsb)
-        MSB = self.bus.read_byte_data(self.address, self.Data_lsb)
+        MSB = self.bus.read_byte_data(self.address, self.Data_msb)
         DATA = (MSB << 8) + LSB
         Ecal = 1 * DATA
         return Ecal
@@ -68,8 +68,6 @@ class ISL03(Device):
     """
 Python library for ISL03A MLAB module with VEML 6030 I2C Light Sensor
     """
-
-  
 
     def __init__(self, parent = None, address = 0x10, fault_queue = 1, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
@@ -117,9 +115,6 @@ Python library for ISL03A MLAB module with VEML 6030 I2C Light Sensor
         DATA = self.bus.read_word_data(self.address, self.Data_lsb)
         Ecal = 1 * DATA
         return Ecal
-
-
-
 
 class RGBC01(Device):
     """

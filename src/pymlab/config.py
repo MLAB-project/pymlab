@@ -116,6 +116,7 @@ class Config(object):
             "lioncell": lioncell.LIONCELL, #LION1CELL and LION2CELL
             "thermopile01": thermopile.THERMOPILE01,
             "i2cadc01": adc.I2CADC01,
+            "vcai2c01": adc.VCAI2C01,
             "LTC2453": adc.LTC2453,
             "LTC2487": adc.LTC2487,
             "i2cpwm": i2cpwm.I2CPWM,
