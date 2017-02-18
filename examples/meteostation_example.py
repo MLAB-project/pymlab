@@ -23,7 +23,6 @@ port    = eval(sys.argv[1])
 cfg = config.Config(
     i2c = {
         "port": port,
-        "device": 'smbus',
     },
     bus = [
         {
