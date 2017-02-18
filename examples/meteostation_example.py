@@ -63,27 +63,58 @@ sen_tempIn = cfg.get_device("temp_in")
 sen_windSpd = cfg.get_device("wind_spd")
 sen_windDir = cfg.get_device("wind_dir")
 
-sen_tempOut.soft_reset()
-sen_tempIn.soft_reset()
+try:
+    sen_tempOut.soft_reset()
+    sen_tempIn.soft_reset()
+except Exception, e:
+    print e
 
 time.sleep(0.5)
 
 try:
     while True:
-        light = sen_light.get_lux()
-        temperatureIn, humidityIn   = sen_tempIn.get_TempHum()
-        temperatureOut, humidityOut = sen_tempOut.get_TempHum()
-        WindSpeed = sen_windSpd.get_speed()
-        (x, y, z) = sen_windDir.axes()
 
-        if y > 0:
-            winddirAWS = 90 - (math.atan(x/y))*180.0/math.pi
-        elif y < 0:
-            winddirAWS = 270 - (math.atan(x/y))*180.0/math.pi
-        elif y == 0 & x < 0:
-            winddirAWS =  180.0
-        elif y == 0 & x > 0:
-            winddirAWS = 0.0
+        try:
+            light = sen_light.get_lux()
+        except Exception, e:
+            print e
+            light = "Err"
+
+        try:
+            temperatureIn, humidityIn   = sen_tempIn.get_TempHum()
+        except Exception, e:
+            print e
+            temperatureIn = "Err"
+            humidityIn = "Err"
+
+        try:
+            temperatureOut, humidityOut = sen_tempOut.get_TempHum()
+        except Exception, e:
+            print e
+            temperatureOut = "Err"
+            humidityOut = "Err"
+
+        try:
+            WindSpeed = sen_windSpd.get_speed()
+        except Exception, e:
+            print e
+            WindSpeed = "Err"
+
+        try:
+            (x, y, z) = sen_windDir.axes()
+
+            if y > 0:
+                winddirAWS = 90 - (math.atan(x/y))*180.0/math.pi
+            elif y < 0:
+                winddirAWS = 270 - (math.atan(x/y))*180.0/math.pi
+            elif y == 0 & x < 0:
+                winddirAWS =  180.0
+            elif y == 0 & x > 0:
+                winddirAWS = 0.0
+
+        except Exception, e:
+            print e
+            winddirAWS = "Err"
 
 
         sys.stdout.write("Osvetleni: %0.2f \r\nTemperatureIn: %0.2f, HumidityIn: %0.2f \r\nTemperatureOut: %0.2f, HumidityOut: %0.2f \r\n WindSpeed: %0.2f ,WindDirection: %0.2f \r\n \r\n" % (light/10, temperatureIn, humidityIn, temperatureOut, humidityOut, WindSpeed, winddirAWS))
