@@ -118,7 +118,7 @@ try:
 
 
         try:
-            sys.stdout.write("Osvetleni: %0.2f \r\nTemperatureIn: %0.2f, HumidityIn: %0.2f \r\nTemperatureOut: %0.2f, HumidityOut: %0.2f \r\n WindSpeed: %0.2f ,WindDirection: %0.2f \r\n \r\n" %(float(light)/10, float(temperatureIn), float(humidityIn), float(temperatureOut), float(humidityOut), float(WindSpeed), float(winddirAWS)))
+            sys.stdout.write("Osvetleni: %s \r\nTemperatureIn: %s, HumidityIn: %s \r\nTemperatureOut: %s, HumidityOut: %s \r\n WindSpeed: %s ,WindDirection: %s \r\n \r\n" %(str(light), str(temperatureIn), str(humidityIn), str(temperatureOut), str(humidityOut), str(WindSpeed), str(winddirAWS)))
             sys.stdout.flush()
         except Exception, e:
             print e
