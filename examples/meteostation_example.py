@@ -117,8 +117,12 @@ try:
             winddirAWS = "Err"
 
 
-        sys.stdout.write("Osvetleni: %0.2f \r\nTemperatureIn: %0.2f, HumidityIn: %0.2f \r\nTemperatureOut: %0.2f, HumidityOut: %0.2f \r\n WindSpeed: %0.2f ,WindDirection: %0.2f \r\n \r\n" % (light/10, temperatureIn, humidityIn, temperatureOut, humidityOut, WindSpeed, winddirAWS))
-        sys.stdout.flush()
+        try:
+            sys.stdout.write("Osvetleni: %0.2f \r\nTemperatureIn: %0.2f, HumidityIn: %0.2f \r\nTemperatureOut: %0.2f, HumidityOut: %0.2f \r\n WindSpeed: %0.2f ,WindDirection: %0.2f \r\n \r\n" %(float(light)/10, float(temperatureIn), float(humidityIn), float(temperatureOut), float(humidityOut), float(WindSpeed), float(winddirAWS)))
+            sys.stdout.flush()
+        except Exception, e:
+            print e
+
         time.sleep(1)
 
 except KeyboardInterrupt:
