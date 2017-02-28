@@ -108,7 +108,7 @@ class SHT31(Device):
         return bits_values
 
 
-    def get_TempHum(self):        
+    def get_TempHum(self):
         self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
         time.sleep(0.05)
 
@@ -121,6 +121,28 @@ class SHT31(Device):
         temperature = -45.0 + 175.0*(temp_data/65535.0) 
 
         return temperature, humidity
+
+    def get_temp(self): #TODO: cist mene i2c bloku ...
+        self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
+        time.sleep(0.05)
+
+        data = self.bus.read_i2c_block(self.address, 6)
+
+        temp_data = data[0]<<8 | data[1]
+        temperature = -45.0 + 175.0*(temp_data/65535.0) 
+
+        return temperature
+
+    def get_humi(self): #TODO: cist mene i2c bloku ...
+        self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
+        time.sleep(0.05)
+
+        data = self.bus.read_i2c_block(self.address, 6)
+
+        hum_data = data[3]<<8 | data[4]
+        humidity = 100.0*(hum_data/65535.0)
+
+        return humidity
 
 
     @staticmethod

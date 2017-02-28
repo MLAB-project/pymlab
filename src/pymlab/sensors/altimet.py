@@ -76,6 +76,27 @@ class ALTIMET01(Device):
         return (t, p);
 
 
+    def get_press(self):
+        p_MSB = self.bus.read_byte_data(self.address,0x01)
+        p_CSB = self.bus.read_byte_data(self.address,0x02)
+        p_LSB = self.bus.read_byte_data(self.address,0x03)
+
+        p = float((p_MSB << 10)|(p_CSB << 2)|(p_LSB >> 6)) + float((p_LSB >> 4)/4.0)
+        return p
+
+    def get_temp(self):
+        t_MSB = self.bus.read_byte_data(self.address,0x04)
+        t_LSB = self.bus.read_byte_data(self.address,0x05)
+
+        if (t_MSB > 0x7F):
+            t = float((t_MSB - 256) + (t_LSB >> 4)/16.0)
+        else:
+            t = float(t_MSB + (t_LSB >> 4)/16.0)
+
+        return t
+
+
+
 class SDP6XX(Device):
     """
     Python library for Sensirion SDP6XX/5xx differential preassure sensors.
