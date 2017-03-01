@@ -46,7 +46,6 @@ cfg = config.Config(
 cfg = config.Config(
     i2c = {
         "port": port,
-        "device": 'smbus',
     },
     bus = [
         {
@@ -72,7 +71,7 @@ try:
         mag.route()
         (x, y, z) = mag.axes()
         #sys.stdout.write("\rHeading: " + magnetometer.degrees(magnetometer.heading()) + " X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " )
-        sys.stdout.write(" X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " + "\r\n")
+        sys.stdout.write(" X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    AZ:" + str(mag.get_azimuth()) + "\r\n")
         sys.stdout.flush()
         time.sleep(0.5)
 except KeyboardInterrupt:

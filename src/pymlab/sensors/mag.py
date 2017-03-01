@@ -89,13 +89,14 @@ class MAG01(Device):
 
     def get_azimuth(self):
         (x, y, z) = self.axes()
-        if y > 0:
-            azimuth = 90 - (math.atan(x/y))*180.0/math.pi
-        elif y < 0:
-            azimuth = 270 - (math.atan(x/y))*180.0/math.pi
-        elif y == 0 & x < 0:
+
+        if z > 0:
+            azimuth = 90 - (math.atan(x/z))*180.0/math.pi
+        elif z < 0:
+            azimuth = 270 - (math.atan(x/z))*180.0/math.pi
+        elif z == 0 & x < 0:
             azimuth =  180.0
-        elif y == 0 & x > 0:
+        elif z == 0 & x > 0:
             azimuth = 0.0
 
         return azimuth
