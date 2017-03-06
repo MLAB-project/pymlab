@@ -73,6 +73,6 @@ try:
         #sys.stdout.write("\rHeading: " + magnetometer.degrees(magnetometer.heading()) + " X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    " )
         sys.stdout.write(" X: " + str(x) + " Y: " + str(y) + " Z: " + str(z) + "    AZ:" + str(mag.get_azimuth()) + "\r\n")
         sys.stdout.flush()
-        time.sleep(0.5)
+        time.sleep(0.2)
 except KeyboardInterrupt:
 	sys.exit(0)
