@@ -279,12 +279,14 @@ class SMBusDriver(Driver):
 
 
 class HIDDriver(Driver):
-    def __init__(self, port = None):
+    def __init__(self, port = None, address = None):
         self.driver_type = 'hid'
         time.sleep(1)   # give a time to OS for remounting the HID device
         import hid
-        self.h = hid.device()      
-        self.h.open(0x10C4, 0xEA90, None) # Connect HID again after enumeration
+        self.h = hid.device() 
+        print "HID devices" 
+        print "=================" 
+        self.h.open(0x10C4, 0xEA90, address) # Connect HID again after enumeration
         self.h.write([0x02, 0xFF, 0x00, 0x00, 0x00])  # Set GPIO to Open-Drain  
         for k in range(3):      # blinking LED
             self.h.write([0x04, 0x00, 0xFF])
@@ -480,6 +482,7 @@ DRIVER = None
 def load_driver(**kwargs):
     device = kwargs.get("device", None)
     port = kwargs.get("port", None)
+    serial = kwargs.get("serial", None)
 
     if device == "hid" or device == None:
         try:
@@ -487,12 +490,23 @@ def load_driver(**kwargs):
             import hid
             LOGGER.info("Initiating HID driver...")
             try:
-                h = hid.device()
-                h.open(0x10C4, 0xEA90) # Try Connect HID # TODO: za none
-                LOGGER.info("Using HID '%s' device with serian number: '%s' from '%s'." %(h.get_product_string(), h.get_serial_number_string(), h.get_manufacturer_string()))
-                h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
-                h.close()
-                return HIDDriver(str(port)) # We can use this connection
+                if not serial:
+                    h = hid.device()
+                    h.open(0x10C4, 0xEA90) # Try Connect HID
+                    LOGGER.info("Using HID '%s' device with serian number: '%s' from '%s'." %(h.get_product_string(), h.get_serial_number_string(), h.get_manufacturer_string()))
+                    h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
+                    h.close()
+                    return HIDDriver(str(port)) # We can use this connection
+
+
+                else:
+                    h = hid.device()
+                    h.open(0x10C4, 0xEA90, unicode(serial)) # Try Connect HID
+                    LOGGER.info("Required is HID with serial number: '%s' " %(serial))
+                    h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
+                    h.close()
+                    return HIDDriver(str(port), unicode(serial)) # We can use this connection
+                    
             except IOError:
                 LOGGER.warning("HID device does not exist, we will try SMBus directly...")
         

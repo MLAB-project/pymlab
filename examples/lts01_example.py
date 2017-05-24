@@ -26,6 +26,7 @@ cfg = config.Config(
     i2c = {
         "port": port,
         "device": None,  # here you can explicitly set I2C driver with 'hid', 'smbus', 'serial'
+        "serial_number": None,
     },
 
 	bus = [
