@@ -89,7 +89,10 @@ class Config(object):
         return self._bus
     
     def init_drivers(self):
-        from pymlab.sensors import lts, mag, sht, i2chub, altimet, acount, clkgen, imu, motor, atmega, gpio, bus_translators, light, thermopile, rps, adc, i2cpwm, i2cio, i2clcd, lioncell
+        from pymlab.sensors import lts, mag, sht, i2chub, altimet, acount, clkgen,\
+                    imu, motor, atmega, gpio, bus_translators, light, thermopile,\
+                    rps, adc, i2cpwm, i2cio, i2clcd, lioncell, rtc
+
         self.drivers = {
             "i2chub": i2chub.I2CHub,
 
@@ -122,6 +125,7 @@ class Config(object):
             "i2cpwm": i2cpwm.I2CPWM,
             "i2cio": i2cio.I2CIO,
             "i2clcd": i2clcd.I2CLCD,
+            "rtc01": rtc.RTC01,
 	    "PCA9635": gpio.PCA9635,
         }
 
