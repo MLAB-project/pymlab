@@ -87,7 +87,7 @@ class Config(object):
         return self._bus
     
     def init_drivers(self):
-        from pymlab.sensors import altimet
+        from pymlab.sensors import *
         self.drivers = {
             "altimet01": altimet.ALTIMET01,
             "SDP600": altimet.SDP6XX,

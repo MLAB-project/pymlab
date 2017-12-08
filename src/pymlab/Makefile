@@ -30,4 +30,4 @@ clean:
 	@echo CC $<
 	@$(CC) $<
 
-.PHONY clean all deploy
+.PHONY: clean all deploy
