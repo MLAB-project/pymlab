@@ -349,12 +349,3 @@ def replace_ext(file_name, extension = None):
         if extension:
             return file_name + "." + extension
         return file_name
-
-
-def main():
-    print __doc__
-
-
-if __name__ == "__main__":
-    main()
-

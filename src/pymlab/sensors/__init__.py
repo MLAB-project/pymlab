@@ -1,22 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""pymlab.sensors module.
 
-Author: Jan Milík <milikjan@fit.cvut.cz>
-"""
-
-
-import logging
 import struct
-import warnings
 
 #from pymlab import config
 from pymlab.utils import obj_repr
 from pymlab.sensors import iic
-
-
-LOGGER = logging.getLogger(__name__)
-
 
 CHANNEL_0 = 0b00000001
 CHANNEL_1 = 0b00000010
@@ -49,18 +38,6 @@ OVERFLOW = Overflow()
 
 
 class Device(object):
-    """Base class for all MLAB sensors.
-
-    .. attribute:: channel
-
-       I2C hub channel number to which the device is connected. Channels
-       are numbered from 0 (on a 8 channel hub, the channels
-       have numbers 0-7). This attribute has no meaning if the device
-       isn't connected to a I2C hub
-       (see :class:`pymlab.sensors.i2chub02.I2CHub`).
-
-    """
-
     def __init__(self, parent = None, address = 0x70, **kwargs):
         self.parent  = parent
         self.address = address
@@ -109,15 +86,6 @@ class Device(object):
         return False
 
     def initialize(self):
-        """This method does nothing, it is meant to be overriden
-        in derived classes. Also, this method is not meant to be called
-        directly by the user, normally a call to
-        :meth:`pymlab.sensors.Bus.initialize` should be used.
-
-        Perform any initialization of the device that
-        may require communication. This is meant to be done
-        after the configuration has been set up (after instantiating
-        :class:`pymlab.config.Config` and setting it up)."""
         pass
 
     def write_byte(self, value):
@@ -137,15 +105,12 @@ class SimpleBus(Device):
         for child in children:
             self.children[child.address] = child
 
-    def __iter__(self):
-        return self.children.itervalues()
-
     def __getitem__(self, key):
         return self.children[key]
 
     def get_named_devices(self):
         result = {}
-        for child in self:
+        for child in self.children.values():
             result.update(child.get_named_devices())
         return result
 
@@ -167,21 +132,12 @@ class SimpleBus(Device):
         device.parent = self
 
     def initialize(self):
-        """See :meth:`pymlab.sensors.Device.initialize` for more information.
-
-        Calls `initialize()` on all devices connected to the bus.
-        """
         Device.initialize(self)
-        for child in self.children.itervalues():
+        for child in self.children.values():
             child.initialize()
 
 
-class Bus(SimpleBus):
-    INT8  = struct.Struct(">b")
-    INT16 = struct.Struct(">h")
-    UINT16 = struct.Struct(">H")
-
-    
+class Bus(SimpleBus):  
     def __init__(self, **kwargs):
         SimpleBus.__init__(self, None)
         
@@ -205,109 +161,81 @@ class Bus(SimpleBus):
         return self._named_devices[name]
     
     def write_byte(self, address, value):
-        """Writes the byte to unaddressed register in a device. """
-        LOGGER.debug("Writing byte %s to device %s!", bin(value), hex(address))
         return self.driver.write_byte(address, value)
     
     def read_byte(self, address):
-        """Reads unadressed byte from a device. """
-        LOGGER.debug("Reading byte from device %s!", hex(address))
         return self.driver.read_byte(address)
     
     def write_byte_data(self, address, register, value):
-        """Write a byte value to a device's register. """
-        LOGGER.debug("Writing byte data %s to register %s on device %s",
-            bin(value), hex(register), hex(address))
         return self.driver.write_byte_data(address, register, value)
     
     def read_byte_data(self, address, register):
         data = self.driver.read_byte_data(address, register)
-        LOGGER.debug("Reading byte %s from register %s in device %s", hex(data),  hex(register), hex(address))
         return data
 
     def write_word_data(self, address, register, value):
-        """Write a 16-bit value to a device's register. """
-        LOGGER.debug("Writing byte data %s to register %s on device %s",
-            bin(value), hex(register), hex(address))
         return self.driver.write_word_data(address, register, value)
     
     def read_word_data(self, address, register):
         data = self.driver.read_word_data(address, register)
-        LOGGER.debug("Reading word %s from register %s in device %s", hex(data),  hex(register), hex(address))
         return data
     
     def write_block_data(self, address, register, value):
         return self.driver.write_block_data(address, register, value)
     
     def read_block_data(self, address, register):
-        LOGGER.debug("Reading SMBus data block %s from register %s in device %s",value, hex(register), hex(address))
         return self.driver.read_block_data(address, register)
     
     def write_i2c_block_data(self, address, register, value):
-        LOGGER.debug("Writing I2C data block %s from register %s in device %s",value, hex(register), hex(address))
         return self.driver.write_i2c_block_data(address, register, value)
     
     def read_i2c_block_data(self, address, register, length = 1):
         data = self.driver.read_i2c_block_data(address, register, length)
-        LOGGER.debug("Reading I2C data block %s from register %s in device %s", data, hex(register), hex(address))
         return data
     
     def write_i2c_block(self, address, value):
-        LOGGER.debug("Writing I2C data block %s to device %s",value, hex(address))
         return self.driver.write_i2c_block(address, value)
     
     def read_i2c_block(self, address, length):
         data = self.driver.read_i2c_block(address, length)
-        LOGGER.debug("Reading I2C data block %s from device %s", data, hex(address))
         return data
 
     def write_int16(self, address, register, value):
         value = struct.unpack("<H", struct.pack(">H", value))[0]
         return self.driver.write_word_data(address, register, value)
     
-    def read_int16(self, address):   ## Reads int16 as two separate bytes, suppose autoincrement of internal register pointer in I2C device. 
+    def read_int16(self, address):
+        # Reads int16 as two separate bytes, suppose autoincrement of internal register pointer in I2C device. 
         MSB = self.driver.read_byte(address)
         LSB = self.driver.read_byte(address)
         data = bytes(bytearray([MSB, LSB]))
-        LOGGER.debug("MSB %s and LSB %s from device %s was read",  hex(MSB), hex(LSB), hex(address))
-        return self.INT16.unpack(data)[0]
+        return struct.unpack(">h", data)[0]
 
-    def read_int16_data(self, address, register):            ## Must be checked, possible bug in byte manipulation (LTS01A sensor sometimes returns wrong values)
-        data = struct.pack("<H",self.driver.read_word_data(address, register))
-        LOGGER.debug("MSB and LSB %r was read from device %s", data, hex(address))
-        return self.INT16.unpack(data)[0]
+    def read_int16_data(self, address, register):
+        # Must be checked, possible bug in byte manipulation (LTS01A sensor sometimes returns wrong values)
+        data = struct.pack("<H", self.driver.read_word_data(address, register))
+        return struct.unpack(">h", data)[0]
 
     
-    def read_uint16(self, address):         ## Reads uint16 as two separate bytes, suppose autoincrement of internal register pointer in I2C device.
+    def read_uint16(self, address):
+        # Reads uint16 as two separate bytes, suppose autoincrement of internal register pointer in I2C device.
         MSB = self.driver.read_byte(address)
         LSB = self.driver.read_byte(address)
         data = bytes(bytearray([MSB, LSB]))
-        LOGGER.debug("Read MSB %s and LSB %s from device %s",  hex(MSB), hex(LSB), hex(address))
-        return self.UINT16.unpack(data)[0]
+        return strcut.unpack(">H", data)[0]
 
-    def read_uint16_data(self, address, register):            ## Must be checked, possible bug in byte manipulation (LTS01A sensor sometimes returns wrong values)
+    def read_uint16_data(self, address, register):
+        # Must be checked, possible bug in byte manipulation (LTS01A sensor sometimes returns wrong values)
         data = struct.pack("<H",self.driver.read_word_data(address, register))
-        return self.UINT16.unpack(data)[0]
+        return struct.unpack(">H", data)[0]
 
     def get_driver(self):
         return self.driver.get_driver()
 
 
     def write_wdata(self, address, register, value):
-        """Write a word (two bytes) value to a device's register. """
-        warnings.warn("write_wdata() is deprecated and will be removed in future versions replace with write_word_data()", DeprecationWarning)
-        LOGGER.debug("Writing word data %s to register %s on device %s",
-            bin(value), hex(register), hex(address))
         return self.driver.write_word_data(address, register, value)
 
     def read_wdata(self, address, register):
-        warnings.warn("read_wdata() is deprecated and will be removed in future versions replace with read_word_data()", DeprecationWarning)
         data = self.driver.read_word_data(address, register)
         return data
-
-def main():
-    print __doc__
-
-
-if __name__ == "__main__":
-    main()

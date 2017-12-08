@@ -104,7 +104,7 @@ class SDP6XX(Device):
         MSB = self.bus.read_byte(self.address)      # read data
         LSB = self.bus.read_byte(self.address)
         check = self.bus.read_byte(self.address)    # read CRC
-        print hex(MSB), hex(LSB), hex(check)
+        # print(hex(MSB), hex(LSB), hex(check))
         pressure = (MSB << 8) | LSB
         if (pressure & 0x1000):
             pressure -= 65536
@@ -135,12 +135,3 @@ class SDP6XX(Device):
 
         self.bus.write_byte(self.address, 0xFE);    # trigger measurement
         time.sleep(0.01)
-
-
-def main():
-    print __doc__
-
-
-if __name__ == "__main__":
-    main()
-

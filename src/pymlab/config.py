@@ -11,14 +11,12 @@ This file contains reference to symbols which may apear in I2C network config st
 
 import sys
 import json
-import logging
 
-from utils import obj_repr, PrettyPrinter
-from pymlab.sensors import Bus, SimpleBus
+from .utils import obj_repr, PrettyPrinter
+from .sensors import Bus, SimpleBus
 
 
-LOGGER = logging.getLogger(__name__)
-
+''
 
 class Node(object):
     def __init__(self, config, address, name = None):
@@ -89,40 +87,11 @@ class Config(object):
         return self._bus
     
     def init_drivers(self):
-        from pymlab.sensors import lts, mag, sht, i2chub, altimet, acount, clkgen, imu, motor, atmega, gpio, bus_translators, light, thermopile, rps, adc, i2cpwm, i2cio, i2clcd, lioncell
+        from pymlab.sensors import altimet
         self.drivers = {
-            "i2chub": i2chub.I2CHub,
-
-            "lts01": lts.LTS01,
-            "mag01": mag.MAG01,
-            "rps01": rps.RPS01,
-            "imu01_acc": imu.IMU01_ACC,
-            "imu01_gyro": imu.IMU01_GYRO,
-            "sht25": sht.SHT25,
-            "sht31": sht.SHT31,
             "altimet01": altimet.ALTIMET01,
             "SDP600": altimet.SDP6XX,
             "SDP610": altimet.SDP6XX,
-            "acount02": acount.ACOUNTER02,
-            "motor01": motor.MOTOR01,
-            "clkgen01": clkgen.CLKGEN01,
-            "atmega": atmega.ATMEGA,
-            "I2CIO_TCA9535": gpio.I2CIO_TCA9535,
-            "DS4520": gpio.DS4520,
-            "TCA6416A": gpio.TCA6416A,
-            "i2cspi": bus_translators.I2CSPI,
-            "isl01": light.ISL01,
-	        "isl03": light.ISL03,
-            "lioncell": lioncell.LIONCELL, #LION1CELL and LION2CELL
-            "thermopile01": thermopile.THERMOPILE01,
-            "i2cadc01": adc.I2CADC01,
-            "vcai2c01": adc.VCAI2C01,
-            "LTC2453": adc.LTC2453,
-            "LTC2487": adc.LTC2487,
-            "i2cpwm": i2cpwm.I2CPWM,
-            "i2cio": i2cio.I2CIO,
-            "i2clcd": i2clcd.I2CLCD,
-	    "PCA9635": gpio.PCA9635,
         }
 
     def get_device(self, name):
@@ -176,19 +145,14 @@ class Config(object):
             #"mult": Multiplexer,
             #"sens": Sensor,
         }
-        exec source in globals(), local_vars
+        exec(source, globals(), local_vars)
         #self.port = local_vars.get("port", self.port)
         
         self.i2c_config = local_vars.get("i2c", {})
         
         bus = self.build_device(local_vars.get("bus", []))
         if not isinstance(bus, Bus):
-            LOGGER.warning(
-                "Top-level device in the configuration is a "
-                "%s and not a bus as expected. Use python list to "
-                "denote a bus.",
-                "None" if bus is None else type(bus).__name__)
-        self._bus = bus
+            self._bus = bus
     
     def load_file(self, file_name):
         if file_name.endswith(".py"):
@@ -198,22 +162,3 @@ class Config(object):
 
     def initialize(self):
         self.bus.initialize()
-
-
-def main():
-    cfg = Config()
-
-    for file_name in sys.argv[1:]:
-        cfg.load_python(file_name)
-
-    pp = PrettyPrinter()
-    pp.format(cfg.root_node)
-    pp.writeln()
-
-    for name, node in cfg.named_nodes.iteritems():
-        print "%s: %r" % (name, node, )
-    #print repr(cfg.root_node)
-
-
-if __name__ == "__main__":
-    main()
