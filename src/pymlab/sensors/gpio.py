@@ -233,11 +233,3 @@ to the pin"""
     def get_ports(self):
         'Reads logical values at pins.' 
         return self.bus.read_byte_data(self.address, self.STATUS_PORT0), self.bus.read_byte_data(self.address, self.STATUS_PORT1);
-
-
-def main():
-    print __doc__
-
-
-if __name__ == "__main__":
-    main()

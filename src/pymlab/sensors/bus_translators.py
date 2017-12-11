@@ -95,12 +95,4 @@ class I2CSPI(Device):
         'Enable or disable slave-select pins as gpio.' 
         self.bus.write_byte_data(self.address, 0xF6, gpio_enable)
         self.bus.write_byte_data(self.address, 0xF7, gpio_config)
-        return 
-
-
-def main():
-    print __doc__
-
-
-if __name__ == "__main__":
-    main()
+        return

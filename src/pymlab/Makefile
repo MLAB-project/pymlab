@@ -1,8 +1,9 @@
 CC = ../../../micropython/mpy-cross/mpy-cross
 
-MOUNTPOINT = ~/mnt/pyb
+TARGET = ~/mnt/pyb/pymlab
 
-SENSORS = altimet.py
+SENSORS = altimet.py \
+		  light.py \
 
 SRC = sensors/iic.py \
 	  sensors/__init__.py \
@@ -14,13 +15,7 @@ OUTPUT = $(SRC:.py=.mpy) $(addprefix sensors/,$(SENSORS:.py=.mpy))
 
 all: $(OUTPUT)
 
-deploy: $(OUTPUT)
-	@mkdir -p $(MOUNTPOINT)/pymlab
-	@for f in $(OUTPUT); do \
-		echo CP $$f; \
-		mkdir -p $(MOUNTPOINT)/pymlab/$$(dirname $$f); \
-		cp $$f $(MOUNTPOINT)/pymlab/$$(dirname $$f)/;\
-	done;
+deploy: $(addprefix $(TARGET)/,$(OUTPUT))
 
 clean:
 	@echo RM $(OUTPUT)
@@ -29,5 +24,10 @@ clean:
 %.mpy: %.py
 	@echo CC $<
 	@$(CC) $<
+
+$(TARGET)/%.mpy: %.mpy
+	@echo CP $<
+	@mkdir -p $$(dirname $@)
+	@cp $< $@
 
 .PHONY: clean all deploy

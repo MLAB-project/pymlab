@@ -21,7 +21,7 @@ def args_repr(*args, **kwargs):
     "'a', (1, 2), some_keyword = ['a', 'b', 'c']"
     """
     items = [repr(a) for a in args]
-    items += ["%s = %r" % (k, v) for k, v in kwargs.iteritems()]
+    items += ["%s = %r" % (k, v) for k, v in kwargs.items()]
     return ", ".join(items)
 
 

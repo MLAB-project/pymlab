@@ -61,11 +61,3 @@ class I2CPWM(Device):
 
     def get_input(self):
 	return self.bus.read_byte_data(self.address, self.PWM_INPUT)
-
-
-def main():
-    print __doc__
-
-
-if __name__ == "__main__":
-    main()

@@ -138,10 +138,3 @@ class SHT31(Device):
                 else:
                     crc = (crc << 1)
         return crc
-
-def main():
-    print __doc__
-
-
-if __name__ == "__main__":
-    main()

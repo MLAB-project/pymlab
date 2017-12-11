@@ -48,8 +48,8 @@ class Device(object):
 
     def __repr__(self):
         if self.name is not None:
-            return obj_repr(self, address = self.address, name = self.name)
-        return obj_repr(self, address = self.address)
+            return obj_repr(self, address = hex(self.address), name = self.name)
+        return obj_repr(self, address = hex(self.address))
     
     @property
     def bus(self):

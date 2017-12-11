@@ -20,11 +20,3 @@ class ATMEGA(Device):
     def get(self):
 		data = self.bus.read_byte(self.address);
 		return data
-
-
-def main():
-    print __doc__
-
-
-if __name__ == "__main__":
-    main()

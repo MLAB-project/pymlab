@@ -51,11 +51,3 @@ class I2CIO(Device):
 
     def set_config1(self, port1):
         self.bus.write_byte_data(self.address, self.IO_CONFIGURATION1, port1)
-
-
-def main():
-    print __doc__
-
-
-if __name__ == "__main__":
-    main()

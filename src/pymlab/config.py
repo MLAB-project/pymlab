@@ -76,7 +76,40 @@ class Config(object):
         self.i2c_config = {}
         self._bus = None
         
-        self.init_drivers()
+        self.drivers = {
+            "i2chub": "i2chub.I2CHub",
+
+            "lts01": "lts.LTS01",
+            "mag01": "mag.MAG01",
+            "rps01": "rps.RPS01",
+            "imu01_acc": "imu.IMU01_ACC",
+            "imu01_gyro": "imu.IMU01_GYRO",
+            "sht25": "sht.SHT25",
+            "sht31": "sht.SHT31",
+            "altimet01": "altimet.ALTIMET01",
+            "SDP600": "altimet.SDP6XX",
+            "SDP610": "altimet.SDP6XX",
+            "acount02": "acount.ACOUNTER02",
+            "motor01": "motor.MOTOR01",
+            "clkgen01": "clkgen.CLKGEN01",
+            "atmega": "atmega.ATMEGA",
+            "I2CIO_TCA9535": "gpio.I2CIO_TCA9535",
+            "DS4520": "gpio.DS4520",
+            "TCA6416A": "gpio.TCA6416A",
+            "i2cspi": "bus_translators.I2CSPI",
+            "isl01": "light.ISL01",
+            "isl03": "light.ISL03",
+            "lioncell": "lioncell.LIONCELL", #LION1CELL and LION2CELL
+            "thermopile01": "thermopile.THERMOPILE01",
+            "i2cadc01": "adc.I2CADC01",
+            "vcai2c01": "adc.VCAI2C01",
+            "LTC2453": "adc.LTC2453",
+            "LTC2487": "adc.LTC2487",
+            "i2cpwm": "i2cpwm.I2CPWM",
+            "i2cio": "i2cio.I2CIO",
+            "i2clcd": "i2clcd.I2CLCD",
+            "PCA9635": "gpio.PCA9635"
+        }
 
         self.config(**kwargs)
     
@@ -85,14 +118,6 @@ class Config(object):
         if self._bus is None:
             self._bus = Bus(**self.i2c_config)
         return self._bus
-    
-    def init_drivers(self):
-        from pymlab.sensors import *
-        self.drivers = {
-            "altimet01": altimet.ALTIMET01,
-            "SDP600": altimet.SDP6XX,
-            "SDP610": altimet.SDP6XX,
-        }
 
     def get_device(self, name):
         return self.bus.get_device(name)
@@ -112,7 +137,10 @@ class Config(object):
                 raise ValueError("Device dictionary doesn't have a \"type\" item.")
 
             try:
-                fn = self.drivers[value["type"]]
+                from sys import modules
+                dev = self.drivers[value["type"]].split(".")
+                __import__("pymlab.sensors." + dev[0])
+                fn = getattr(modules["pymlab.sensors." + dev[0]], dev[1])
             except KeyError:
                 raise ValueError("Unknown device type: {!r}".format(value["type"]))
 

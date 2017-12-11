@@ -1,11 +1,6 @@
 #!/usr/bin/python
 
-import struct
-import logging
-
 from pymlab.sensors import Device
-
-LOGGER = logging.getLogger(__name__)
 
 class ISL01(Device):
     """
@@ -48,7 +43,6 @@ Python library for ISL2902001A MLAB module with ISL29020 I2C Light Sensor
         Ends the current ADC-integration and starts another. Used only with External Timing Mode.
         """
         self.bus.write_byte_data(self.address, 0xff, 0x01)
-        LOGGER.debug("syncing ILS ADC",)
         return
 
     
@@ -98,7 +92,6 @@ Python library for ISL03A MLAB module with VEML 6030 I2C Light Sensor
         Ends the current ADC-integration and starts another. Used only with External Timing Mode.
         """
         self.bus.write_byte_data(self.address, 0xff, 0x01)
-        LOGGER.debug("syncing ILS ADC",)
         return
 
     
