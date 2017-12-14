@@ -312,7 +312,7 @@ class MachineDriver(Driver):
         return self.bus.readfrom(address, length)
 
     def write_i2c_block_data(self, address, register, value):
-    data = b''
+        data = b''
         for b in value:
             data += struct.pack("B", b)
         self.bus.writeto_mem(address, register, data)
