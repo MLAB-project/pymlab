@@ -143,6 +143,7 @@ class Bus(SimpleBus):
         
         self._driver = kwargs.pop("driver", None)
         self._driver_config = dict(kwargs)
+        self.port = kwargs.pop("port", None)
         
         self._named_devices = None
     

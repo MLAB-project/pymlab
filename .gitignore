@@ -1,3 +1,4 @@
 *.pyc
 *~
 *.mpy
+i2c-protocol

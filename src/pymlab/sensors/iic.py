@@ -270,6 +270,10 @@ class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I
 class MachineDriver(Driver):
     def __init__(self, bus):
         self.bus = bus
+        self.driver_type = "machine"
+
+    def get_driver(self):
+        return self.driver_type
 
     def write_byte(self, address, value, stop=True):
         return self.bus.writeto(address, struct.pack("B", value), stop=stop)
@@ -290,10 +294,31 @@ class MachineDriver(Driver):
         return struct.unpack("H", self.bus.readfrom_mem(address, register, 2))[0]
     
     def write_block_data(self, address, register, value):
-        raise NotImplementedError()
+        data = b''
+        for b in value:
+            data += struct.pack("B", b)
+        self.bus.writeto_mem(address, register, data)
     
     def read_block_data(self, address, register):
-        raise NotImplementedError()
+        return self.bus.readfrom(address, register, 32)
+
+    def write_i2c_block(self, address, value):
+        data = b''
+        for b in value:
+            data += struct.pack("B", b)
+        return self.bus.writeto(address, data)
+
+    def read_i2c_block(self, address, length):
+        return self.bus.readfrom(address, length)
+
+    def write_i2c_block_data(self, address, register, value):
+    data = b''
+        for b in value:
+            data += struct.pack("B", b)
+        self.bus.writeto_mem(address, register, data)
+    
+    def read_i2c_block_data(self, address, register, length=1):
+        return self.bus.readfrom_mem(address, register, length)
 
     def get_driver(self):
         return self.driver_type
@@ -345,8 +370,7 @@ def load_driver(**kwargs):
         freq = kwargs.get("freq", None)
         if freq == None:
             freq = 100000
-        bus = I2C(port, freq=freq)
-        return MachineDriver(bus)
+        return MachineDriver(I2C(port, freq=freq))
     
     raise RuntimeError("Failed to load I2C driver")
 

@@ -4,6 +4,7 @@ TARGET = ~/mnt/pyb/pymlab
 
 SENSORS = altimet.py \
 		  light.py \
+		  sht.py
 
 SRC = sensors/iic.py \
 	  sensors/__init__.py \
