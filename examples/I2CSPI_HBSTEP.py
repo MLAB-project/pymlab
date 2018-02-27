@@ -33,16 +33,18 @@ class axis:
         spi.SPI_write_byte(self.CS, 0xFF) 
         spi.SPI_write_byte(self.CS, 0x05)      # ACC 
         spi.SPI_write_byte(self.CS, 0x00)
-        spi.SPI_write_byte(self.CS, 0x30) 
+        spi.SPI_write_byte(self.CS, 0x20) 
         spi.SPI_write_byte(self.CS, 0x06)      # DEC 
         spi.SPI_write_byte(self.CS, 0x00)
-        spi.SPI_write_byte(self.CS, 0x30) 
+        spi.SPI_write_byte(self.CS, 0x20) 
         spi.SPI_write_byte(self.CS, 0x0A)      # KVAL_RUN
-        spi.SPI_write_byte(self.CS, 0xF0)
+        spi.SPI_write_byte(self.CS, 0xd0)
         spi.SPI_write_byte(self.CS, 0x0B)      # KVAL_ACC
-        spi.SPI_write_byte(self.CS, 0xF0)
+        spi.SPI_write_byte(self.CS, 0xd0)
         spi.SPI_write_byte(self.CS, 0x0C)      # KVAL_DEC
-        spi.SPI_write_byte(self.CS, 0xF0)
+        spi.SPI_write_byte(self.CS, 0xd0)
+        spi.SPI_write_byte(self.CS, 0x16)      # STEPPER
+        spi.SPI_write_byte(self.CS, 0b00000000)
         spi.SPI_write_byte(self.CS, 0x18)      # CONFIG
         spi.SPI_write_byte(self.CS, 0b00111000)
         spi.SPI_write_byte(self.CS, 0b00000000)
@@ -126,13 +128,13 @@ class axis:
 while True:
     cfg = config.Config(
         i2c = {
-            "port": 1,
+            "port": 7,
         },
 
         bus = [
             { 
             "name":"spi", 
-            "type":"i2cspi"
+            "type":"i2cspi",
             },
         ],
     )
@@ -147,13 +149,13 @@ while True:
 
     try:
         print "SPI configuration.."
-        spi.SPI_config(spi.I2CSPI_MSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_HIGH_DATA_EDGE_TRAILING| spi.I2CSPI_CLK_461kHz)
+        spi.SPI_config(spi.I2CSPI_MSB_FIRST | spi.I2CSPI_MODE_CLK_IDLE_HIGH_DATA_EDGE_TRAILING| spi.I2CSPI_CLK_461kHz)
         time.sleep(1)
 
         print "Axis inicialization"
         X = axis(spi.I2CSPI_SS0, 0, 641)    # set Number of Steps per axis Unit and set Direction of Rotation
         X.Reset()
-        X.MaxSpeed(10)                      # set maximal motor speed 
+        X.MaxSpeed(2)                      # set maximal motor speed 
 
         print "Axis is running. Press CTRL+C to finish the test."
 
@@ -163,8 +165,8 @@ while True:
     #        time.sleep(0.5)
             X.MoveWait(-500)     # move 50 unit backward and wait for motor stop
     #        time.sleep(0.5)
-	    print "Cycle# %d" %i
-	    i +=1
+        print "Cycle# %d" %i
+        i +=1
 
         X.Float()   # release power
 

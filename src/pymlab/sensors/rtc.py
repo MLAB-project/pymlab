@@ -3,6 +3,7 @@
 import struct
 import logging
 import time
+import datetime
 
 from pymlab.sensors import Device
 
@@ -14,6 +15,8 @@ class RTC01(Device):
     FUNCT_MODE_count = 0b00100000
     FUNCT_MODE_test =  0b00110000
 
+    MAX_COUNT = 999999
+
 
     def __init__(self, parent = None, address = 0x50, fault_queue = 1, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
@@ -24,8 +27,6 @@ class RTC01(Device):
     def initialize(self):
         self.last_reset = time.time()
         
-        #self.bus.write_byte_data(self.address, self.Reg_conf, setup)
-
         LOGGER.debug("RTC01 sensor initialized. ",)
         return self.bus.read_byte_data(self.address,0x01);
 
@@ -36,6 +37,19 @@ class RTC01(Device):
     def set_config(self, config):
         self.bus.write_byte_data(self.address, self.CONTROL_STATUS, config)
         return config
+
+    def set_datetime(self, dt = None):
+        if not dt:
+            dt = datetime.datetime.utcnow()
+        # TODO
+
+    def get_datetime(self):
+        for reg in xrange(1,6):
+            print hex(self.bus.read_byte_data(self.address, reg))
+
+        #TODO
+    def get_integration_time(self):
+        return time.time()-self.last_reset
 
     def reset_counter(self):
         self.bus.write_byte_data(self.address,0x01,0x00)
@@ -54,12 +68,4 @@ class RTC01(Device):
         b = self.bus.read_byte_data(self.address, 0x02)
         c = self.bus.read_byte_data(self.address, 0x03)
 
-        return int((a&0x0f)*1 + ((a&0xf0)>>4)*10 + (b&0x0f)*100 + ((b&0xf0)>>4)*1000)
-
-    def get_temp(self):
-#        self.bus.write_byte(self.address,0x00)
-        temp = self.bus.read_int16_data(self.address, self.Reg_temp) / 256.0 
-        #temperature calculation register_value * 0.00390625; (Sensor is a big-endian but SMBus is little-endian by default)
-        return temp
-
-
+        return int((a&0x0f)*1 + ((a&0xf0)>>4)*10 + (b&0x0f)*100 + ((b&0xf0)>>4)*1000+ (c&0x0f)*10000 + ((c&0xf0)>>4)*1000000)
