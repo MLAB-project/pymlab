@@ -251,7 +251,7 @@ class SMBusDriver(Driver):
         The opposite of the Block Read command, this writes bytes to 
         a device, to a designated register that is specified through the
         Comm byte. Note that command lengths of 0, 2, or more bytes are
-        supported as they are indistinguishable from data.
+        seupported as they are indistinguishable from data.
 
         S Addr Wr [A] Comm [A] Data [A] Data [A] ... [A] Data [A] P
 
@@ -279,21 +279,25 @@ class SMBusDriver(Driver):
 
 
 class HIDDriver(Driver):
-    def __init__(self, port = None, address = None):
-        self.driver_type = 'hid'
-        time.sleep(1)   # give a time to OS for remounting the HID device
+    def __init__(self,**kwargs):
         import hid
-        self.h = hid.device() 
-        print "HID devices" 
-        print "=================" 
-        self.h.open(0x10C4, 0xEA90, address) # Connect HID again after enumeration
+
+        serial = kwargs.get('serial', None)
+        if serial: serial = unicode(serial)
+        print(serial, type(serial))
+
+        self.driver_type = 'hid'
+        self.h = hid.device()     
+        self.h.open(0x10C4, 0xEA90, serial) # Connect HID again after enumeration
         self.h.write([0x02, 0xFF, 0x00, 0x00, 0x00])  # Set GPIO to Open-Drain  
         for k in range(3):      # blinking LED
             self.h.write([0x04, 0x00, 0xFF])
             time.sleep(0.05)
             self.h.write([0x04, 0xFF, 0xFF])
             time.sleep(0.05)
-        self.h.write([0x02, 0xFF, 0x00, 0xFF, 0x00])  # Set GPIO to RX/TX LED  
+        if kwargs.get('led', True):
+            self.h.write([0x02, 0xFF, 0x00, 0xFF, 0x00])  # Set GPIO to RX/TX LED  
+    
         # Set SMB Configuration (AN 495)
         self.h.write([0x06, 0x00, 0x01, 0x86, 0xA0, 0x02, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0x00, 0x0F])  
 
@@ -302,6 +306,12 @@ class HIDDriver(Driver):
         self.h.close()
         time.sleep(3)   # Give a time to OS for release the BUS
         raise IOError()
+
+    def write_hid(self, data):
+        self.h.write(data)
+
+    def read_hid(self, len):
+        return self.h.read(len)
 
     def get_handler(self):
         return h
@@ -483,35 +493,30 @@ def load_driver(**kwargs):
     device = kwargs.get("device", None)
     port = kwargs.get("port", None)
     serial = kwargs.get("serial", None)
+    print(kwargs)
 
-    if device == "hid" or device == None:
+    if (device == "hid") or (device == None):
         try:
             LOGGER.info("Loading HID driver...")
             import hid
             LOGGER.info("Initiating HID driver...")
             try:
-                if not serial:
-                    h = hid.device()
-                    h.open(0x10C4, 0xEA90) # Try Connect HID
-                    LOGGER.info("Using HID '%s' device with serian number: '%s' from '%s'." %(h.get_product_string(), h.get_serial_number_string(), h.get_manufacturer_string()))
-                    h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
-                    h.close()
-                    return HIDDriver(str(port)) # We can use this connection
+                if serial: serial = unicode(serial)
 
+                h = hid.device()
+                h.open(0x10C4, 0xEA90, serial) # Try Connect HID
+                kwargs['serial'] = h.get_serial_number_string()
+                LOGGER.info("Using HID with serial number: '%s' " %(h.get_serial_number_string()))
+                h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
+                h.close()
+                time.sleep(1) # wait for system HID (re)mounting
+                return HIDDriver(**kwargs) # We can use this connection
 
-                else:
-                    h = hid.device()
-                    h.open(0x10C4, 0xEA90, unicode(serial)) # Try Connect HID
-                    LOGGER.info("Required is HID with serial number: '%s' " %(serial))
-                    h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
-                    h.close()
-                    return HIDDriver(str(port), unicode(serial)) # We can use this connection
-                    
             except IOError:
-                LOGGER.warning("HID device does not exist, we will try SMBus directly...")
+                LOGGER.warning("HID device does not exist, we will try SMBus directly... (1)")
         
         except ImportError:
-            LOGGER.warning("HID driver cannot be imported, we will try SMBus driver...")
+            LOGGER.warning("HID driver cannot be imported, we will try SMBus driver...(2)")
 
 
     if (device == "smbus" or device == None) and (port is not None):
