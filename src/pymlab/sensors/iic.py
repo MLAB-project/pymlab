@@ -295,8 +295,18 @@ class HIDDriver(Driver):
             time.sleep(0.05)
             self.h.write([0x04, 0xFF, 0xFF])
             time.sleep(0.05)
-        if kwargs.get('led', True):
-            self.h.write([0x02, 0xFF, 0x00, 0xFF, 0x00])  # Set GPIO to RX/TX LED  
+
+        self.gpio_direction = 0x00   # 0 - input, 1 - output
+        self.gpio_pushpull  = 0x00   # 0 - open-drain, 1 - push-pull
+        self.gpio_special   = 0x00   # only on bits 0-2,  0 standard gpio, 1 special function as LED, CLK out
+        self.gpio_clockdiv  = 0x00   # see manual for more info..
+
+        if kwargs.get('led', True):     # Set GPIO to RX/TX LED  
+            self.gpio_direction = 0x02
+            self.gpio_pushpull  = 0xFF
+            self.gpio_special   = 0xFF
+
+        self.h.write([0x02, self.gpio_direction, self.gpio_pushpull, self.gpio_special, self.gpio_clockdiv])  # initialize GPIO
     
         # Set SMB Configuration (AN 495)
         self.h.write([0x06, 0x00, 0x01, 0x86, 0xA0, 0x02, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0x00, 0x0F])  

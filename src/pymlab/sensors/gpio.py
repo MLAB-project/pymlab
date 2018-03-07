@@ -8,13 +8,28 @@ from pymlab.sensors import Device
 
 LOGGER = logging.getLogger(__name__)
 
+
+class Gpio(Device):
+    def __init__(self, parent = None, address = 0x01, fault_queue = 1, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+
+    def setup(self, pin, direction = 0b0, push_pull = 0b0):
+        raise NotImplementedError()
+
+    def output(self, pin, value):
+        raise NotImplementedError()
+
+    def setup_bus(self, bus, direction, push_pull):
+        raise NotImplementedError()
+
+    def output_bus(self, bus, value):
+        raise NotImplementedError()
+
+
 class PCA9635(Device):
     """
 Python library for PCA9635
     """
-
-  
-
     def __init__(self, parent = None, address = 0x01, fault_queue = 1, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
@@ -235,9 +250,66 @@ to the pin"""
         return self.bus.read_byte_data(self.address, self.STATUS_PORT0), self.bus.read_byte_data(self.address, self.STATUS_PORT1);
 
 
+
+
+
+class USBI2C_GPIO(Gpio):
+    IN = 0b0
+    OUT = 0b1
+    OPEN_DRAIN = 0b0
+    PUSH_PULL = 0b1
+    SPECIAL_ALL = 0b11100000
+    SPECIAL_LED = 0b11000000
+    SPECIAL_CLK = 0b00100000
+    SPECIAL_OFF = 0b00000000
+    PIN_COUNT = 8
+
+    def __init__(self, parent = None, **kwargs):
+        Gpio.__init__(self, parent, None, **kwargs)
+
+    def initialize(self):
+        if not self.bus.driver.__class__.__name__ == 'HIDDriver':
+            raise ValueError("This {!r} GPIO device requires a 'HIDdriver' driver.".format(self.name))
+
+        self.g_direction = self.bus.driver.gpio_direction
+        self.g_pushpull =  self.bus.driver.gpio_pushpull
+        self.g_special  =  self.bus.driver.gpio_special
+        self.g_clockdiv =  self.bus.driver.gpio_clockdiv
+
+
+    def update_gpio(self):
+        return self.bus.driver.write_hid([0x02, self.g_direction, self.g_pushpull, self.g_special, self.g_clockdiv])
+
+    def setup(self, pin, direction = 0b0, push_pull = 0b0):
+        if not (-1 < pin < self.PIN_COUNT):
+            raise ValueError("GPIO pin (%i) is out or range [0,7]." %pin)
+
+        if direction: self.g_direction = (self.g_direction | (1<<pin))
+        else: self.g_direction = (self.g_direction & ~(1<<pin))
+
+        if push_pull:  self.g_pushpull = (self.g_pushpull | (1<<pin))
+        else: self.g_pushpull = (self.g_pushpull & ~(1<<pin))
+
+        self.update_gpio()
+
+    def output(self, pin, value):
+        #TODO: Overeni, jestli pin je nastaven jakou output a nasledne udelat chybu
+        #  a jestli se nezapisuje na 'special pin'
+        if False:
+            raise ValueError("Pin is not set as OUTput.")
+        self.bus.driver.write_hid([0x04, (bool(value)<<pin), (1 << pin)])
+
+    def set_special(self, special = None, divider = None):
+        if special: self.g_special = special
+        if divider: self.g_clockdiv = divider
+
+        self.update_gpio()
+
+    #def blick(self, pin, count, delay = None, on = None, off = None):        
+
+
 def main():
     print __doc__
-
 
 if __name__ == "__main__":
     main()

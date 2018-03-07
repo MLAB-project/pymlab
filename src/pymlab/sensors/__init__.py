@@ -180,6 +180,7 @@ class Bus(SimpleBus):
     INT8  = struct.Struct(">b")
     INT16 = struct.Struct(">h")
     UINT16 = struct.Struct(">H")
+    port = None
 
     
     def __init__(self, **kwargs):
