@@ -138,7 +138,7 @@ class SimpleBus(Device):
             self.children[child.address] = child
 
     def __iter__(self):
-        return self.children.itervalues()
+        return iter(self.children.values())
 
     def __getitem__(self, key):
         return self.children[key]
@@ -172,7 +172,7 @@ class SimpleBus(Device):
         Calls `initialize()` on all devices connected to the bus.
         """
         Device.initialize(self)
-        for child in self.children.itervalues():
+        for child in iter(self.children.values()):
             child.initialize()
 
 

@@ -7,6 +7,7 @@ Author: Jan Milik <milikjan@fit.cvut.cz>
 import time
 import struct
 import logging
+import six
 
 
 LOGGER = logging.getLogger(__name__)
@@ -283,7 +284,7 @@ class HIDDriver(Driver):
         import hid
 
         serial = kwargs.get('serial', None)
-        if serial: serial = unicode(serial)
+        if serial: serial = six.text_type(serial)
         print(serial, type(serial))
 
         self.driver_type = 'hid'
