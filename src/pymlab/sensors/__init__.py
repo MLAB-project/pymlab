@@ -73,7 +73,7 @@ class Device(object):
         if self.name is not None:
             return obj_repr(self, address = self.address, name = self.name)
         return obj_repr(self, address = self.address)
-    
+
     @property
     def bus(self):
         if self.parent is None:
@@ -182,45 +182,45 @@ class Bus(SimpleBus):
     UINT16 = struct.Struct(">H")
     port = None
 
-    
+
     def __init__(self, **kwargs):
         SimpleBus.__init__(self, None)
-        
+
         self._driver = kwargs.pop("driver", None)
         self._driver_config = dict(kwargs)
-        
+
         self._named_devices = None
-    
+
     def __repr__(self):
         return obj_repr(self, port = self.port)
-    
+
     @property
     def driver(self):
         if self._driver is None:
             self._driver = iic.load_driver(**self._driver_config)
         return self._driver
-    
+
     def get_device(self, name):
         if self._named_devices is None:
             self._named_devices = self.get_named_devices()
         return self._named_devices[name]
-    
+
     def write_byte(self, address, value):
         """Writes the byte to unaddressed register in a device. """
         LOGGER.debug("Writing byte %s to device %s!", bin(value), hex(address))
         return self.driver.write_byte(address, value)
-    
+
     def read_byte(self, address):
         """Reads unadressed byte from a device. """
         LOGGER.debug("Reading byte from device %s!", hex(address))
         return self.driver.read_byte(address)
-    
+
     def write_byte_data(self, address, register, value):
         """Write a byte value to a device's register. """
         LOGGER.debug("Writing byte data %s to register %s on device %s",
             bin(value), hex(register), hex(address))
         return self.driver.write_byte_data(address, register, value)
-    
+
     def read_byte_data(self, address, register):
         data = self.driver.read_byte_data(address, register)
         LOGGER.debug("Reading byte %s from register %s in device %s", hex(data),  hex(register), hex(address))
@@ -231,32 +231,32 @@ class Bus(SimpleBus):
         LOGGER.debug("Writing byte data %s to register %s on device %s",
             bin(value), hex(register), hex(address))
         return self.driver.write_word_data(address, register, value)
-    
+
     def read_word_data(self, address, register):
         data = self.driver.read_word_data(address, register)
         LOGGER.debug("Reading word %s from register %s in device %s", hex(data),  hex(register), hex(address))
         return data
-    
+
     def write_block_data(self, address, register, value):
         return self.driver.write_block_data(address, register, value)
-    
+
     def read_block_data(self, address, register):
         LOGGER.debug("Reading SMBus data block %s from register %s in device %s",value, hex(register), hex(address))
         return self.driver.read_block_data(address, register)
-    
+
     def write_i2c_block_data(self, address, register, value):
         LOGGER.debug("Writing I2C data block %s from register %s in device %s",value, hex(register), hex(address))
         return self.driver.write_i2c_block_data(address, register, value)
-    
+
     def read_i2c_block_data(self, address, register, length = 1):
         data = self.driver.read_i2c_block_data(address, register, length)
         LOGGER.debug("Reading I2C data block %s from register %s in device %s", data, hex(register), hex(address))
         return data
-    
+
     def write_i2c_block(self, address, value):
         LOGGER.debug("Writing I2C data block %s to device %s",value, hex(address))
         return self.driver.write_i2c_block(address, value)
-    
+
     def read_i2c_block(self, address, length):
         data = self.driver.read_i2c_block(address, length)
         LOGGER.debug("Reading I2C data block %s from device %s", data, hex(address))
@@ -265,8 +265,8 @@ class Bus(SimpleBus):
     def write_int16(self, address, register, value):
         value = struct.unpack("<H", struct.pack(">H", value))[0]
         return self.driver.write_word_data(address, register, value)
-    
-    def read_int16(self, address):   ## Reads int16 as two separate bytes, suppose autoincrement of internal register pointer in I2C device. 
+
+    def read_int16(self, address):   ## Reads int16 as two separate bytes, suppose autoincrement of internal register pointer in I2C device.
         MSB = self.driver.read_byte(address)
         LSB = self.driver.read_byte(address)
         data = bytes(bytearray([MSB, LSB]))
@@ -278,7 +278,7 @@ class Bus(SimpleBus):
         LOGGER.debug("MSB and LSB %r was read from device %s", data, hex(address))
         return self.INT16.unpack(data)[0]
 
-    
+
     def read_uint16(self, address):         ## Reads uint16 as two separate bytes, suppose autoincrement of internal register pointer in I2C device.
         MSB = self.driver.read_byte(address)
         LSB = self.driver.read_byte(address)
@@ -307,7 +307,7 @@ class Bus(SimpleBus):
         return data
 
 def main():
-    print __doc__
+    print(__doc__)
 
 
 if __name__ == "__main__":

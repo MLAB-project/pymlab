@@ -4,7 +4,7 @@
 
 Author: Jan Milík <milikjan@fit.cvut.cz>
 
-This file contains reference to symbols which may apear in I2C network config string. 
+This file contains reference to symbols which may apear in I2C network config string.
 
 """
 
@@ -13,7 +13,8 @@ import sys
 import json
 import logging
 
-from utils import obj_repr, PrettyPrinter
+import utils
+#from utils import obj_repr, PrettyPrinter
 from pymlab.sensors import Bus, SimpleBus
 
 
@@ -31,7 +32,7 @@ class Node(object):
         config.add_node(self)
 
     def __repr__(self):
-        return obj_repr(self, self.address, self.name)
+        return utils.obj_repr(self, self.address, self.name)
 
     def __pprint__(self, printer, level = 0):
         printer.write("%s  %d  %s" % (type(self).__name__, self.address, self.name, ))
@@ -68,24 +69,24 @@ class Config(object):
                 ),
             },
         )
-    
+
     """
-    
-    
+
+
     def __init__(self, **kwargs):
         self.drivers = {}
         self.i2c_config = {}
         self._bus = None
-        
+
         self.init_drivers()
         self.config(**kwargs)
-    
+
     @property
     def bus(self):
         if self._bus is None:
             self._bus = Bus(**self.i2c_config)
         return self._bus
-    
+
     def init_drivers(self):
         from pymlab.sensors import lts, mag, sht, i2chub, altimet, acount, clkgen,\
                     imu, motor, atmega, gpio, bus_translators, light, thermopile,\
@@ -130,7 +131,7 @@ class Config(object):
 
     def get_device(self, name):
         return self.bus.get_device(name)
-    
+
     def build_device(self, value, parent = None):
         if isinstance(value, list) or isinstance(value, tuple):
             if parent is None:
@@ -140,7 +141,7 @@ class Config(object):
             for child in value:
                 result.add_child(self.build_device(child, result))
             return result
-        
+
         if isinstance(value, dict):
             if "type" not in value:
                 raise ValueError("Device dictionary doesn't have a \"type\" item.")
@@ -166,11 +167,11 @@ class Config(object):
             return value
 
         raise ValueError("Cannot create a device from: {!r}!".format(value))
-    
+
     def config(self, **kwargs):
         self.i2c_config = kwargs.get("i2c", {})
         self._bus = self.build_device(kwargs.get("bus", []))
-    
+
     def load_python(self, source):
         local_vars = {
             "cfg":  self,
@@ -179,11 +180,11 @@ class Config(object):
             #"mult": Multiplexer,
             #"sens": Sensor,
         }
-        exec source in globals(), local_vars
+        exec(source in globals(), local_vars)
         #self.port = local_vars.get("port", self.port)
-        
+
         self.i2c_config = local_vars.get("i2c", {})
-        
+
         bus = self.build_device(local_vars.get("bus", []))
         if not isinstance(bus, Bus):
             LOGGER.warning(
@@ -192,7 +193,7 @@ class Config(object):
                 "denote a bus.",
                 "None" if bus is None else type(bus).__name__)
         self._bus = bus
-    
+
     def load_file(self, file_name):
         if file_name.endswith(".py"):
             with open(file_name, "r") as f:
@@ -214,7 +215,7 @@ def main():
     pp.writeln()
 
     for name, node in cfg.named_nodes.iteritems():
-        print "%s: %r" % (name, node, )
+        print("%s: %r" % (name, node ))
     #print repr(cfg.root_node)
 
 

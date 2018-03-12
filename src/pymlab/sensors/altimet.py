@@ -9,10 +9,10 @@ class ALTIMET01(Device):
     """
     Python library for ALTIMET01A MLAB module with MPL3115A2 Freescale Semiconductor i2c altimeter and barometer sensor.
     """
-    
+
     def __init__(self, parent = None, address = 0x60, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
-        
+
         #MPL3115A register address
         self.MPL3115_STATUS              =0x00
         self.MPL3115_PRESSURE_DATA       =0x01
@@ -43,15 +43,15 @@ class ALTIMET01(Device):
         self.MPL3115_OFFSET_P            =0x2b
         self.MPL3115_OFFSET_T            =0x2c
         self.MPL3115_OFFSET_H            =0x2d
-    
+
     def initialize(self):
-        # Set to Barometer  
+        # Set to Barometer
         self.bus.write_byte_data(self.address, self.MPL3115_CTRL_REG1, 0xB8);
         # Enable Data Flags in PT_DATA_CFG
         self.bus.write_byte_data(self.address, self.MPL3115_PT_DATA_CFG, 0x07)
         # Set Active, barometer mode with an OSR = 128
         self.bus.write_byte_data(self.address, self.MPL3115_CTRL_REG1, 0x39)
-    
+
     def get_tp(self):
         # Read STATUS Register
         #STA = self.bus.read_byte(MPL3115_STATUS)
@@ -101,7 +101,7 @@ class SDP6XX(Device):
     """
     Python library for Sensirion SDP6XX/5xx differential preassure sensors.
     """
-    
+
     def __init__(self, parent = None, address = 0x40, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
@@ -124,7 +124,7 @@ class SDP6XX(Device):
         MSB = self.bus.read_byte(self.address)      # read data
         LSB = self.bus.read_byte(self.address)
         check = self.bus.read_byte(self.address)    # read CRC
-        print hex(MSB), hex(LSB), hex(check)
+        print(hex(MSB), hex(LSB), hex(check))
         pressure = (MSB << 8) | LSB
         if (pressure & 0x1000):
             pressure -= 65536
@@ -135,21 +135,21 @@ class SDP6XX(Device):
 # bit;        // bit mask
 # crc = 0x00; // calculated checksum
 # byteCtr;    // byte counter
-  
+
 #          # calculates 8-Bit checksum with given polynomial
 #          for(byteCtr = 0; byteCtr < nbrOfBytes; byteCtr++)
 #            crc ^= (data[byteCtr]);
 #            for(bit = 8; bit > 0; --bit)
 #              if(crc & 0x80) crc = (crc << 1) ^ POLYNOMIAL;
 #              else           crc = (crc << 1);
-          
+
           # verify checksum
 #          if(crc != checksum) return CHECKSUM_ERROR;
 #          else                return NO_ERROR;
 
     def reset(self):
         '''
-        Calls the soft reset mechanism that forces the sensor into a well-defined 
+        Calls the soft reset mechanism that forces the sensor into a well-defined
         state without removing the power supply.
         '''
 
@@ -158,9 +158,8 @@ class SDP6XX(Device):
 
 
 def main():
-    print __doc__
+    print(__doc__)
 
 
 if __name__ == "__main__":
     main()
-

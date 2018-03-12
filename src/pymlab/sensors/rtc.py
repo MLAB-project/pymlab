@@ -21,12 +21,12 @@ class RTC01(Device):
     def __init__(self, parent = None, address = 0x50, fault_queue = 1, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
-## register definitions 
+## register definitions
         self.CONTROL_STATUS = 0x00
 
     def initialize(self):
         self.last_reset = time.time()
-        
+
         LOGGER.debug("RTC01 sensor initialized. ",)
         return self.bus.read_byte_data(self.address,0x01);
 
@@ -45,7 +45,7 @@ class RTC01(Device):
 
     def get_datetime(self):
         for reg in xrange(1,6):
-            print hex(self.bus.read_byte_data(self.address, reg))
+            print (hex(self.bus.read_byte_data(self.address, reg)))
 
         #TODO
     def get_integration_time(self):

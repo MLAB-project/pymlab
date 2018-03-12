@@ -6,7 +6,7 @@ import time
 from pymlab.sensors import Device
 
 
-#TODO: Implement output data checksum checking 
+#TODO: Implement output data checksum checking
 
 class ATMEGA(Device):
     'Python library for ATmega MLAB module.'
@@ -18,12 +18,12 @@ class ATMEGA(Device):
         self.bus.write_byte(self.address, data);
 
     def get(self):
-		data = self.bus.read_byte(self.address);
-		return data
+        data = self.bus.read_byte(self.address);
+        return data
 
 
 def main():
-    print __doc__
+    print(__doc__)
 
 
 if __name__ == "__main__":

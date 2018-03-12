@@ -36,14 +36,14 @@ class I2CPWM(Device):
 
     def set_pwm0(self, frequency, duty): # frequency in Hz, Duty cycle in % (0-100)
         period = int((1.0/float(frequency))*152.0)-1
-	duty = int((float(duty)/100.0)*255.0)
+        duty = int((float(duty)/100.0)*255.0)
         self.bus.write_byte_data(self.address, 0x01, period)
         self.bus.write_byte_data(self.address, self.PWM_PWM0, duty)
 
 
     def set_pwm1(self, frequency, duty): # frequency in Hz, Duty cycle in % (0-100)
         period = int((1.0/float(frequency))*152.0)-1
-	duty = int((float(duty)/100.0)*255.0)
+        duty = int((float(duty)/100.0)*255.0)
         self.bus.write_byte_data(self.address, self.PWM_PSC1, period)
         self.bus.write_byte_data(self.address, self.PWM_PWM1, duty)
 
@@ -54,17 +54,17 @@ class I2CPWM(Device):
 
     def set_ls1(self, mode):
         self.bus.write_byte_data(self.address, self.PWM_LS1, mode)
-	
+
     def set_output_type(self, mode = ['X','X','X','X','X','X','X','X']):
         set_ls0((MODES[mode[0]] << 6) | (MODES[mode[1]] << 4) | (MODES[mode[2]] << 2) | MODES[mode[3]])
         set_ls1((MODES[mode[4]] << 6) | (MODES[mode[5]] << 4) | (MODES[mode[6]] << 2) | MODES[mode[7]])
 
     def get_input(self):
-	return self.bus.read_byte_data(self.address, self.PWM_INPUT)
+        return self.bus.read_byte_data(self.address, self.PWM_INPUT)
 
 
 def main():
-    print __doc__
+    print(__doc__)
 
 
 if __name__ == "__main__":
