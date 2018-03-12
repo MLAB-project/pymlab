@@ -23,3 +23,15 @@ cfg = config.Config(
 cfg.initialize()
 
 usbi2c = cfg.get_device("usbi2c")
+
+usbi2c.setup(0, usbi2c.OUT, usbi2c.PUSH_PULL)
+usbi2c.setup(1, usbi2c.OUT, usbi2c.OPEN_DRAIN)
+
+for x in range(10):
+    usbi2c.output(0, 0)
+    usbi2c.output(1, 1)
+    time.sleep(0.2)
+
+    usbi2c.output(0, 1)
+    usbi2c.output(1, 0)
+    time.sleep(0.2)
