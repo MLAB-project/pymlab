@@ -268,6 +268,7 @@ class USBI2C_GPIO(Gpio):
         Gpio.__init__(self, parent, None, **kwargs)
 
     def initialize(self):
+        print(self.bus.driver.__class__)
         if not self.bus.driver.__class__.__name__ == 'HIDDriver':
             raise ValueError("This {!r} GPIO device requires a 'HIDdriver' driver.".format(self.name))
 
