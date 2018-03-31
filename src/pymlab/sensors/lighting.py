@@ -9,26 +9,22 @@ from pymlab.sensors import Device
 
 class AS3935(Device):
     'Python library for LIGHTNING01A MLAB module with austria microsystems AS3935 I2C/SPI lighting detecor.'
-    def __init__(self, parent = None, address = 0x03, **kwargs):
+    def __init__(self, parent = None, address = 0x02, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
-
     def soft_reset(self):
-        #self.bus.write_byte(self.address, self.SOFT_RESET);
+        self.bus.write_byte_data(self.address, 0x3c, 0x96);
         return
 
-    def setup(self, setup_reg ):  # writes to status register and returns its value
-        pass
+    def reset(self):
+        self.soft_reset()
+
+    def calib_rco(self):
+        self.bus.write_byte_data(self.address, 0x3d, 0x96);
+        return
 
     def initialize(self):
-        print("INITIALIZATION ..........")
-
-        print(self.bus.read_i2c_block(self.address,0x07))
-
-        #for reg in list(range(0x00,0x09))+[0x3a, 0x3b]:
-        #    data = self.bus.read_byte_data(self.address, reg)
-        #    print("register", hex(reg), "data", "0x{:02x}   0b{:08b}".format(data, data))
-        #    time.sleep(0.1)
+        pass
 
     def getDistance(self):
         distance = self.bus.read_byte_data(self.address, 0x07) & 0b00111111
@@ -53,22 +49,6 @@ class AS3935(Device):
     def getOutdoor(self):
         return not self.getIndoor()
 
-    def getNoiseFloor(self):
-        value = self.bus.read_byte_data(self.address, 0x01) & 0b01110000 >> 3
-        outdoor = self.getIndoor()
-        matrix = [
-            [390, 28],
-            [630, 45],
-            [860, 62],
-            [1100,78],
-            [1140,95],
-            [1570,112],
-            [1800,130],
-            [2000,146]]
-        return matrix[value][int(outdoor)]
-
-
-
     def setIndoor(self, state):
         byte = self.bus.read_byte_data(self.address, 0x00)
         if state:
@@ -81,17 +61,66 @@ class AS3935(Device):
         self.bus.write_byte_data(self.address, 0x00, byte)
         return byte
 
+
+    def getNoiseFloor(self):
+        value = (self.bus.read_byte_data(self.address, 0x01) & 0b01110000) >> 4
+        indoor = self.getIndoor()
+        matrix = [
+            [390, 28],
+            [630, 45],
+            [860, 62],
+            [1100,78],
+            [1140,95],
+            [1570,112],
+            [1800,130],
+            [2000,146]]
+        return matrix[value][int(indoor)]
+
+    def setNoiseFloor(self, value):
+        data = self.bus.read_byte_data(self.address, 0x01)
+        data = (data & (~(7<<4))) | (value<<4)
+        self.bus.write_byte_data(self.address, 0x01, data)
+
+    def setNoiseFloorAdv(self, value):
+        pass
+
+
+    def getSpikeRejection(self):
+        data = self.bus.read_byte_data(self.address, 0x02) & 0b1111
+        return data
+
+    def setSpikeRejection(self, value):
+        data = self.bus.read_byte_data(self.address, 0x02) & 0b1111
+        data = (data & (~(0b1111))) | (value)
+        self.bus.write_byte_data(self.address, 0x02, data)
+
     def getPowerStatus(self):
-        return bool(self.bus.read_byte_data(self.address, 0x00) & 0b1)
+        return not bool(self.bus.read_byte_data(self.address, 0x00) & 0b1)
 
     def getInterrupts(self):
         reg = self.bus.read_byte_data(self.address, 0x03)
         out = {}
-        out['INT_NH'] = reg & 0b00000001
-        out['INT_D']  = reg & 0b00000100
-        out['INT_N']  = reg & 0b00001000
+        out['INT_NH'] = bool(reg & 0b00000001)
+        out['INT_D']  = bool(reg & 0b00000100)
+        out['INT_N']  = bool(reg & 0b00001000)
         return out
 
+    def getSingleEnergy(self):
+        lsb = self.bus.read_byte_data(self.address, 0x04)
+        msb = self.bus.read_byte_data(self.address, 0x05)
+        mmsb= self.bus.read_byte_data(self.address, 0x06) & 0b11111
+        return lsb | msb << 8 | mmsb << 16
+
+    def getMaskDist(self):
+        return bool(self.bus.read_byte_data(self.address, 0x03) & 0b00100000)
+
+    def setMaskDist(self, value):
+        value = bool(value)
+        data = self.bus.read_byte_data(self.address, 0x03)
+        if value:
+            self.bus.write_byte_data(self.address, 0x03, data | 0b00100000)
+        else:
+            self.bus.write_byte_data(self.address, 0x03, data & (~0b00100000))
 
 
 def main():
