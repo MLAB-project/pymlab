@@ -203,6 +203,7 @@ class Config(object):
 
     def initialize(self):
         self.bus.initialize()
+        return self._bus
 
 
 def main():

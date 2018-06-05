@@ -37,6 +37,9 @@ class Driver(object):
     def read_block_data(self, address, register):
         raise NotImplementedError()
 
+    def scan_bus(self):
+        raise NotImplementedError()
+
     def get_driver(self):
         return self.driver_type
 
@@ -277,6 +280,24 @@ class SMBusDriver(Driver):
         Functionality flag: I2C_FUNC_SMBUS_READ_I2C_BLOCK
         """
         return self.smbus.read_i2c_block_data(address, register, length)
+
+    def scan_bus(self, verbose = False):
+        devices = []
+        for addr in range(128):
+            out = self.smbus.read_byte(addr)
+            if out > 0:
+                devices += [addr]
+            if verbose:
+                if addr % 0x0f == 0:
+                    print ""
+                    print hex(addr)+":",
+                if out > 0:
+                    print hex(addr),
+                else:
+                    print " -- ",
+
+        print("")
+        return devices
 
 
 class HIDDriver(Driver):
@@ -596,6 +617,9 @@ def write_i2c_block_data(self, address, register, value):
 
 def read_i2c_block_data(self, address, register, length):
     return DRIVER.read_i2c_block_data(self, address, register, length)
+
+def scan_bus(self):
+    return DRIVER.scan_bus(self)
 
 def main():
     print(__doc__)
