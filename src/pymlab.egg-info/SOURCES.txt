@@ -33,6 +33,7 @@ src/pymlab/sensors/i2cpwm.py
 src/pymlab/sensors/iic.py
 src/pymlab/sensors/imu.py
 src/pymlab/sensors/light.py
+src/pymlab/sensors/lighting.py
 src/pymlab/sensors/lioncell.py
 src/pymlab/sensors/lts.py
 src/pymlab/sensors/mag.py
