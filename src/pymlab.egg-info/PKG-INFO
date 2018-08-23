@@ -7,7 +7,6 @@ Author: Jan Milík
 Author-email: milikjan@fit.cvut.cz
 License: Lesser General Public License v3
 Download-URL: https://github.com/MLAB-project/MLAB-I2c-modules/archive/0.3.tar.gz
-Description-Content-Type: UNKNOWN
 Description: 
         pymlab I2C modules drivers package 
         ==================================
