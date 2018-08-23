@@ -64,6 +64,7 @@ class Device(object):
     def __init__(self, parent = None, address = 0x70, **kwargs):
         self.parent  = parent
         self.address = address
+        self.possible_addresses = kwargs.get("possible_addresses", [])
         self.channel = kwargs.get("channel", None)
         self.name    = kwargs.get("name", None)
 

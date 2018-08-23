@@ -100,6 +100,7 @@ class Config(object):
             "rps01": rps.RPS01,
             "imu01_acc": imu.IMU01_ACC,
             "imu01_gyro": imu.IMU01_GYRO,
+            "mpu6050": imu.MPU6050,
             "sht25": sht.SHT25,
             "sht31": sht.SHT31,
             "altimet01": altimet.ALTIMET01,
@@ -203,6 +204,7 @@ class Config(object):
 
     def initialize(self):
         self.bus.initialize()
+        return self._bus
 
 
 def main():

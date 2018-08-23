@@ -4,6 +4,7 @@ import struct
 import logging
 import time
 import datetime
+import math
 
 from pymlab.sensors import Device
 
@@ -18,7 +19,7 @@ class RTC01(Device):
     MAX_COUNT = 999999
 
 
-    def __init__(self, parent = None, address = 0x50, fault_queue = 1, **kwargs):
+    def __init__(self, parent = None, address = 0x50, possible_adresses = [0x50, 0x51], **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
 ## register definitions
@@ -69,3 +70,17 @@ class RTC01(Device):
         c = self.bus.read_byte_data(self.address, 0x03)
 
         return int((a&0x0f)*1 + ((a&0xf0)>>4)*10 + (b&0x0f)*100 + ((b&0xf0)>>4)*1000+ (c&0x0f)*10000 + ((c&0xf0)>>4)*1000000)
+
+    def get_speed(self, **kwargs):
+        diameter = kwargs.get('diameter', 1)
+        reset = kwargs.get('reset', 0)
+        time_reset = kwargs.get('time_reset', 60)
+
+        if time.time() - self.last_reset > time_reset:
+            self.reset_counter()
+
+        freq = self.get_frequency()
+        spd = math.pi*diameter/1000*freq
+        #if reset:
+        #    self.reset_counter()
+        return spd
