@@ -11,13 +11,13 @@ from pymlab import config
 
 #### Script Arguments ###############################################
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 3:
     sys.stderr.write("Invalid number of arguments.\n")
-    sys.stderr.write("Usage: %s PORT\n" % (sys.argv[0], ))
+    sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
     sys.exit(1)
 
 port    = sys.argv[1]
-address = 0x50
+address = int(sys.argv[2],0)
 #### Sensor Configuration ###########################################
 
 cfg = config.Config(
