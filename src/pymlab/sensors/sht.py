@@ -7,7 +7,7 @@ import sys
 from pymlab.sensors import Device
 
 
-#TODO: Implement output data checksum checking 
+#TODO: Implement output data checksum checking
 
 class SHT25(Device):
     'Python library for SHT25v01A MLAB module with Sensirion SHT25 i2c humidity and temperature sensor.'
@@ -18,7 +18,7 @@ class SHT25(Device):
         self.SHT25_HEATER_ON = 0x04
         self.SHT25_HEATER_OFF = 0x00
         self.SHT25_OTP_reload_off = 0x02
-        self.SHT25_RH12_T14 = 0x00 
+        self.SHT25_RH12_T14 = 0x00
         self.SHT25_RH8_T12 = 0x01
         self.SHT25_RH10_T13 = 0x80
         self.SHT25_RH11_T11 = 0x81
@@ -50,7 +50,8 @@ class SHT25(Device):
 
         value = data[0]<<8 | data[1]
         value &= ~0b11    # trow out status bits
-        return(-46.85 + 175.72*(value/65536.0))
+
+        return(-46.85 + 175.72/65536.0*value)
 
     def get_hum(self, raw = False):
         """
@@ -70,13 +71,13 @@ class SHT25(Device):
         if raw:                 # raw sensor output, useful for getting an idea of sensor failure status
             return humidity
 
-        else: 
+        else:
 
             if humidity > 100.0:        # limit values to relevant physical variable (values out of that limit is sensor error state and are dependent on specific sensor piece)
                 return 100.0
             elif humidity < 0.0:
                 return 0.0
-            else: 
+            else:
                 return humidity
 
 class SHT31(Device):
@@ -107,7 +108,7 @@ class SHT31(Device):
         return bits_values
 
 
-    def get_TempHum(self):        
+    def get_TempHum(self):
         self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
         time.sleep(0.05)
 
@@ -117,9 +118,31 @@ class SHT31(Device):
         hum_data = data[3]<<8 | data[4]
 
         humidity = 100.0*(hum_data/65535.0)
-        temperature = -45.0 + 175.0*(temp_data/65535.0) 
+        temperature = -45.0 + 175.0*(temp_data/65535.0)
 
         return temperature, humidity
+
+    def get_temp(self): #TODO: cist mene i2c bloku ...
+        self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
+        time.sleep(0.05)
+
+        data = self.bus.read_i2c_block(self.address, 6)
+
+        temp_data = data[0]<<8 | data[1]
+        temperature = -45.0 + 175.0*(temp_data/65535.0)
+
+        return temperature
+
+    def get_humi(self): #TODO: cist mene i2c bloku ...
+        self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
+        time.sleep(0.05)
+
+        data = self.bus.read_i2c_block(self.address, 6)
+
+        hum_data = data[3]<<8 | data[4]
+        humidity = 100.0*(hum_data/65535.0)
+
+        return humidity
 
 
     @staticmethod
@@ -140,7 +163,7 @@ class SHT31(Device):
         return crc
 
 def main():
-    print __doc__
+    print(__doc__)
 
 
 if __name__ == "__main__":

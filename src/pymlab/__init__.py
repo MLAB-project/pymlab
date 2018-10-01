@@ -50,5 +50,5 @@ __version__ = "0.3"
 
 
 if __name__ == "__main__":
-	print __doc__
+	print(__doc__)
     #main()

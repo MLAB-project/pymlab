@@ -93,6 +93,10 @@ Python library for ISL03A MLAB module with VEML 6030 I2C Light Sensor
         self.range_16kLUX = 0b10
         self.range_64kLUX = 0b11
 
+    def initialize(self):
+        self.config(self.continuous_measurement)
+
+
     def ADC_sync(self):
         """ 
         Ends the current ADC-integration and starts another. Used only with External Timing Mode.

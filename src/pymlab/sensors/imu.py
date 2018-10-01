@@ -289,3 +289,88 @@ class IMU01_GYRO(Device):
         temp = self.bus.read_byte_data(self.address, self.A3G4250D_OUT_TEMP)
         return temp
 
+    # https://www.invensense.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf
+class MPU6050(Device):
+    
+    MPU6050_ACCEL_XOUT_H = 0x3B
+    MPU6050_ACCEL_XOUT_L = 0x3C
+    MPU6050_ACCEL_YOUT_H = 0x3D
+    MPU6050_ACCEL_YOUT_L = 0x3E
+    MPU6050_ACCEL_ZOUT_H = 0x3F
+    MPU6050_ACCEL_ZOUT_L = 0x40
+    MPU6050_TEMP_OUT_H = 0x41
+    MPU6050_TEMP_OUT_L = 0x42
+    MPU6050_GYRO_XOUT_H = 0x43
+    MPU6050_GYRO_XOUT_L = 0x44
+    MPU6050_GYRO_YOUT_H = 0x45
+    MPU6050_GYRO_YOUT_L = 0x46
+    MPU6050_GYRO_ZOUT_H = 0x47
+    MPU6050_GYRO_ZOUT_L = 0x78
+        
+    def __init__(self, parent = None, address = 0x68, possible_adresses = [0x68, 0x69],  **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+    
+    def initialize(self):
+        self.bus.write_byte_data(self.address, 0x6b, 0x00) # power management 1
+
+    def get_accel(self):
+        MSB = self.bus.read_byte_data(self.address,  self.MPU6050_ACCEL_XOUT_H)
+        LSB = self.bus.read_byte_data(self.address,  self.MPU6050_ACCEL_XOUT_L)
+        x = (MSB << 8) + LSB
+        if (x >= 0x8000):
+            x = -1*((65535 - x) + 1)
+
+        MSB = self.bus.read_byte_data(self.address,  self.MPU6050_ACCEL_YOUT_H)
+        LSB = self.bus.read_byte_data(self.address,  self.MPU6050_ACCEL_YOUT_L)
+        y = (MSB << 8) + LSB
+        if (y >= 0x8000):
+            y = -1*((65535 - y) + 1)
+
+        MSB = self.bus.read_byte_data(self.address,  self.MPU6050_ACCEL_ZOUT_H)
+        LSB = self.bus.read_byte_data(self.address,  self.MPU6050_ACCEL_ZOUT_L)
+        z = (MSB << 8) + LSB
+        if (z >= 0x8000):
+            z = -1*((65535 - z) + 1)
+
+        return(x/16384.0,y/16384.0,z/16384.0)
+
+
+    def get_temp(self):
+        MSB = self.bus.read_byte_data(self.address,  self.MPU6050_TEMP_OUT_H)
+        LSB = self.bus.read_byte_data(self.address,  self.MPU6050_TEMP_OUT_L)
+        t = (MSB << 8) + LSB
+
+        return(t/340+36.5)
+
+
+    def get_gyro(self):
+        MSB = self.bus.read_byte_data(self.address,  self.MPU6050_GYRO_XOUT_H)
+        LSB = self.bus.read_byte_data(self.address,  self.MPU6050_GYRO_XOUT_L)
+        x = (MSB << 8) + LSB
+
+        MSB = self.bus.read_byte_data(self.address,  self.MPU6050_GYRO_YOUT_H)
+        LSB = self.bus.read_byte_data(self.address,  self.MPU6050_GYRO_YOUT_L)
+        y = (MSB << 8) + LSB
+
+        MSB = self.bus.read_byte_data(self.address,  self.MPU6050_GYRO_ZOUT_H)
+        LSB = self.bus.read_byte_data(self.address,  self.MPU6050_GYRO_ZOUT_L)
+        z = (MSB << 8) + LSB
+
+        return(x/131,y/131,z/131)
+
+    def dist(self, a,b):
+        return math.sqrt((a*a)+(b*b))
+
+    def get_rotation(self, position = None):
+        if position:
+            (x, y, z) = position
+        else:
+            (x, y, z) = self.get_accel()
+         
+        radians = math.atan2(y, self.dist(x,z))
+        rx = math.degrees(radians)
+
+        radians = math.atan2(x, self.dist(y,z))
+        ry = -math.degrees(radians)
+
+        return (rx, ry)

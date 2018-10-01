@@ -54,7 +54,7 @@ class I2CIO(Device):
 
 
 def main():
-    print __doc__
+    print(__doc__)
 
 
 if __name__ == "__main__":

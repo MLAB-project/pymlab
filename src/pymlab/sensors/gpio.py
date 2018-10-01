@@ -8,17 +8,32 @@ from pymlab.sensors import Device
 
 LOGGER = logging.getLogger(__name__)
 
+
+class Gpio(Device):
+    def __init__(self, parent = None, address = 0x01, fault_queue = 1, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+
+    def setup(self, pin, direction = 0b0, push_pull = 0b0):
+        raise NotImplementedError()
+
+    def output(self, pin, value):
+        raise NotImplementedError()
+
+    def setup_bus(self, bus, direction, push_pull):
+        raise NotImplementedError()
+
+    def output_bus(self, bus, value):
+        raise NotImplementedError()
+
+
 class PCA9635(Device):
     """
 Python library for PCA9635
     """
-
-  
-
     def __init__(self, parent = None, address = 0x01, fault_queue = 1, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
-## register definitions 
+## register definitions
         self.MODE1 = 0x00
         self.MODE2 = 0x01
         self.LEDOUT0 = 0x14
@@ -47,7 +62,7 @@ Python library for PCA9635
         self.led01_config = (0xAA)
         self.mode1_config = (0x00)
         self.mode2_config = (0x01)
- 
+
     def get_mode1(self):
         DATA = self.bus.read_byte_data(self.address, self.MODE1)
         Ecal = 1 * DATA
@@ -68,7 +83,7 @@ Python library for PCA9635
         Ecal = 1 * DATA
         return Ecal
 
-    
+
     def config(self):
         self.bus.write_byte_data(self.address, self.LEDOUT0, self.led00_config)
         self.bus.write_byte_data(self.address, self.LEDOUT1, self.led01_config)
@@ -143,13 +158,13 @@ class I2CIO_TCA9535(Device):
         return True
 
     def set_ports(self, port0 = 0x00, port1 = 0x00):
-        'Writes specified value to the pins defined as output by config_ports() method. Writing to input pins has no effect.' 
+        'Writes specified value to the pins defined as output by config_ports() method. Writing to input pins has no effect.'
         self.bus.write_byte_data(self.address, self.OUTPUT_PORT0, port0)
         self.bus.write_byte_data(self.address, self.OUTPUT_PORT1, port1)
         return True
 
     def get_ports(self):
-        'Reads logical values at pins.' 
+        'Reads logical values at pins.'
         return (self.bus.read_byte_data(self.address, self.STATUS_PORT0), self.bus.read_byte_data(self.address, self.STATUS_PORT1));
 
 
@@ -187,11 +202,11 @@ class TCA6416A(Device):
         return
 
     def get_ports(self):
-        'Reads logical values at pins.' 
+        'Reads logical values at pins.'
         return (self.bus.read_byte_data(self.address, self.STATUS_PORT0), self.bus.read_byte_data(self.address, self.STATUS_PORT1));
 
     def get_config(self):
-        'Reads logical values at pins.' 
+        'Reads logical values at pins.'
         return (self.bus.read_byte_data(self.address, self.CONTROL_PORT0), self.bus.read_byte_data(self.address, self.CONTROL_PORT1));
 
 
@@ -200,7 +215,7 @@ class DS4520(Device):
 
     def __init__(self, parent = None, address = 0x50, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
-        
+
         """
 I/O control for I/O_0 to I/O_7. I/O_0 is the LSB and I/O_7 is the MSB. Clearing
 the corresponding bit of the register pulls the selected I/O pin low; setting the
@@ -219,25 +234,83 @@ to the pin"""
         self.STATUS_PORT1 = 0xF9
 
     def set_pullups(self, port0 = 0x00, port1 = 0x00):
-        'Sets INPUT (1) or OUTPUT (0) direction on pins. Inversion setting is applicable for input pins  1-inverted 0-noninverted input polarity.' 
+        'Sets INPUT (1) or OUTPUT (0) direction on pins. Inversion setting is applicable for input pins  1-inverted 0-noninverted input polarity.'
         self.bus.write_byte_data(self.address, self.PULLUP_PORT0, port0)
         self.bus.write_byte_data(self.address, self.PULLUP_PORT1, port1)
         return #self.bus.read_byte_data(self.address, self.PULLUP_PORT0), self.bus.read_byte_data(self.address, self.PULLUP_PORT1)
 
     def set_ports(self, port0 = 0x00, port1 = 0x00):
-        'Writes specified value to the pins defined as output by method. Writing to input pins has no effect.' 
+        'Writes specified value to the pins defined as output by method. Writing to input pins has no effect.'
         self.bus.write_byte_data(self.address, self.CONTROL_PORT0, port0)
         self.bus.write_byte_data(self.address, self.CONTROL_PORT0, port1)
         return
 
     def get_ports(self):
-        'Reads logical values at pins.' 
+        'Reads logical values at pins.'
         return self.bus.read_byte_data(self.address, self.STATUS_PORT0), self.bus.read_byte_data(self.address, self.STATUS_PORT1);
 
 
-def main():
-    print __doc__
 
+
+
+class USBI2C_GPIO(Gpio):
+    IN = 0b0
+    OUT = 0b1
+    OPEN_DRAIN = 0b0
+    PUSH_PULL = 0b1
+    SPECIAL_ALL = 0b11100000
+    SPECIAL_LED = 0b11000000
+    SPECIAL_CLK = 0b00100000
+    SPECIAL_OFF = 0b00000000
+    PIN_COUNT = 8
+
+    def __init__(self, parent = None, **kwargs):
+        Gpio.__init__(self, parent, None, **kwargs)
+
+    def initialize(self):
+        print(self.bus.driver.__class__)
+        if not self.bus.driver.__class__.__name__ == 'HIDDriver':
+            raise ValueError("This {!r} GPIO device requires a 'HIDdriver' driver.".format(self.name))
+
+        self.g_direction = self.bus.driver.gpio_direction
+        self.g_pushpull =  self.bus.driver.gpio_pushpull
+        self.g_special  =  self.bus.driver.gpio_special
+        self.g_clockdiv =  self.bus.driver.gpio_clockdiv
+
+
+    def update_gpio(self):
+        return self.bus.driver.write_hid([0x02, self.g_direction, self.g_pushpull, self.g_special, self.g_clockdiv])
+
+    def setup(self, pin, direction = 0b0, push_pull = 0b0):
+        if not (-1 < pin < self.PIN_COUNT):
+            raise ValueError("GPIO pin (%i) is out or range [0,7]." %pin)
+
+        if direction: self.g_direction = (self.g_direction | (1<<pin))
+        else: self.g_direction = (self.g_direction & ~(1<<pin))
+
+        if push_pull:  self.g_pushpull = (self.g_pushpull | (1<<pin))
+        else: self.g_pushpull = (self.g_pushpull & ~(1<<pin))
+
+        self.update_gpio()
+
+    def output(self, pin, value):
+        #TODO: Overeni, jestli pin je nastaven jakou output a nasledne udelat chybu
+        #  a jestli se nezapisuje na 'special pin'
+        if False:
+            raise ValueError("Pin is not set as OUTput.")
+        self.bus.driver.write_hid([0x04, (bool(value)<<pin), (1 << pin)])
+
+    def set_special(self, special = None, divider = None):
+        if special: self.g_special = special
+        if divider: self.g_clockdiv = divider
+
+        self.update_gpio()
+
+    #def blick(self, pin, count, delay = None, on = None, off = None):
+
+
+def main():
+    print(__doc__)
 
 if __name__ == "__main__":
     main()

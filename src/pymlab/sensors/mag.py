@@ -70,7 +70,11 @@ class MAG01(Device):
         LOGGER.debug("Byte data %s to register %s to address %s writen",
             bin(self.bus.read_byte_data(self.address, self.HMC5883L_MR)), hex(self.HMC5883L_MR), hex(self.address))
 
-    def axes(self):
+        self.x = [0, 0, 0] # min, max, offset
+        self.y = [0, 0, 0]
+        self.z = [0, 0, 0]
+
+    def axes(self, offset = False):
         """returns measured value in miligauss"""
         reg, self._scale = self.SCALES[self._gauss]
         x = self.bus.read_int16_data(self.address, self.HMC5883L_DXRA) 
@@ -79,7 +83,14 @@ class MAG01(Device):
         if y == -4096: y = OVERFLOW
         z = self.bus.read_int16_data(self.address, self.HMC5883L_DZRA)
         if z == -4096: z = OVERFLOW
-        return (x*self._scale, y*self._scale, z*self._scale)
+
+        x*=self._scale
+        y*=self._scale
+        z*=self._scale
+
+        if offset: (x, y, z) = self.__offset((x,y,z))
+
+        return (x, y, z)
 
     def __str__(self):
         (x, y, z) = self.axes()
@@ -87,4 +98,42 @@ class MAG01(Device):
                "Axis Y: " + str(y) + "\n" \
                "Axis Z: " + str(z) + "\n" \
 
+    def __offset(self, read):
+        (x, y, z) = read
+
+        if x < self.x[0]: self.x[0] = x
+        if x > self.x[1]: self.x[1] = x
+
+        if y < self.y[0]: self.y[0] = y
+        if y > self.y[1]: self.y[1] = y
+
+        if z < self.z[0]: self.z[0] = z
+        if z > self.z[1]: self.z[1] = z
+
+        x = x - (self.x[0]+self.x[1])/2
+        y = y - (self.y[0]+self.y[1])/2
+        z = z - (self.z[0]+self.z[1])/2
+
+        return (x, y, z)
+
+
+    def get_azimuth(self, offset = -90):
+        (x, y, z) = self.axes(offset = True)
+
+        heading = math.atan2(y, x)
+
+        if heading < 0:
+            heading += 2*math.pi
+
+        if heading > 2*math.pi:
+            heading -= 2*math.pi
+
+        heading = heading * 180/math.pi; 
+
+        heading += offset
+        if heading > 360: heading -= 360
+        if heading < 0: heading += 360
+
+
+        return 360-heading
 

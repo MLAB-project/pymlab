@@ -35,17 +35,18 @@ sensor = cfg.get_device("light")
 time.sleep(0.5)
 
 
-sensor.config(0x0000)
-
 i=0
 
 #### Data Logging ###################################################
 
 try:
     while True:
-        sys.stdout.write("Sensor status: " + str(sensor.get_lux()) + "\n")
-        sys.stdout.flush()
-        time.sleep(1)
+        try:
+            sys.stdout.write("Sensor status: " + str(sensor.get_lux()) + "\n")
+            sys.stdout.flush()
+            time.sleep(1)
+        except Exception, e:
+            print e
 except KeyboardInterrupt:
     sys.exit(0)
 

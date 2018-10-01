@@ -3,20 +3,20 @@
 Python MLAB control modules
 ================
 
-I2C bus, SPI, RS232, Ethernet and USB modules binding. The code purpose is easy control as many digital electronic MLAB modules as possible. Initial development of this library was focused on I2C devices but it is suitable for use with another interfaces for now. 
+I2C bus, SPI, RS232, Ethernet and USB modules binding. The code purpose is easy control as many digital electronic MLAB modules as possible. Initial development of this library was focused on I2C devices but it is suitable for use with another interfaces for now.
 
 Installation
 ------------
 
 ### Dependencies
 
-    $ sudo apt-get install git python-setuptools python-smbus
+    $ sudo apt-get install git python-setuptools python-smbus python-six python3-six 
 
 The latest version of pymlab library use true I²C transfers instead of SMBus transfers. It is needed by some sensors. Namely by SHT31, SHT25 etc.  Therefore an updated version of i2c-tools and python-smbus module is needed for correct working of pymlab library and some examples.
 The latest version of python-smbus could be installed from [this fork of i2c-tools](https://github.com/MLAB-project/i2c-tools).
 
 ### Install in to Ubuntu python system
-    
+
     $ git clone https://github.com/MLAB-project/pymlab
     $ cd pymlab/
     $ sudo python setup.py develop
@@ -26,7 +26,7 @@ The latest version of python-smbus could be installed from [this fork of i2c-too
 Required if you want to use the [USBI2C01A](http://wiki.mlab.cz/doku.php?id=en:usbi2c) module to communicate with SMBus/I2C devices via USB HID layer. Very useful in Windows environment where standard hardware interfaces are not accessible directly.
 
     $ sudo apt-get install libudev-dev libusb-1.0-0-dev libhidapi-dev python-setuptools python-smbus cython
-   
+
 
 Usage
 -----
@@ -47,7 +47,7 @@ cfg = config.Config(
         {
             "type": "i2chub",
             "address": 0x72,
-            
+
             "children": [
                 {"name": "altimet", "type": "altimet01" , "channel": 7, },   
             ],
@@ -63,4 +63,4 @@ gauge.route()
 
 ```
 
-Some more examples of usage are in 'examples' directory in that repository. If you have some compatible device and interface on your computer you can run an example directly. 
+Some more examples of usage are in 'examples' directory in that repository. If you have some compatible device and interface on your computer you can run an example directly.
