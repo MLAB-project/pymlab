@@ -5,6 +5,7 @@
 import time
 import datetime
 import sys
+import numpy as np
 #import logging 
 #logging.basicConfig(level=logging.DEBUG) 
 
@@ -71,13 +72,17 @@ time.sleep(0.5)
 
 sys.stdout.write("MLAB pitot-static tube data acquisition system started \n")
 
+gauge.route()
+
+dp = np.array([gauge.get_p()])
+
 try:
         while True:
             gauge.route()
-            dp = gauge.get_p()
-            sys.stdout.write("Pressure Diff: %f \n" % dp)
+            dp = np.append(dp, gauge.get_p())
+            sys.stdout.write("Pressure Diff: %f \n" % np.nanmean(dp))
             sys.stdout.flush()
-            time.sleep(0.5)
+            time.sleep(0.1)
             
 except KeyboardInterrupt:
     sys.exit(0)
