@@ -121,15 +121,15 @@ class SDP6XX(Device):
 
     def get_p(self):
         self.bus.write_byte(self.address, self.TRIGGER_MEASUREMENT);    # trigger measurement
-        MSB = self.bus.read_byte(self.address)      # read data
-        LSB = self.bus.read_byte(self.address)
-        check = self.bus.read_byte(self.address)    # read CRC
-        print(hex(MSB), hex(LSB), hex(check))
-        pressure = (MSB << 8) | LSB
-        if (pressure & 0x1000):
-            pressure -= 65536
 
-        return (pressure/60.0)
+        data = self.bus.read_i2c_block(self.address, 3)
+
+        press_data = data[0]<<8 | data[1]
+
+        if (press_data & 0x1000):
+            press_data -= 65536
+
+        return (press_data/60.0)
 
 
 # bit;        // bit mask
