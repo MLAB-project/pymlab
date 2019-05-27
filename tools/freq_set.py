@@ -4,11 +4,16 @@ import curses
 from pymlab import config
 import sys
 
-port = eval(sys.argv[1])
+if len(sys.argv) != 2:
+    sys.stderr.write("Invalid number of arguments. Missing path to a bus config file!\n")
+    sys.stderr.write("Usage: %s i2c_bus.cfg\n" % (sys.argv[0], ))
+    sys.exit(1)
 
-cfg = config.Config(i2c = {"port": port}, bus = [
-                    {"type": "i2chub", "address": 0x70,
-                     "children": [{"name":"clkgen", "type":"clkgen01", "channel": 1}]}])
+print type(sys.argv[1])
+
+cfg = config.Config()
+cfg.load_file(sys.argv[1])
+
 cfg.initialize()
 fgen = cfg.get_device("clkgen")
 fgen.route()
@@ -37,50 +42,25 @@ def show_freq():
     freq_str = str(freq)
     stdscr.addstr(FREQ_Y, FREQ_X - len(freq_str), freq_str)
 
-def show_freqa():
-    vis_str = str(freq)[:2]+' '+str(freq)[2:5]+' '+str(freq)[5:9]
-    stdscr.addstr(FREQ_Y, FREQ_X - len(vis_str), vis_str)
-
-t=(2, 6)
-
 while 1:
     try:
-        show_freqa()
+        show_freq()
         stdscr.move(e, f)
         c = stdscr.getch()
         if c == curses.KEY_RIGHT:
-            f = f + 1 
+            f = f + 1     
         elif c == curses.KEY_LEFT:
             f = f - 1
         elif c == curses.KEY_UP:
-            if f in t:
-                pass
-            if f in [0, 1]:
-                freq = freq + 10 ** (7 - f)
-                show_freqa()
-            if f in [3, 4, 5]:
-                freq = freq + 10 ** (8 - f)
-                show_freqa()
-            if f in [7, 8, 9]:
-                freq = freq + 10 ** (9 - f)
-                show_freqa()
-            
-            #si570_set_freq(freq)
+            freq = freq + 10 ** (9 - f)
+            show_freq()
+            si570_set_freq(freq)
         elif c == curses.KEY_DOWN:
-            if f in t:
-                pass
-            if f in [0, 1]:
-                freq = freq - 10 ** (7 - f)
-                show_freqa()
-            if f in [3, 4, 5]:
-                freq = freq - 10 ** (8 - f)
-                show_freqa()
-            if f in [7, 8, 9]:
-                freq = freq - 10 ** (9 - f)
-                show_freqa()        
-            #freq = freq - 10 ** (9 - f)
-            #si570_set_freq(freq)
-
+            freq = freq - 10 ** (9 - f)
+            show_freq()
+            si570_set_freq(freq)
+        elif c == ord("q"):
+            break
     except KeyboardInterrupt:
         curses.nocbreak()
         stdscr.keypad(0)
