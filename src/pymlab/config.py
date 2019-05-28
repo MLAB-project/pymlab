@@ -182,7 +182,7 @@ class Config(object):
             #"mult": Multiplexer,
             #"sens": Sensor,
         }
-        exec(source in globals(), local_vars)
+        exec(source, globals(), local_vars)
         #self.port = local_vars.get("port", self.port)
 
         self.i2c_config = local_vars.get("i2c", {})
