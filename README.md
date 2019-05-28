@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/MLAB-project/pymlab.svg?branch=dev)](https://travis-ci.org/MLAB-project/pymlab)
+[![Build Status](https://travis-ci.org/MLAB-project/pymlab.svg?branch=master)](https://travis-ci.org/MLAB-project/pymlab)
 
 Python MLAB control modules
 ================
