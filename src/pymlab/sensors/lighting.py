@@ -102,7 +102,7 @@ class AS3935(Device):
         out = {}
         out['INT_NH'] = bool(reg & 0b00000001)
         out['INT_D']  = bool(reg & 0b00000100)
-        out['INT_N']  = bool(reg & 0b00001000)
+        out['INT_L']  = bool(reg & 0b00001000)
         return out
 
     def getSingleEnergy(self):
