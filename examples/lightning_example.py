@@ -21,7 +21,7 @@ port = eval(sys.argv[1])
 
 cfg = config.Config(
     i2c = {
-            "device": 'hid'
+            "port": 0
     },
     bus = [
         {
@@ -41,8 +41,8 @@ i=0
 #### Data Logging ###################################################
 
 try:
-    sensor.setNoiseFloor(0)
-    sensor.setIndoor(False)
+    #sensor.setNoiseFloor(0)
+    sensor.setIndoor(True)
     sensor.setSpikeRejection(0b0000)
     while True:
         i += 1
@@ -58,11 +58,11 @@ try:
         print("Mask dusturbance:", sensor.getMaskDist())
 
         #sensor.setNoiseFloor(0)
-        time.sleep(0.5)
+        time.sleep(1.5)
         if i == 10:
             i = 0
             print("=================")
-            sensor.setMaskDist(True)
+            sensor.setMaskDist(False)
 
             #sensor.reset()
             #sensor.calib_rco()
