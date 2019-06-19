@@ -34,23 +34,24 @@ cfg.initialize()
 sensor = cfg.get_device("lighting")
 
 time.sleep(0.5)
-sensor.reset()
+#sensor.reset()
 
 print("Start Antenna tunnig.")
-sensor.antennatune_on()
-time.sleep(50)
+sensor.antennatune_on(FDIV=0,TUN_CAP=0)
+time.sleep(5)
 sensor.reset()
 
-time.sleep(0.5)
+#time.sleep(0.5)
 
-sensor.calib_rco()
+#sensor.calib_rco()
 
 time.sleep(0.5)
 sensor.reset()
 
-#sensor.setNoiseFloor(0)
+sensor.setWDTH(1)
+sensor.setNoiseFloor(3)
 #sensor.setIndoor(False)
-#sensor.setSpikeRejection(0)
+sensor.setSpikeRejection(0)
 
 time.sleep(0.5)
 
@@ -66,12 +67,13 @@ try:
         print("Storm is {:02d} km away".format(distance))
         print("sINTer:",sensor.getInterrupts())
         print("AFEgain:",sensor.getAFEgain())
+        print("WDTH:",sensor.getWDTH())
         print("power: ", sensor.getPowerStatus())
         print("indoor:", sensor.getIndoor())
         print("Noise floor is {} uVrms".format(sensor.getNoiseFloor()))
         print("Spike rejection 0b{:04b}".format(sensor.getSpikeRejection()))
         print("single Energy:", sensor.getSingleEnergy(), bin(sensor.getSingleEnergy()))
-        print("Mask dusturbance:", sensor.getMaskDist())
+        print("Mask disturbance:", sensor.getMaskDist())
 
         time.sleep(5)
 

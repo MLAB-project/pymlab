@@ -26,9 +26,17 @@ class AS3935(Device):
         print bin(self.bus.read_byte_data(self.address, 0x3B))
         return
 
-    def antennatune_on(self):          #todo antenna tunnig
+    def antennatune_on(self, FDIV = 0,TUN_CAP=0):          #todo antenna tunnig
+
+        # set frequency division
+        data = self.bus.read_byte_data(self.address, 0x03)
+        data = (data & (~(3<<6))) | (FDIV<<6)
+        self.bus.write_byte_data(self.address, 0x03, data)
+        print hex(self.bus.read_byte_data(self.address, 0x03))
+
+        # Display LCO on IRQ pin
         reg = self.bus.read_byte_data(self.address, 0x08)
-        reg = (reg & 0x7f) | 0x80;
+        reg =  0x80  # (reg & 0xff) | 0x40;
         self.bus.write_byte_data(self.address, 0x08, reg)
 
         print hex(self.bus.read_byte_data(self.address, 0x08))
@@ -39,12 +47,28 @@ class AS3935(Device):
         pass
 
     def getDistance(self):
-        distance = self.bus.read_byte_data(self.address, 0x07) & 0b00111111
-        if distance < 2:
-            distance = 0 # storm is over head
-        elif (distance == 0b111111):
-            distance = 255 # storm is out of range
-        return distance
+        data = self.bus.read_byte_data(self.address, 0x07) & 0b00111111
+
+        distance = {0b111111: 255,
+            0b101000: 40,
+            0b100101: 37,
+            0b100010: 34,
+            0b011111: 31,
+            0b011011: 27,
+            0b011000: 24,
+            0b010100: 20,
+            0b010001: 17,
+            0b001110: 14,
+            0b001100: 12,
+            0b001010: 10,
+            0b001000: 8,
+            0b000110: 6,
+            0b000101: 5,
+            0b000001: 0}
+
+        return distance[data]
+
+
 
     def getAFEgain(self):
         gain = self.bus.read_byte_data(self.address, 0x00) & 0b00111110
@@ -92,6 +116,16 @@ class AS3935(Device):
         data = self.bus.read_byte_data(self.address, 0x01)
         data = (data & (~(7<<4))) | (value<<4)
         self.bus.write_byte_data(self.address, 0x01, data)
+
+
+    def setWDTH(self, value):
+        data = self.bus.read_byte_data(self.address, 0x01)
+        data = (data & (~(0x0f))) | (value)
+        self.bus.write_byte_data(self.address, 0x01, data)
+
+    def getWDTH(self):
+        data = self.bus.read_byte_data(self.address, 0x01)
+        return (data & 0x0f)
 
     def setNoiseFloorAdv(self, value):
         pass
