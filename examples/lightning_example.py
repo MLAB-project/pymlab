@@ -31,40 +31,49 @@ cfg = config.Config(
     ])
 cfg.initialize()
 
-#print "SHT25 humidity and temperature sensor example \r\n"
-#print "Temperature  Humidity[%%]  \r\n"
 sensor = cfg.get_device("lighting")
+
 time.sleep(0.5)
+sensor.reset()
+
+print("Start Antenna tunnig.")
+sensor.antennatune_on()
+time.sleep(50)
+sensor.reset()
+
+time.sleep(0.5)
+
+sensor.calib_rco()
+
+time.sleep(0.5)
+sensor.reset()
+
+#sensor.setNoiseFloor(0)
+#sensor.setIndoor(False)
+#sensor.setSpikeRejection(0)
+
+time.sleep(0.5)
+
 
 i=0
 
 #### Data Logging ###################################################
 
 try:
-    #sensor.setNoiseFloor(0)
-    sensor.setIndoor(True)
-    sensor.setSpikeRejection(0b0000)
     while True:
         i += 1
         distance = sensor.getDistance()
         print("Storm is {:02d} km away".format(distance))
         print("sINTer:",sensor.getInterrupts())
-        print("AFEgai:",sensor.getAFEgain())
+        print("AFEgain:",sensor.getAFEgain())
         print("power: ", sensor.getPowerStatus())
         print("indoor:", sensor.getIndoor())
-        print("Noise noise floor is {} uVrms".format(sensor.getNoiseFloor()))
+        print("Noise floor is {} uVrms".format(sensor.getNoiseFloor()))
         print("Spike rejection 0b{:04b}".format(sensor.getSpikeRejection()))
         print("single Energy:", sensor.getSingleEnergy(), bin(sensor.getSingleEnergy()))
         print("Mask dusturbance:", sensor.getMaskDist())
 
-        #sensor.setNoiseFloor(0)
-        time.sleep(1.5)
-        if i == 10:
-            i = 0
-            print("=================")
-            sensor.setMaskDist(False)
+        time.sleep(5)
 
-            #sensor.reset()
-            #sensor.calib_rco()
 except KeyboardInterrupt:
     sys.exit(0)

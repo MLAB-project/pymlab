@@ -20,8 +20,20 @@ class AS3935(Device):
         self.soft_reset()
 
     def calib_rco(self):
+        byte = self.bus.read_byte_data(self.address, 0x08)   # TODO tunning
         self.bus.write_byte_data(self.address, 0x3d, 0x96);
+        print bin(self.bus.read_byte_data(self.address, 0x3A))
+        print bin(self.bus.read_byte_data(self.address, 0x3B))
         return
+
+    def antennatune_on(self):          #todo antenna tunnig
+        reg = self.bus.read_byte_data(self.address, 0x08)
+        reg = (reg & 0x7f) | 0x80;
+        self.bus.write_byte_data(self.address, 0x08, reg)
+
+        print hex(self.bus.read_byte_data(self.address, 0x08))
+        return
+
 
     def initialize(self):
         pass
@@ -30,8 +42,8 @@ class AS3935(Device):
         distance = self.bus.read_byte_data(self.address, 0x07) & 0b00111111
         if distance < 2:
             distance = 0 # storm is over head
-        elif distance > 62:
-            distance = 99 # storm is out of range
+        elif (distance == 0b111111):
+            distance = 255 # storm is out of range
         return distance
 
     def getAFEgain(self):
@@ -57,7 +69,7 @@ class AS3935(Device):
         else:
             byte |= 0b011100
             byte &=~0b100010
-        print("{:08b}".format(byte))
+        #print("{:08b}".format(byte))
         self.bus.write_byte_data(self.address, 0x00, byte)
         return byte
 
@@ -95,7 +107,7 @@ class AS3935(Device):
         self.bus.write_byte_data(self.address, 0x02, data)
 
     def getPowerStatus(self):
-        return not bool(self.bus.read_byte_data(self.address, 0x00) & 0b1)
+        return not bool(self.bus.read_byte_data(self.address, 0x00) & 0b1) #returns true in Active state
 
     def getInterrupts(self):
         reg = self.bus.read_byte_data(self.address, 0x03)
