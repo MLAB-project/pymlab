@@ -128,7 +128,7 @@ class Config(object):
             "i2clcd": i2clcd.I2CLCD,
             "rtc01": rtc.RTC01,
             "PCA9635": gpio.PCA9635,
-            "LIGHTNING01A": lighting.AS3935
+            "LIGHTNING01A": lightning.AS3935
         }
 
     def get_device(self, name):

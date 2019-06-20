@@ -36,22 +36,22 @@ sensor = cfg.get_device("lighting")
 time.sleep(0.5)
 #sensor.reset()
 
-print("Start Antenna tunnig.")
-sensor.antennatune_on(FDIV=0,TUN_CAP=0)
-time.sleep(5)
-sensor.reset()
+#print("Start Antenna tunnig.")
+#sensor.antennatune_on(FDIV=0,TUN_CAP=0)
+#time.sleep(5)
+#sensor.reset()
 
 #time.sleep(0.5)
 
-#sensor.calib_rco()
+sensor.calib_rco()
 
 time.sleep(0.5)
 sensor.reset()
 
-#sensor.setWDTH(1)
-#sensor.setNoiseFloor(3)
+sensor.setWDTH(1)
+sensor.setNoiseFloor(1)
 #sensor.setIndoor(False)
-#sensor.setSpikeRejection(0)
+sensor.setSpikeRejection(0)
 
 time.sleep(0.5)
 
