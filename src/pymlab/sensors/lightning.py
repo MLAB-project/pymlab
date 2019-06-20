@@ -42,7 +42,6 @@ class AS3935(Device):
         print hex(self.bus.read_byte_data(self.address, 0x08))
         return
 
-
     def initialize(self):
         pass
 
@@ -69,12 +68,6 @@ class AS3935(Device):
 
         return distance[data]
 
-
-
-    def getAFEgain(self):
-        gain = self.bus.read_byte_data(self.address, 0x00) & 0b00111110
-        return gain
-
     def getIndoor(self):
         indoor = self.bus.read_byte_data(self.address, 0x00) &  0b00111110
         if indoor == 0b100100:
@@ -82,9 +75,7 @@ class AS3935(Device):
         elif indoor == 0b011100:
             return False
         else:
-            pass #TODO chybova hlaska, ve toto neni znamo
-    def getOutdoor(self):
-        return not self.getIndoor()
+            pass #TODO chybova hlaska, ze toto neni znamo
 
     def setIndoor(self, state):
         byte = self.bus.read_byte_data(self.address, 0x00)
@@ -97,7 +88,6 @@ class AS3935(Device):
         #print("{:08b}".format(byte))
         self.bus.write_byte_data(self.address, 0x00, byte)
         return byte
-
 
     def getNoiseFloor(self):
         value = (self.bus.read_byte_data(self.address, 0x01) & 0b01110000) >> 4

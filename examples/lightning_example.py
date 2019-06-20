@@ -62,18 +62,26 @@ i=0
 
 try:
     while True:
-        print("sINTer:",sensor.getInterrupts())
-        print("AFEgain:",sensor.getAFEgain())
-        print("WDTH:",sensor.getWDTH())
-#        print("power: ", sensor.getPowerStatus())
-        print("indoor:", sensor.getIndoor())
-        print("Noise floor is {} uVrms".format(sensor.getNoiseFloor()))
-        print("Spike rejection 0b{:04b}".format(sensor.getSpikeRejection()))
-        print("single Energy:", sensor.getSingleEnergy(), bin(sensor.getSingleEnergy()))
-        print("Mask disturbance:", sensor.getMaskDist())
-        print("Storm is {:02d} km away".format(sensor.getDistance()))
+        interrupts = sensor.getInterrupts()
 
-        time.sleep(5)
+        if not all( value == False for value in interrupts)
+
+            print("sINTer:", interrupts, i)
+            print("WDTH:",sensor.getWDTH())
+    #        print("power: ", sensor.getPowerStatus())
+            print("indoor:", sensor.getIndoor())
+            print("Noise floor is {} uVrms".format(sensor.getNoiseFloor()))
+            print("Spike rejection 0b{:04b}".format(sensor.getSpikeRejection()))
+            print("single Energy:", sensor.getSingleEnergy(), bin(sensor.getSingleEnergy()))
+            print("Mask disturbance:", sensor.getMaskDist())
+            print("Storm is {:02d} km away".format(sensor.getDistance()))
+
+            time.sleep(0.5)
+            
+            i++
+
+        else 
+            time.sleep(5)
 
 except KeyboardInterrupt:
     sys.exit(0)
