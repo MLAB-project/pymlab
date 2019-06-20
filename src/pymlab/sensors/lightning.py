@@ -48,6 +48,7 @@ class AS3935(Device):
 
     def getDistance(self):
         data = self.bus.read_byte_data(self.address, 0x07) & 0b00111111
+        print hex(data)
 
         distance = {0b111111: 255,
             0b101000: 40,

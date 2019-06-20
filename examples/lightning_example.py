@@ -62,18 +62,16 @@ i=0
 
 try:
     while True:
-        i += 1
-        distance = sensor.getDistance()
-        print("Storm is {:02d} km away".format(distance))
         print("sINTer:",sensor.getInterrupts())
         print("AFEgain:",sensor.getAFEgain())
         print("WDTH:",sensor.getWDTH())
-        print("power: ", sensor.getPowerStatus())
+#        print("power: ", sensor.getPowerStatus())
         print("indoor:", sensor.getIndoor())
         print("Noise floor is {} uVrms".format(sensor.getNoiseFloor()))
         print("Spike rejection 0b{:04b}".format(sensor.getSpikeRejection()))
         print("single Energy:", sensor.getSingleEnergy(), bin(sensor.getSingleEnergy()))
         print("Mask disturbance:", sensor.getMaskDist())
+        print("Storm is {:02d} km away".format(sensor.getDistance()))
 
         time.sleep(5)
 
