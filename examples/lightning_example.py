@@ -48,10 +48,10 @@ sensor.reset()
 time.sleep(0.5)
 sensor.reset()
 
-sensor.setWDTH(1)
-sensor.setNoiseFloor(3)
+#sensor.setWDTH(1)
+#sensor.setNoiseFloor(3)
 #sensor.setIndoor(False)
-sensor.setSpikeRejection(0)
+#sensor.setSpikeRejection(0)
 
 time.sleep(0.5)
 
