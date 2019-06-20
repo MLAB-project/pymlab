@@ -64,7 +64,7 @@ try:
     while True:
         interrupts = sensor.getInterrupts()
 
-        if not all( value == False for value in interrupts)
+        if not any( value == False for value in interrupts):
 
             print("sINTer:", interrupts, i)
             print("WDTH:",sensor.getWDTH())
@@ -77,10 +77,10 @@ try:
             print("Storm is {:02d} km away".format(sensor.getDistance()))
 
             time.sleep(0.5)
-            
-            i++
 
-        else 
+            i += 1 
+
+        else:
             time.sleep(5)
 
 except KeyboardInterrupt:
