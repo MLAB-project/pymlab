@@ -36,7 +36,7 @@ class AS3935(Device):
 
         # Display LCO on IRQ pin
         reg = self.bus.read_byte_data(self.address, 0x08)
-        reg =  0x80  # (reg & 0xff) | 0x40;
+        reg =  0x84  # (reg & 0xff) | 0x40;
         self.bus.write_byte_data(self.address, 0x08, reg)
 
         print hex(self.bus.read_byte_data(self.address, 0x08))
