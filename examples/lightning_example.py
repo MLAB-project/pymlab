@@ -38,20 +38,20 @@ time.sleep(0.5)
 
 print("Start Antenna tunnig.")
 sensor.antennatune_on(FDIV=0,TUN_CAP=0)
-time.sleep(50)
+time.sleep(5)
 sensor.reset()
 
 #time.sleep(0.5)
 
-#sensor.calib_rco()
+sensor.calib_rco()
 
 time.sleep(0.5)
 sensor.reset()
 
-#sensor.setWDTH(1)
-#sensor.setNoiseFloor(3)
+sensor.setWDTH(1)
+sensor.setNoiseFloor(1)
 #sensor.setIndoor(False)
-#sensor.setSpikeRejection(0)
+sensor.setSpikeRejection(0)
 
 time.sleep(0.5)
 
@@ -62,20 +62,26 @@ i=0
 
 try:
     while True:
-        i += 1
-        distance = sensor.getDistance()
-        print("Storm is {:02d} km away".format(distance))
-        print("sINTer:",sensor.getInterrupts())
-        print("AFEgain:",sensor.getAFEgain())
-        print("WDTH:",sensor.getWDTH())
-        print("power: ", sensor.getPowerStatus())
-        print("indoor:", sensor.getIndoor())
-        print("Noise floor is {} uVrms".format(sensor.getNoiseFloor()))
-        print("Spike rejection 0b{:04b}".format(sensor.getSpikeRejection()))
-        print("single Energy:", sensor.getSingleEnergy(), bin(sensor.getSingleEnergy()))
-        print("Mask disturbance:", sensor.getMaskDist())
+        interrupts = sensor.getInterrupts()
 
-        time.sleep(5)
+        if not any( value == False for value in interrupts):
+
+            print("sINTer:", interrupts, i)
+            print("WDTH:",sensor.getWDTH())
+    #        print("power: ", sensor.getPowerStatus())
+            print("indoor:", sensor.getIndoor())
+            print("Noise floor is {} uVrms".format(sensor.getNoiseFloor()))
+            print("Spike rejection 0b{:04b}".format(sensor.getSpikeRejection()))
+            print("single Energy:", sensor.getSingleEnergy(), bin(sensor.getSingleEnergy()))
+            print("Mask disturbance:", sensor.getMaskDist())
+            print("Storm is {:02d} km away".format(sensor.getDistance()))
+
+            time.sleep(0.5)
+
+            i += 1 
+
+        else:
+            time.sleep(5)
 
 except KeyboardInterrupt:
     sys.exit(0)
