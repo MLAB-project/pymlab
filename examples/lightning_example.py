@@ -37,8 +37,8 @@ time.sleep(0.5)
 #sensor.reset()
 
 print("Start Antenna tunnig.")
-sensor.antennatune_on(FDIV=0,TUN_CAP=0)
-time.sleep(5)
+sensor.antennatune_on(FDIV=0,TUN_CAP=5)
+time.sleep(50)
 sensor.reset()
 
 #time.sleep(0.5)

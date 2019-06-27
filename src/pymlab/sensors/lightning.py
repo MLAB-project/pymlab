@@ -34,9 +34,11 @@ class AS3935(Device):
         self.bus.write_byte_data(self.address, 0x03, data)
         print hex(self.bus.read_byte_data(self.address, 0x03))
 
+        self.setTUN_CAP(TUN_CAP)
+
         # Display LCO on IRQ pin
         reg = self.bus.read_byte_data(self.address, 0x08)
-        reg =  0x84  # (reg & 0xff) | 0x40;
+        reg = (reg & 0x8f) | 0x80;
         self.bus.write_byte_data(self.address, 0x08, reg)
 
         print hex(self.bus.read_byte_data(self.address, 0x08))
@@ -107,6 +109,13 @@ class AS3935(Device):
         data = self.bus.read_byte_data(self.address, 0x01)
         data = (data & (~(7<<4))) | (value<<4)
         self.bus.write_byte_data(self.address, 0x01, data)
+
+    def setTUN_CAP(self, value):
+        # Display LCO on IRQ pin
+        reg = self.bus.read_byte_data(self.address, 0x08)
+        reg = (reg & 0x0f) | value;
+        self.bus.write_byte_data(self.address, 0x08, reg)
+
 
 
     def setWDTH(self, value):
