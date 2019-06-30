@@ -27,7 +27,7 @@ cfg = config.Config(
         {
             "name":          "lighting",
             "type":        "LIGHTNING01A",
-            "TUN_CAP":      5,
+            "TUN_CAP":      6,
         },
     ])
 cfg.initialize()
@@ -37,21 +37,17 @@ sensor = cfg.get_device("lighting")
 time.sleep(0.5)
 #sensor.reset()
 
-print("Start Antenna tunnig.")
-sensor.antennatune_on(FDIV=0,TUN_CAP=7)
-time.sleep(50)
-sensor.reset()
-print sensor.getTUN_CAP()
+#print("Start Antenna tunnig.")
+#sensor.antennatune_on(FDIV=0,TUN_CAP=7)
+#time.sleep(50)
+#sensor.reset()
 
 #time.sleep(0.5)
 
 sensor.calib_rco()
 
-time.sleep(0.5)
-sensor.reset()
-
-sensor.setWDTH(1)
-sensor.setNoiseFloor(1)
+sensor.setWDTH(3)
+sensor.setNoiseFloor(3)
 #sensor.setIndoor(False)
 sensor.setSpikeRejection(0)
 
@@ -65,16 +61,17 @@ i=0
 try:
     while True:
         interrupts = sensor.getInterrupts()
-
-        if not any( value == False for value in interrupts):
+#        interrupts = {"first":True, "secodnd":False, "third":False}
+        if any(value == True for value in interrupts.values()):
 
             print("sINTer:", interrupts, i)
             print("WDTH:",sensor.getWDTH())
+            print("TUN_CAP:",sensor.getTUN_CAP())
     #        print("power: ", sensor.getPowerStatus())
             print("indoor:", sensor.getIndoor())
             print("Noise floor is {} uVrms".format(sensor.getNoiseFloor()))
             print("Spike rejection 0b{:04b}".format(sensor.getSpikeRejection()))
-            print("single Energy:", sensor.getSingleEnergy(), bin(sensor.getSingleEnergy()))
+            print("single Energy:", sensor.getSingleEnergy())
             print("Mask disturbance:", sensor.getMaskDist())
             print("Storm is {:02d} km away".format(sensor.getDistance()))
 
