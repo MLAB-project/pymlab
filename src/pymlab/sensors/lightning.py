@@ -9,8 +9,12 @@ from pymlab.sensors import Device
 
 class AS3935(Device):
     'Python library for LIGHTNING01A MLAB module with austria microsystems AS3935 I2C/SPI lighting detecor.'
-    def __init__(self, parent = None, address = 0x02, **kwargs):
+    def __init__(self, parent = None, address = 0x02,  TUN_CAP = 0, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
+
+
+        self._TUN_CAP = TUN_CAP
+
 
     def soft_reset(self):
         self.bus.write_byte_data(self.address, 0x3c, 0x96);
@@ -32,7 +36,7 @@ class AS3935(Device):
         data = self.bus.read_byte_data(self.address, 0x03)
         data = (data & (~(3<<6))) | (FDIV<<6)
         self.bus.write_byte_data(self.address, 0x03, data)
-        print hex(self.bus.read_byte_data(self.address, 0x03))
+        #print hex(self.bus.read_byte_data(self.address, 0x03))
 
         self.setTUN_CAP(TUN_CAP)
 
@@ -40,12 +44,11 @@ class AS3935(Device):
         reg = self.bus.read_byte_data(self.address, 0x08)
         reg = (reg & 0x8f) | 0x80;
         self.bus.write_byte_data(self.address, 0x08, reg)
-
-        print hex(self.bus.read_byte_data(self.address, 0x08))
         return
 
     def initialize(self):
-        pass
+        self.soft_reset()
+        self.setTUN_CAP(self._TUN_CAP)
 
     def getDistance(self):
         data = self.bus.read_byte_data(self.address, 0x07) & 0b00111111
@@ -116,7 +119,10 @@ class AS3935(Device):
         reg = (reg & 0x0f) | value;
         self.bus.write_byte_data(self.address, 0x08, reg)
 
-
+    def getTUN_CAP(self):
+        data = self.bus.read_byte_data(self.address, 0x08)
+        data = data & 0x0f
+        return data
 
     def setWDTH(self, value):
         data = self.bus.read_byte_data(self.address, 0x01)

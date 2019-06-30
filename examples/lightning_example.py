@@ -27,6 +27,7 @@ cfg = config.Config(
         {
             "name":          "lighting",
             "type":        "LIGHTNING01A",
+            "TUN_CAP":      5,
         },
     ])
 cfg.initialize()
@@ -37,9 +38,10 @@ time.sleep(0.5)
 #sensor.reset()
 
 print("Start Antenna tunnig.")
-sensor.antennatune_on(FDIV=0,TUN_CAP=5)
+sensor.antennatune_on(FDIV=0,TUN_CAP=7)
 time.sleep(50)
 sensor.reset()
+print sensor.getTUN_CAP()
 
 #time.sleep(0.5)
 
@@ -78,7 +80,7 @@ try:
 
             time.sleep(0.5)
 
-            i += 1 
+            i += 1
 
         else:
             time.sleep(5)
