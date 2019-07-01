@@ -38,7 +38,7 @@ time.sleep(0.5)
 #sensor.reset()
 
 #print("Start Antenna tunnig.")
-#sensor.antennatune_on(FDIV=0,TUN_CAP=7)
+#sensor.antennatune_on(FDIV=0,TUN_CAP=6)
 #time.sleep(50)
 #sensor.reset()
 
@@ -46,10 +46,11 @@ time.sleep(0.5)
 
 sensor.calib_rco()
 
-sensor.setWDTH(3)
+sensor.setWDTH(1)
 sensor.setNoiseFloor(3)
-#sensor.setIndoor(False)
+sensor.setIndoor(False)
 sensor.setSpikeRejection(0)
+sensor.setMaskDist(True)
 
 time.sleep(0.5)
 
@@ -63,7 +64,7 @@ try:
         interrupts = sensor.getInterrupts()
         if any(value == True for value in interrupts.values()):
 
-            print("sINTer:", interrupts, i)
+            print("sINTer:", interrupts, datetime.datetime.now().isoformat(' '))
             print("WDTH:",sensor.getWDTH())
             print("TUN_CAP:",sensor.getTUN_CAP())
     #        print("power: ", sensor.getPowerStatus())
