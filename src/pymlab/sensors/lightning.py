@@ -71,7 +71,7 @@ class AS3935(Device):
             0b000101: 5,
             0b000001: 0}
 
-        return distance[data]
+        return distance.get(data,data)  # returns distance or distance data adirectly in case there is no distance code.
 
     def getIndoor(self):
         indoor = self.bus.read_byte_data(self.address, 0x00) &  0b00111110
