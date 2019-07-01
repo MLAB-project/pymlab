@@ -61,7 +61,6 @@ i=0
 try:
     while True:
         interrupts = sensor.getInterrupts()
-#        interrupts = {"first":True, "secodnd":False, "third":False}
         if any(value == True for value in interrupts.values()):
 
             print("sINTer:", interrupts, i)
