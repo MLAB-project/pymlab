@@ -48,7 +48,7 @@ sensor.calib_rco()
 
 sensor.setWDTH(1)
 sensor.setNoiseFloor(3)
-sensor.setIndoor(False)
+sensor.setIndoor(True)
 sensor.setSpikeRejection(0)
 sensor.setMaskDist(True)
 
