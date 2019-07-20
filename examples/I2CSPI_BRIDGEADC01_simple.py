@@ -325,13 +325,6 @@ try:
 
     print "Zero scale calibration completed.. Start reading the data.."
 
+except KeyboardInterrupt:
+    sys.exit(0)
 
-finally:
-    timer = app.Timer(connect=update, interval=0)
-    timer.start()
-
-
-if __name__ == '__main__':
-    import sys
-    if sys.flags.interactive != 1:
-        app.run()
