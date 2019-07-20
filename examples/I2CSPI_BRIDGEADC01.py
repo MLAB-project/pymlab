@@ -18,21 +18,6 @@ import numpy as np
 LOGGER = logging.getLogger(__name__)
 
 def update(ev):
-    scale1.setMode(
-                 mode = scale1.AD7730_SCONVERSION_MODE
-                ,polarity = scale1.AD7730_UNIPOLAR_MODE
-                ,den = scale1.AD7730_IODISABLE_MODE
-                ,iovalue = 0b00
-                ,data_length = scale1.AD7730_24bitDATA_MODE
-                ,reference = scale1.AD7730_REFERENCE_5V
-                ,input_range = scale1.AD7730_80mVIR_MODE
-                ,clock_enable = scale1.AD7730_MCLK_ENABLE_MODE
-                ,burn_out = scale1.AD7730_BURNOUT_DISABLE
-                ,channel = scale1.AD7730_AIN1P_AIN1N
-            )
-
-    while scale1.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
-        time.sleep(0.05)
 
     channel1 = scale1.getData()
 
