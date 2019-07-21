@@ -106,6 +106,8 @@ class Config(object):
             "altimet01": altimet.ALTIMET01,
             "SDP600": altimet.SDP6XX,
             "SDP610": altimet.SDP6XX,
+            "SDP33": altimet.SDP3X,
+
             "acount02": acount.ACOUNTER02,
             "motor01": motor.MOTOR01,
             "clkgen01": clkgen.CLKGEN01,

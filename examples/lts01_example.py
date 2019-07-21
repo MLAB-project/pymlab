@@ -15,7 +15,7 @@ from pymlab import config
 
 if len(sys.argv) != 2:
     sys.stderr.write("Invalid number of arguments.\n")
-    sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
+    sys.stderr.write("Usage: %s Port\n" % (sys.argv[0], ))
     sys.exit(1)
 
 port    = sys.argv[1]
@@ -25,7 +25,7 @@ address = 0x48
 cfg = config.Config(
     i2c = {
         "port": port,
-        "device": None,  # here you can explicitly set I2C driver with 'hid', 'smbus', 'serial'
+        "device": "smbus",  # here you can explicitly set I2C driver with 'hid', 'smbus', 'serial'
         "serial_number": None,
     },
 

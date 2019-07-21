@@ -6,6 +6,8 @@ import time
 import datetime
 import sys
 import numpy as np
+import os
+
 #import logging 
 #logging.basicConfig(level=logging.DEBUG) 
 
@@ -52,8 +54,8 @@ cfglist=[
         },
         bus = [
             {
-                "name":          "pitot_tube",
-                "type":        "SDP610",
+                "name":        "pitot_tube",
+                "type":        "SDP33",
             },
         ],
     ),
@@ -71,19 +73,39 @@ time.sleep(0.5)
 
 #### Data Logging ###################################################
 
+log_name = ("SDP33_tp_log_%s.txt" % datetime.datetime.utcfromtimestamp(time.time()).isoformat())
+# filepath = "/home/jakub/SDP33_logs/" + log_name
+filepath = "SDP33_logs/" + log_name
+log_file = open(filepath, "w")
+# log_file = open(log_name, "w")
+
 sys.stdout.write("MLAB pitot-static tube data acquisition system started \n")
-
 gauge.route()
+gauge.reset()
+gauge.start_meas()
 
-dp = np.array([gauge.get_p()])
+num = 0
+
 
 try:
         while True:
             gauge.route()
-            dp = np.append(dp, gauge.get_p())
-            sys.stdout.write("Pressure Diff: %f \n" % np.nanmean(dp))
-            sys.stdout.flush()
-            time.sleep(0.1)
+
+            dp, t = gauge.get_tp()
+            ts = time.time()
+            msg = ("%d;%0.4f;%0.2f;%0.3f\n"% (num, ts, dp, t))
+            log_file.write(msg)
+            
+
+            if num % (25) == 0 :
+                sys.stdout.write("%d; %0.3f; Pressure Diff: %+4.2f [Pa]; Temp %2.3f [degC] \n" % (num, ts, dp, t))
+            # sys.stdout.flush()
+                # sys.stdout.write(msg)
+                # sys.stdout.flush()
+
+            num += 1
+            
+            # time.sleep(0.5)
             
 except KeyboardInterrupt:
     sys.exit(0)

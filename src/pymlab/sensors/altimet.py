@@ -96,7 +96,6 @@ class ALTIMET01(Device):
         return t
 
 
-
 class SDP6XX(Device):
     """
     Python library for Sensirion SDP6XX/5xx differential preassure sensors.
@@ -132,20 +131,20 @@ class SDP6XX(Device):
         return (press_data/60.0)
 
 
-# bit;        // bit mask
-# crc = 0x00; // calculated checksum
-# byteCtr;    // byte counter
+    # bit;        // bit mask
+    # crc = 0x00; // calculated checksum
+    # byteCtr;    // byte counter
 
-#          # calculates 8-Bit checksum with given polynomial
-#          for(byteCtr = 0; byteCtr < nbrOfBytes; byteCtr++)
-#            crc ^= (data[byteCtr]);
-#            for(bit = 8; bit > 0; --bit)
-#              if(crc & 0x80) crc = (crc << 1) ^ POLYNOMIAL;
-#              else           crc = (crc << 1);
+    #          # calculates 8-Bit checksum with given polynomial
+    #          for(byteCtr = 0; byteCtr < nbrOfBytes; byteCtr++)
+    #            crc ^= (data[byteCtr]);
+    #            for(bit = 8; bit > 0; --bit)
+    #              if(crc & 0x80) crc = (crc << 1) ^ POLYNOMIAL;
+    #              else           crc = (crc << 1);
 
-          # verify checksum
-#          if(crc != checksum) return CHECKSUM_ERROR;
-#          else                return NO_ERROR;
+              # verify checksum
+    #          if(crc != checksum) return CHECKSUM_ERROR;
+    #          else                return NO_ERROR;
 
     def reset(self):
         '''
@@ -157,9 +156,100 @@ class SDP6XX(Device):
         time.sleep(0.01)
 
 
+
+
+class SDP3X(Device):
+    """
+    Python library for Sensirion SDP3X differential pressure sensors.
+    """
+
+    def __init__(self, parent = None, address = 0x21, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+
+        self.TRIGGER_MEASUREMENT = [0x36, 0x1E]              # command: trigger differential pressure measurement
+        self.SOFT_RESET          = 0x06              # command: soft reset
+        self.READ_PRODUCT_IDENTIFIER1 = [0x36, 0x7c]      # command: read product idetifier register
+        self.READ_PRODUCT_IDENTIFIER2 = [0xE1, 0x02] 
+                
+
+    def get_p(self):
+        raw_data = self.bus.read_i2c_block(self.address, 2)
+        press_data = raw_data[0]<<8 | raw_data[1]
+
+        if (press_data & 0x1000):
+            press_data -= 65536
+
+        press_sc_f = 20.0
+
+        return(press_data/press_sc_f)
+
+
+    def get_t(self):
+        raw_data = self.bus.read_i2c_block(self.address, 5)
+        temp_data = data[3]<<8 | data[4]
+        temp_sc_f = 200.0
+
+        return(temp_data/temp_sc_f)
+
+
+    def get_tp(self):
+        raw_data = self.bus.read_i2c_block(self.address, 5)
+        press_data = raw_data[0]<<8 | raw_data[1]
+        temp_data = raw_data[3]<<8 | raw_data[4]
+
+        if (press_data & 0x1000):
+            press_data -= 65536
+
+        press_sc_f = 20.0
+        temp_sc_f = 200.0
+
+        return((press_data/press_sc_f), (temp_data/temp_sc_f))
+
+
+        # print(data)
+
+        # self.bus.write_byte_data(self.address, self.READ_PRODUCT_IDENTIFIER1[0], self.READ_PRODUCT_IDENTIFIER1[1]);    # trigger measurement
+        # self.bus.write_byte_data(self.address, self.READ_PRODUCT_IDENTIFIER2[0], self.READ_PRODUCT_IDENTIFIER2[1]);    # trigger measurement
+        
+        # id_data = self.bus.read_i2c_block_data(self.READ_PRODUCT_IDENTIFIER2[0], self.READ_PRODUCT_IDENTIFIER2[1], 18)
+
+        # print(id_data)
+        # data1 = self.bus.read_byte(self.address)
+        # print(data1)
+        # print(data)
+
+        # data = self.bus.read_i2c_block(self.address, 9)
+
+
+
+
+        # self.bus.write_i2c_block(self.address, self.READ_PRODUCT_IDENTIFIER1); 
+        # id_data = self.bus.read_i2c_block_data(self.address, self.READ_PRODUCT_IDENTIFIER2, 18); 
+
+        # id_data = self.bus.read_i2c_block(self.address, 18)
+
+        # product_number = (id_data[0] << 24) | (id_data[1] << 16) | (id_data[3] << 8) | id_data [4]
+
+        # print("product_number: ")
+        # print(hex(product_number))
+
+        # return (press_data/20.0)
+
+    def start_meas(self):
+        self.bus.write_byte_data(self.address, self.TRIGGER_MEASUREMENT[0], self.TRIGGER_MEASUREMENT[1]);    # trigger measurement
+        time.sleep(0.1)
+
+    def reset(self):
+        self.bus.write_byte(0x00, self.SOFT_RESET);    #  soft reset of the sensor
+        time.sleep(0.1)
+        # print("RESET DONE")
+
+
+
 def main():
     print(__doc__)
 
 
 if __name__ == "__main__":
     main()
+
