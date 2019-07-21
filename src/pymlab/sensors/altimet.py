@@ -193,17 +193,25 @@ class SDP3X(Device):
 
 
     def get_tp(self):
-        raw_data = self.bus.read_i2c_block(self.address, 5)
+        raw_data = self.bus.read_i2c_block(self.address, 9)
         press_data = raw_data[0]<<8 | raw_data[1]
         temp_data = raw_data[3]<<8 | raw_data[4]
+       
 
-        if (press_data & 0x1000):
+        if (press_data > 0x7fff):
             press_data -= 65536
+
+        if (temp_data > 0x7fff):
+            temp_data -= 65536
 
         press_sc_f = 20.0
         temp_sc_f = 200.0
 
-        return((press_data/press_sc_f), (temp_data/temp_sc_f))
+        # dbg_raw_data_1 = (raw_data[0] << 16) | (raw_data[1] << 8) | (raw_data[2])
+        # dbg_raw_data_2 = (raw_data[3] << 16) | (raw_data[4] << 8) | (raw_data[5])
+        # dbg_raw_data_3 = (raw_data[6] << 16) | (raw_data[7] << 8) | (raw_data[8])
+
+        return((press_data/press_sc_f), (temp_data/temp_sc_f), raw_data[0], raw_data[1], raw_data[2], raw_data[3], raw_data[4], raw_data[5], raw_data[6], raw_data[7], raw_data[8])
 
 
         # print(data)
