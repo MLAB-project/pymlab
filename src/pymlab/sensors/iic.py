@@ -8,6 +8,8 @@ import time
 import struct
 import logging
 import six
+import subprocess
+import ast
 
 
 LOGGER = logging.getLogger(__name__)
@@ -517,6 +519,65 @@ class SerialDriver(Driver): # Driver for I2C23201A modul with SC18IM700 master I
         raise NotImplementedError()
 
 
+class RemoteDriver(Driver):
+    def __init__(self, host, remote_device):
+        import sys
+
+        hosts = host if isinstance(host, list) else [host]
+        self.host = hosts[-1]
+
+        cmd = [arg for h in hosts for arg in ["ssh", h]] \
+              + ["python", "-m", "pymlab.iic_server"]
+        self.sp = subprocess.Popen(cmd, stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE,
+                                   stderr=sys.stderr)
+
+        self._remote_call('load_driver', remote_device)
+
+    def _remote_call(self, method, *args):
+        self.sp.stdin.write(repr((method,) + args) + '\n')
+        line = self.sp.stdout.readline().strip()
+        try:
+            reply = ast.literal_eval(line)
+            assert isinstance(reply, dict) and 'good' in reply
+        except Exception as e:
+            raise RuntimeError('%s sent invalid reply %r' % (self.host, line))
+
+        if reply.get('good', False):
+            return reply.get('result', None)
+        else:
+            raise RuntimeError('%s raised exception: %s' \
+                               % (self.host, reply.get('exception', '<missing>')))
+
+
+    def write_byte(self, address, value):
+        return self._remote_call('write_byte', address, value)
+
+    def read_byte(self, address):
+        return self._remote_call('read_byte', address)
+
+    def write_byte_data(self, address, register, value):
+        return self._remote_call('write_byte_data', address, register, value)
+
+    def read_byte_data(self, address, register):
+        return self._remote_call('read_byte_data', address, register)
+
+    def write_word_data(self, address, register, value):
+        return self._remote_call('write_word_data', address, register, value)
+
+    def read_word_data(self, address, register):
+        return self._remote_call('read_word_data', address, register)
+
+    def write_block_data(self, address, register, value):
+        return self._remote_call('write_block_data', address, register, value)
+
+    def read_block_data(self, address, register):
+        return self._remote_call('read_block_data', address, register)
+
+    def scan_bus(self):
+        return self._remote_call('scan_bus')
+
+
 
 DRIVER = None
 
@@ -574,6 +635,8 @@ def load_driver(**kwargs):
             except ImportError:
                     LOGGER.warning("Failed to import 'SC18IM700' driver. I2C232 driver cannot be loaded for port %s." %(serial_port))
 
+    if device == "remote":
+        return RemoteDriver(kwargs['host'], kwargs.get("remote_device", {}))
 
     raise RuntimeError("Failed to load I2C driver. Enable logging for more details.")
 
