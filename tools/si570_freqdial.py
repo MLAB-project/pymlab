@@ -172,9 +172,15 @@ sizer.AddF(dial, wx.SizerFlags().Expand().Border())
 import time
 def thread():
     from pymlab import config
+    import sys
+
+    if len(sys.argv) != 2:
+            sys.stderr.write("Invalid number of arguments. Missing path to a config file!\n")
+            sys.stderr.write("Usage: %s i2c_bus.cfg\n" % (sys.argv[0], ))
+            sys.exit(1)
 
     cfg = config.Config()
-    cfg.load_file("bus_config.py")
+    cfg.load_file(sys.argv[1])
     cfg.initialize()
     fgen = cfg.get_device("clkgen")
     fgen.route()
@@ -210,8 +216,8 @@ def thread():
 t = threading.Thread(target=thread)
 t.start()
 
-top.SetMinSize(wx.Size(440, 90))
-top.SetMaxSize(wx.Size(440, 90))
+top.SetMinSize(wx.Size(440, 120))
+top.SetMaxSize(wx.Size(440, 120))
 top.SetSizer(sizer)
 top.Layout()
 top.Fit()
