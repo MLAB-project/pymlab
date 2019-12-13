@@ -170,49 +170,41 @@ class SDP3X(Device):
         self.SOFT_RESET          = 0x06              # command: soft reset
         self.READ_PRODUCT_IDENTIFIER1 = [0x36, 0x7c]      # command: read product idetifier register
         self.READ_PRODUCT_IDENTIFIER2 = [0xE1, 0x02] 
+        # self.dpsf = 60.0 # differential pressure sensor scaling factor (dpsf = 60 means resolution of 16.666  mPa / LSB)
+        self.tsf = 200.0 #temperature scaling factor (same for all SDP3X sensors)
                 
 
     def get_p(self):
-        raw_data = self.bus.read_i2c_block(self.address, 2)
+        raw_data = self.bus.read_i2c_block(self.address, 9)
         press_data = raw_data[0]<<8 | raw_data[1]
 
         if (press_data & 0x1000):
             press_data -= 65536
+        
+        dpsf = float(raw_data[6]<<8 | raw_data[7]) # SDP3X sensor scaling factor obtained from byte 6 and 7 of read message
 
-        press_sc_f = 20.0
-
-        return(press_data/press_sc_f)
-
+        return(press_data/dpsf)
 
     def get_t(self):
         raw_data = self.bus.read_i2c_block(self.address, 5)
         temp_data = data[3]<<8 | data[4]
-        temp_sc_f = 200.0
 
-        return(temp_data/temp_sc_f)
-
+        return(temp_data/tsf)
 
     def get_tp(self):
         raw_data = self.bus.read_i2c_block(self.address, 9)
         press_data = raw_data[0]<<8 | raw_data[1]
         temp_data = raw_data[3]<<8 | raw_data[4]
-       
 
         if (press_data > 0x7fff):
             press_data -= 65536
-
+        
         if (temp_data > 0x7fff):
             temp_data -= 65536
 
-        press_sc_f = 20.0
-        temp_sc_f = 200.0
+        dpsf = float(raw_data[6]<<8 | raw_data[7]) # SDP3X sensor scaling factor obtained from byte 6 and 7 of read message
 
-        # dbg_raw_data_1 = (raw_data[0] << 16) | (raw_data[1] << 8) | (raw_data[2])
-        # dbg_raw_data_2 = (raw_data[3] << 16) | (raw_data[4] << 8) | (raw_data[5])
-        # dbg_raw_data_3 = (raw_data[6] << 16) | (raw_data[7] << 8) | (raw_data[8])
-
-        return((press_data/press_sc_f), (temp_data/temp_sc_f), raw_data[0], raw_data[1], raw_data[2], raw_data[3], raw_data[4], raw_data[5], raw_data[6], raw_data[7], raw_data[8])
-
+        return((press_data/dpsf), (temp_data/self.tsf))
 
         # print(data)
 
@@ -227,9 +219,6 @@ class SDP3X(Device):
         # print(data)
 
         # data = self.bus.read_i2c_block(self.address, 9)
-
-
-
 
         # self.bus.write_i2c_block(self.address, self.READ_PRODUCT_IDENTIFIER1); 
         # id_data = self.bus.read_i2c_block_data(self.address, self.READ_PRODUCT_IDENTIFIER2, 18); 
@@ -251,7 +240,6 @@ class SDP3X(Device):
         self.bus.write_byte(0x00, self.SOFT_RESET);    #  soft reset of the sensor
         time.sleep(0.1)
         # print("RESET DONE")
-
 
 
 def main():
