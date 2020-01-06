@@ -7,7 +7,6 @@ import math
 import time
 import sys
 import logging
-import time
 
 from pymlab.sensors import Device
 
@@ -374,3 +373,747 @@ class MPU6050(Device):
         ry = -math.degrees(radians)
 
         return (rx, ry)
+
+
+
+class WINDGAUGE03A(Device):
+
+    def __init__(self, parent = None, address = 0x68, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+    
+        self.SDP33_i2c_address = 0x21
+        self.mag_i2c_address = 0x0C
+
+        ## USER BANK 0 REGISTERS
+        self.ICM20948_WHO_AM_I = 0x00
+        self.ICM20948_USER_CTRL = 0x03
+        self.ICM20948_LP_CONFIG = 0x05
+        self.ICM20948_PWR_MGMT_1 = 0x06
+        self.ICM20948_PWR_MGMT_2 = 0x07
+        self.ICM20948_INT_PIN_CFG = 0x0F
+        self.ICM20948_INT_ENABLE = 0x10
+        self.ICM20948_I2C_MST_STATUS = 0x17
+        self.ICM20948_ACEL_XOUT_H = 0x2D
+        self.ICM20948_ACEL_XOUT_L = 0x2E
+        self.ICM20948_ACEL_YOUT_H = 0x2F
+        self.ICM20948_ACEL_YOUT_L = 0x30
+        self.ICM20948_ACEL_ZOUT_H = 0x31
+        self.ICM20948_ACEL_XOUT_L = 0x32
+        self.ICM20948_GYRO_XOUT_H = 0x33
+        self.ICM20948_GYRO_XOUT_L = 0x34
+        self.ICM20948_GYRO_YOUT_H = 0x35
+        self.ICM20948_GYRO_YOUT_L = 0x36
+        self.ICM20948_GYRO_ZOUT_H = 0x37
+        self.ICM20948_GYRO_XOUT_L = 0x38
+        self.ICM20948_TEMP_OUT_H = 0x39
+        self.ICM20948_TEMP_OUT_L = 0x3A
+        self.ICM20948_EXT_SLV_SENS_DATA_00 = 0x3B
+
+        # USER BANK 2 REGISTERS
+        self.ICM20948_GYRO_CONFIG = 0x01
+        self.ICM20948_ACEL_CONFIG = 0x14
+
+        ## USER BANK 3 REGISTERS
+        self.ICM20948_I2C_SLV0_ADDR = 0x03
+        self.ICM20948_I2C_SLV0_REG = 0x04 # I2C slave 0 register address from where to begin data transfer.
+        self.ICM20948_I2C_SLV0_CTRL  = 0x05
+        self.ICM20948_I2C_SLV0_DO = 0x06
+
+        self.ICM20948_I2C_SLV1_ADDR = 0x07
+        self.ICM20948_I2C_SLV1_REG = 0x08 # I2C slave 1 register address from where to begin data transfer.
+        self.ICM20948_I2C_SLV1_CTRL  = 0x09
+        self.ICM20948_I2C_SLV1_DO = 0x0A
+
+        ## USER BANK REGISTERS 0-3
+        self.ICM20948_REG_BANK_SEL = 0x7F # 0
+
+    def usr_bank_sel(self, usr_bank_reg):
+        self.bus.write_byte_data(self.address, self.ICM20948_REG_BANK_SEL, usr_bank_reg << 4)
+
+    def write_icm20948_reg_data(self, reg_address, reg_usr_bank, value):
+        self.usr_bank_sel(reg_usr_bank)
+        self.bus.write_byte_data(self.address, reg_address, value)
+
+    def read_icm20948_reg_data(self, reg_address, reg_usr_bank, num_of_bytes):
+        self.usr_bank_sel(reg_usr_bank)
+        if num_of_bytes > 1:
+            return(self.bus.read_i2c_block_data(self.address, reg_address, num_of_bytes))
+        else:
+            return((self.bus.read_byte_data(self.address, reg_address)))
+
+    def reset (self):
+        self.write_icm20948_reg_data(self.ICM20948_PWR_MGMT_1, 0, 0x80) # reset device and register values
+        time.sleep(1)
+
+    def initialize (self): 
+        # self.bus.write_byte_data(self.address, self.ICM20948_PWR_MGMT_2, 0x3f) # gyro and accel off
+        # self.write_icm20948_reg_data(self.ICM20948_PWR_MGMT_2, 0, 0x00) # gyro and accel on
+        self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x00) # I2C_MST_EN set to 0
+        self.write_icm20948_reg_data(self.ICM20948_INT_PIN_CFG, 0, 0x02) # BYPASS ENABLE
+        # self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x02) # I2C_MST_RST set to 1 (bit auto clears)
+        self.write_icm20948_reg_data(self.ICM20948_PWR_MGMT_1, 0, 0x01) # clear sleep bit and wake up device
+        time.sleep(0.1)
+
+
+    def i2c_master_init (self):
+        # self.write_icm20948_reg_data(self.ICM20948_INT_ENABLE, 0, 0xFF) # enable i2c master interrupt to propagate to interrupt pin1
+        # self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x02) # I2C_MST_RST
+        # time.sleep(0.1)
+
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x20) # When bit 5 set (0x20), the transaction does not write a register value, it will only read data, or write data
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, self.SDP33_i2c_address)
+
+        # self.write_icm20948_reg_data(self.ICM20948_LP_CONFIG, 0, 0x00) #disable master's duty cycled mode
+        self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x20) # I2C_MST_EN set to 1
+
+
+    def i2c_master_write (self, slv_id, slv_addr, data_out, slv_reg ): # 
+        self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x20)                                     # USER_CTRL[5] (I2C_MST_EN) = 1
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR + (slv_id * 4), 3, slv_addr | (1 << 7))   # I2C_SLVX_ADDR[6:0] = (slv_addr | I2C_SLV0_RNW) - slave addres | R/W bit MSB (1)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_DO + (slv_id * 4), 3, data_out)                # I2C_SLVX_DO[7:0](0-15) = data_out 
+        if slv_reg is not None:
+            self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_REG + (slv_id * 4), 3, slv_reg)               # I2C_SLVX_REG[7:0] = slv_reg
+            self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL + (slv_id * 4), 3, 0xA0)              # I2C_SLVX_CTRL[7] (I2C_SLVX_EN) = 1, I2C_SLVX_CTRL[5] (I2C_SLVX_REG_EN) = 1
+        else:
+            self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL + (slv_id * 4), 3, 0x80)              # I2C_SLVX_CTRL[7] (I2C(0-15)_SLVX_EN) = 1, I2C_SLVX_CTRL[5] (I2C_SLVX_REG_EN) = 0
+        self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x00)                                     # USER_CTRL[5] (I2C_MST_EN) = 0
+        time.sleep(0.1)
+
+    def i2c_master_read (self, slv_id, slv_addr, slv_rd_len, slv_reg ): # 
+        self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x20)                                     # USER_CTRL[5] (I2C_MST_EN) = 1
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR + (slv_id * 4), 3, slv_addr | (1 << 7))   # I2C_SLVX_ADDR[6:0] = (slv_addr | I2C_SLV0_RNW) - slave addres | R/W bit MSB (0) 
+        if slv_reg is not None:
+            self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_REG + (slv_id * 4), 3, slv_reg)            # I2C_SLVX_REG[7:0] = slv_reg
+            self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL + (slv_id * 4), 3, 0xA0 | slv_rd_len) # I2C_SLVX_CTRL[7] (I2C_SLVX_EN) = 1, I2C_SLVX_CTRL[5] (I2C_SLVX_REG_EN) = 1, I2C_SLVX_LENG[3:0] = slv_rd_len (number of bytes to be read from slave (0-15))
+        else:
+            self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL + (slv_id * 4), 3, 0x80 | slv_rd_len) # I2C_SLVX_CTRL[7] (I2C_SLVX_EN) = 1, I2C_SLVX_CTRL[5] (I2C_SLVX_REG_EN) = 0, I2C_SLVX_LENG[3:0] = slv_rd_len (number of bytes to be read from slave (0-15))
+        time.sleep(0.1)
+
+    def i2c_master_sdp33_init(self):
+        self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x20) # I2C_MST_EN set to 1
+        # time.sleep(0.01)
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_DO, 3, 0x04)
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_REG, 3, 0x31) # adress of the slave register master will write to 
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_ADDR, 3, 0x0C) # R/W bit MSB - write operation
+        # time.sleep(gi)
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_CTRL, 3, 0xA9)   # I2C_SLV1_EN, I2C_SLV1_REG_DIS, I2C_SLV1_LENG[3:0] 
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_CTRL, 3, 0x00)   # I2C_SLV0_DIS
+
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_ADDR, 3, 0xA1) # SPD3X i2c address =0x21 | R/W bit MSB - read (1)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_CTRL, 3, 0xA9)   # I2C_SLV1_EN, I2C_SLV1_REG_EN, I2C_SLV1_LENG[3:0] 
+        time.sleep(0.1)
+
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_REG, 3, 0x00) # adress of the first slave register master will start reading from 
+        # print("reading", end = ' ')
+        # print(self.read_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 1))
+        # time.sleep(gi)
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_CTRL, 3, 0x8f) 
+
+    def i2c_master_mag_init (self):
+
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_DO, 3, 0x01) 
+        # self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x00) # I2C_MST_EN set to 0, I2C_MST_RST set to 1
+        # time.sleep(gi)
+        self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x20) # I2C_MST_EN set to 0, I2C_MST_RST set to 1
+        # time.sleep(gi)
+        # self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x02) # I2C_MST_EN set to 0, I2C_MST_RST set to 1
+        # time.sleep(0.1)
+        
+
+        ## MAGNETOMETER SOFT RESET
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_DO, 3, 0x01) 
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_REG, 3, 0x32) # adress of the slave register master will write to 
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 0x0C) # R/W bit MSB - write operation
+        # # time.sleep(gi)
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x8a)   # I2C_SLV0_EN, I2C_SLV0_REG_EN, I2C_SLV0_LENG[3:0] = 9
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x00)   # I2C_SLV0_DIS
+
+        # time.sleep(gi)
+
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_DO, 3, 0x04)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_REG, 3, 0x31) # adress of the slave register master will write to 
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 0x0C) # R/W bit MSB - write operation
+        # time.sleep(gi)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x8a)   # I2C_SLV0_EN, I2C_SLV0_REG_EN, I2C_SLV0_LENG[3:0] = 9
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x00)   # I2C_SLV0_DIS
+
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 0x8C) # R/W bit MSB
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_REG, 3, 0x00) # adress of the first slave register master will start reading from 
+        # print("reading", end = ' ')
+        # print(self.read_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 1))
+        # time.sleep(gi)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x8d)   # I2C_SLV0_EN, I2C_SLV0_REG_EN, I2C_SLV0_LENG[3:0] = 9
+        # print(self.read_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 1))
+        # self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x20) # I2C_MST_EN set to 1
+        time.sleep(0.1)
+        # time.sleep(gi)
+
+    def get_temp(self):
+        room_temp_offset = 21.0
+        tem_sens = 333.87
+        temp_raw_data = self.read_icm20948_reg_data(self.ICM20948_TEMP_OUT_H, 0, 2)
+        temp_raw = ((temp_raw_data[0] << 8) + temp_raw_data[1])
+        return(((temp_raw - room_temp_offset)/temp_sens) + room_temp_offset)
+
+    def get_accel(self):
+        accel_sens = float((1 << (3 - (self.read_icm20948_reg_data(self.ICM20948_ACEL_CONFIG, 2, 1) & 0x6))) * 2048)
+        accel_raw = self.read_icm20948_reg_data(self.ICM20948_ACEL_XOUT_H, 0, 6)
+        accel_x_raw = ((accel_raw[0] << 8) + accel_raw_[1])
+        accel_y_raw = ((accel_raw[2] << 8) + accel_raw_[3])
+        accel_z_raw = ((accel_raw[4] << 8) + accel_raw_[5])
+
+        if accel_x_raw > 0x7fff:
+            accel_x_raw -= 65536
+        if accel_y_raw > 0x7fff:
+            accel_y_raw -= 65536
+        if accel_z_raw > 0x7fff:
+            accel_z_raw -= 65536
+
+        return((accel_x_raw / accel_sens), (accel_y_raw / accel_sens), (accel_z_raw / accel_sens) )
+
+    def get_gyro(self):
+        gyro_sens = float((1 << (3 - (self.read_icm20948_reg_data(self.ICM20948_GYRO_CONFIG, 2, 1) & 0x6))) * 16.4)
+        gyro_raw = self.read_icm20948_reg_data(self.ICM20948_GYRO_XOUT_H, 0, 6)
+        gyro_x_raw = ((gyro_raw[0] << 8) + gyro_raw_[1])
+        gyro_y_raw = ((gyro_raw[2] << 8) + gyro_raw_[3])
+        gyro_z_raw = ((gyro_raw[4] << 8) + gyro_raw_[5])
+
+        if gyro_x_raw > 0x7fff:
+            gyro_x_raw -= 65536
+        if gyro_y_raw > 0x7fff:
+            gyro_y_raw -= 65536
+        if gyro_z_raw > 0x7fff:
+            gyro_z_raw -= 65536
+
+        return((gyro_x_raw / gyro_sens), (gyro_y_raw / gyro_sens), (gyro_z_raw / gyro_sens))
+
+    
+    def SDP33_write (self, SDP33_i2c_address, command):
+        self.bus.write_i2c_block_data(self.SDP33_i2c_address, command)
+
+
+    def SDP33_read (self, SDP33_i2c_address, command):
+        # write = i2c_msg.write(SDP33_i2c_address, command)
+        # read = i2c_msg.read(SDP33_i2c_address, 9)
+        
+                # raw_data = bus2.i2c_rdwr(write, read)
+        self.bus2.write_i2c_block_data(self, self.SDP33_i2c_address, 0, [0x36, 0x24])
+        raw_data = self.bus2.read_i2c_block_data(self, self.SDP33_i2c_address, 9)        
+        return(raw_data)
+
+    def get_mag(self, cal_available):
+
+        if (cal_available):
+            cal_file = open("ICM20948_mag_cal.txt", "r")
+            cal_consts = cal_file.readline().split(",")
+
+            offset_x = float(cal_consts[0])
+            offset_y = float(cal_consts[1])
+            offset_z = float(cal_consts[2])
+
+            scale_x = float(cal_consts[3])
+            scale_y = float(cal_consts[4])
+            scale_z = float(cal_consts[5])
+
+            # print(str(offset_x)+"\n")
+            # print(str(offset_y)+"\n")
+            # print(str(offset_z)+"\n")
+
+            # print(str(scale_x)+"\n")
+            # print(str(scale_y)+"\n")
+            # print(str(scale_z)+"\n")
+        else:
+            offset_x, offset_y, offset_z = 0, 0, 0
+            scale_x, scale_y, scale_z = 1, 1, 1
+
+
+
+        mag_raw_data = self.read_icm20948_reg_data(self.ICM20948_EXT_SLV_SENS_DATA_00, 0, 13)
+
+        magX = (mag_raw_data[6] << 8) + mag_raw_data[5]
+        magY = (mag_raw_data[8] << 8) + mag_raw_data[7]
+        magZ = (mag_raw_data[10] << 8) + mag_raw_data[9]
+
+        if magX > 0x7fff:
+            magX -= 65536
+        if magY > 0x7fff:
+            magY -= 65536
+        if magZ > 0x7fff:
+            magZ -= 65536
+        
+        mag_scf = 4912/32752.0
+
+        # print(magX)
+        # print(((magX*mag_scf) - offset_x) * scale_x)
+
+        
+
+        return(((magX*mag_scf) - offset_x) * scale_x, ((magY*mag_scf) - offset_y) * scale_y, ((magZ*mag_scf) - offset_z)*scale_z)
+
+    def calib_mag(self, calib_time):
+        try:
+            decision = False
+            print("\nDo you wish to perform new magnetometer calibration? Old calibration data will be lost!")
+            
+                
+            while not decision:
+                start_cal =  raw_input("[Y/N]\n")
+                if (start_cal == 'N') or (start_cal == 'n'):
+                    print("\nCalibration canceled, no new calibration values saved.\n\n")
+                    sys.exit(1)
+                elif (start_cal == 'Y') or (start_cal == 'y'):
+                    decision = True
+
+            self.i2c_master_mag_init()
+            delay = 5
+            print("\nStarting calibration in %d seconds with duration of %d seconds!\n" % (delay,calib_time))
+            time.sleep(1)
+            for i in range(delay):
+                print(str(delay-i))
+                time.sleep(1)
+            
+            print("Calibration has started!\n")            
+
+            t_end = time.time() + calib_time
+            mag_x = []
+            mag_y = []
+            mag_z = []
+
+            while time.time() < t_end:
+                mag_x_i, mag_y_i, mag_z_i = self.get_mag(False)
+                mag_x.append(mag_x_i)
+                mag_y.append(mag_y_i)
+                mag_z.append(mag_z_i)
+                print("%f,%f,%f\n" % (mag_x_i, mag_y_i, mag_z_i))
+         
+
+            ### HARDIRON COMPAS COMPENSATION
+          
+            offset_x = (max(mag_x) + min(mag_x)) / 2
+            offset_y = (max(mag_y) + min(mag_y)) / 2
+            offset_z = (max(mag_z) + min(mag_z)) / 2
+
+            ### SOFTIRON COMPASS COMPENSATION
+
+            avg_delta_x = (max(mag_x) - min(mag_x)) / 2
+            avg_delta_y = (max(mag_y) - min(mag_y)) / 2
+            avg_delta_z = (max(mag_z) - min(mag_z)) / 2
+
+            avg_delta = (avg_delta_x + avg_delta_y + avg_delta_z) / 3
+
+            scale_x = avg_delta / avg_delta_x
+            scale_y = avg_delta / avg_delta_y
+            scale_z = avg_delta / avg_delta_z
+
+            # sys.stdout.write(str(offset_x)+"\n")
+            # sys.stdout.write(str(offset_y)+"\n")
+            # sys.stdout.write(str(offset_z)+"\n")
+
+            # sys.stdout.write(str(scale_x)+"\n")
+            # sys.stdout.write(str(scale_y)+"\n")
+            # sys.stdout.write(str(scale_z)+"\n")
+
+            decision = False
+            print("\nFinished. Do you wish to save calibration data?")
+            
+            while not decision:
+                start_cal =  raw_input("[Y/N]\n")
+                if (start_cal == 'N') or (start_cal == 'n'):
+                    print("\nCalibration canceled, no new calibration values saved.\n\n")
+                    sys.exit(1)
+                elif (start_cal == 'Y') or (start_cal == 'y'):
+                    decision = True
+
+        except KeyboardInterrupt:
+                
+            print("\nCalibration canceled, no new calibration values saved.\n\n")
+            sys.exit(0)
+
+        cal_file = open("ICM20948_mag_cal.txt", "w")
+        cal_file.write("%f,%f,%f,%f,%f,%f" % (offset_x, offset_y, offset_z, scale_x, scale_y, scale_z))
+        cal_file.close()
+
+        sys.stdout.write("Calibration successful!\n\n")
+
+
+
+class ICM20948(Device):
+
+    # def __init__(self):
+    def __init__(self, parent = None, address = 0x68, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+    
+        self.SDP33_i2c_address = 0x21
+        self.mag_i2c_address = 0x0C
+
+        ## USER BANK 0 REGISTERS
+        self.ICM20948_WHO_AM_I = 0x00
+        self.ICM20948_USER_CTRL = 0x03
+        self.ICM20948_LP_CONFIG = 0x05
+        self.ICM20948_PWR_MGMT_1 = 0x06
+        self.ICM20948_PWR_MGMT_2 = 0x07
+        self.ICM20948_INT_PIN_CFG = 0x0F
+        self.ICM20948_INT_ENABLE = 0x10
+        self.ICM20948_I2C_MST_STATUS = 0x17
+        self.ICM20948_ACEL_XOUT_H = 0x2D
+        self.ICM20948_ACEL_XOUT_L = 0x2E
+        self.ICM20948_ACEL_YOUT_H = 0x2F
+        self.ICM20948_ACEL_YOUT_L = 0x30
+        self.ICM20948_ACEL_ZOUT_H = 0x31
+        self.ICM20948_ACEL_XOUT_L = 0x32
+        self.ICM20948_GYRO_XOUT_H = 0x33
+        self.ICM20948_GYRO_XOUT_L = 0x34
+        self.ICM20948_GYRO_YOUT_H = 0x35
+        self.ICM20948_GYRO_YOUT_L = 0x36
+        self.ICM20948_GYRO_ZOUT_H = 0x37
+        self.ICM20948_GYRO_XOUT_L = 0x38
+        self.ICM20948_TEMP_OUT_H = 0x39
+        self.ICM20948_TEMP_OUT_L = 0x3A
+        self.ICM20948_EXT_SLV_SENS_DATA_00 = 0x3B
+
+        # USER BANK 2 REGISTERS
+        self.ICM20948_GYRO_CONFIG = 0x01
+        self.ICM20948_ACEL_CONFIG = 0x14
+
+        ## USER BANK 3 REGISTERS
+        self.ICM20948_I2C_SLV0_ADDR = 0x03
+        self.ICM20948_I2C_SLV0_REG = 0x04 # I2C slave 0 register address from where to begin data transfer.
+        self.ICM20948_I2C_SLV0_CTRL  = 0x05
+        self.ICM20948_I2C_SLV0_DO = 0x06
+
+        self.ICM20948_I2C_SLV1_ADDR = 0x07
+        self.ICM20948_I2C_SLV1_REG = 0x08 # I2C slave 1 register address from where to begin data transfer.
+        self.ICM20948_I2C_SLV1_CTRL  = 0x09
+        self.ICM20948_I2C_SLV1_DO = 0x0A
+
+        ## USER BANK REGISTERS 0-3
+        self.ICM20948_REG_BANK_SEL = 0x7F # 0
+
+    def usr_bank_sel(self, usr_bank_reg):
+        self.bus.write_byte_data(self.address, self.ICM20948_REG_BANK_SEL, usr_bank_reg << 4)
+
+    def write_icm20948_reg_data(self, reg_address, reg_usr_bank, value):
+        self.usr_bank_sel(reg_usr_bank)
+        self.bus.write_byte_data(self.address, reg_address, value)
+
+    def read_icm20948_reg_data(self, reg_address, reg_usr_bank, num_of_bytes):
+        self.usr_bank_sel(reg_usr_bank)
+        if num_of_bytes > 1:
+            return(self.bus.read_i2c_block_data(self.address, reg_address, num_of_bytes))
+        else:
+            return((self.bus.read_byte_data(self.address, reg_address)))
+
+    def reset (self):
+        self.write_icm20948_reg_data(self.ICM20948_PWR_MGMT_1, 0, 0x80) # reset device and register values
+        time.sleep(1)
+
+    def initialize (self): 
+        # self.write_icm20948_reg_data( self.ICM20948_REG_BANK_SEL, 0, 0x00) # select user register bank 0
+        # self.bus.write_byte_data(self.address, self.ICM20948_PWR_MGMT_2, 0x3f) # gyro and accel off
+        # self.write_icm20948_reg_data(self.ICM20948_PWR_MGMT_2, 0, 0x00) # gyro and accel on
+        # self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x20) # I2C_MST_EN set to 1
+        # time.sleep(0.1)
+        self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x00) # I2C_MST_EN set to 0
+        # time.sleep(0.01)
+        self.write_icm20948_reg_data(self.ICM20948_INT_PIN_CFG, 0, 0x02) # BYPASS ENABLE
+        # time.sleep(0.1)
+        # self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x00) # I2C_MST_EN set to 0
+        # self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x02) # I2C_MST_RST set to 1 (bit auto clears)
+        # time.sleep(0.1)
+        self.write_icm20948_reg_data(self.ICM20948_PWR_MGMT_1, 0, 0x01) # clear sleep bit and wake up device
+        time.sleep(0.1)
+
+
+    def i2c_master_init (self):
+        # self.write_icm20948_reg_data(self.ICM20948_INT_ENABLE, 0, 0xFF) # enable i2c master interrupt to propagate to interrupt pin1
+        # self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x02) # I2C_MST_RST
+        # time.sleep(0.1)
+
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x20) # When bit 5 set (0x20), the transaction does not write a register value, it will only read data, or write data
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, self.SDP33_i2c_address)
+
+        # self.write_icm20948_reg_data(self.ICM20948_LP_CONFIG, 0, 0x00) #disable master's duty cycled mode
+        self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x20) # I2C_MST_EN set to 1
+
+
+    def i2c_master_write (self, command): # THIS WILL NOT WORK BECAUSE IMU'S MASTER CAPABILITY CAN'T WRITE 2 BYTE COMMAND (ONLY ONE BYTE)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, self.SDP33_i2c_address)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_DO, 3, command >> 8)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, self.SDP33_i2c_address)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_DO, 3, command & 0xFF)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, self.SDP33_i2c_address)
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x87) 
+        # print(self.read_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 1))
+
+    def i2c_master_sdp33_init(self):
+        self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x20) # I2C_MST_EN set to 1
+        # time.sleep(0.01)
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_DO, 3, 0x04)
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_REG, 3, 0x31) # adress of the slave register master will write to 
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_ADDR, 3, 0x0C) # R/W bit MSB - write operation
+        # time.sleep(gi)
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_CTRL, 3, 0xA9)   # I2C_SLV1_EN, I2C_SLV1_REG_DIS, I2C_SLV1_LENG[3:0] 
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_CTRL, 3, 0x00)   # I2C_SLV0_DIS
+
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_ADDR, 3, 0xA1) # SPD3X i2c address =0x21 | R/W bit MSB - read (1)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_CTRL, 3, 0xA9)   # I2C_SLV1_EN, I2C_SLV1_REG_DIS, I2C_SLV1_LENG[3:0] 
+        time.sleep(0.1)
+
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_REG, 3, 0x00) # adress of the first slave register master will start reading from 
+        # print("reading", end = ' ')
+        # print(self.read_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 1))
+        # time.sleep(gi)
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV1_CTRL, 3, 0x8f) 
+
+    def i2c_master_mag_init (self):
+
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_DO, 3, 0x01) 
+        # self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x00) # I2C_MST_EN set to 0, I2C_MST_RST set to 1
+        # time.sleep(gi)
+        self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x20) # I2C_MST_EN set to 0, I2C_MST_RST set to 1
+        # time.sleep(gi)
+        # self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x02) # I2C_MST_EN set to 0, I2C_MST_RST set to 1
+        # time.sleep(0.1)
+        
+
+        ## MAGNETOMETER SOFT RESET
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_DO, 3, 0x01) 
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_REG, 3, 0x32) # adress of the slave register master will write to 
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 0x0C) # R/W bit MSB - write operation
+        # # time.sleep(gi)
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x8a)   # I2C_SLV0_EN, I2C_SLV0_REG_EN, I2C_SLV0_LENG[3:0] = 9
+        # self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x00)   # I2C_SLV0_DIS
+
+        # time.sleep(gi)
+
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_DO, 3, 0x04)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_REG, 3, 0x31) # adress of the slave register master will write to 
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 0x0C) # R/W bit MSB - write operation
+        # time.sleep(gi)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x8a)   # I2C_SLV0_EN, I2C_SLV0_REG_DIS, I2C_SLV0_LENG[3:0] = 9
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x00)   # I2C_SLV0_DIS
+
+
+        
+
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 0x8C) # R/W bit MSB
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_REG, 3, 0x00) # adress of the first slave register master will start reading from 
+        # print("reading", end = ' ')
+        # print(self.read_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 1))
+        # time.sleep(gi)
+        self.write_icm20948_reg_data(self.ICM20948_I2C_SLV0_CTRL, 3, 0x8d)   # I2C_SLV0_EN, I2C_SLV0_REG_EN, I2C_SLV0_LENG[3:0] = 9
+        # print(self.read_icm20948_reg_data(self.ICM20948_I2C_SLV0_ADDR, 3, 1))
+        # self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x20) # I2C_MST_EN set to 1
+        time.sleep(0.1)
+        # time.sleep(gi)
+
+
+    def get_temp(self):
+        RoomTemp_Offset = 21
+        Temp_Sensitivity = 333.87
+        temp_raw_data = self.read_icm20948_reg_data(self.ICM20948_TEMP_OUT_H, 0, 2)
+        MSB = temp_raw_data[0]
+        LSB = temp_raw_data[1]
+        t  = (MSB << 8) + LSB
+        TEMP_degC = ((t - RoomTemp_Offset)/Temp_Sensitivity) + 21
+        return(TEMP_degC)
+
+    def get_accel_x(self):
+        Accel_Sensitivity = float((1 << (3 - (self.read_icm20948_reg_data(self.ICM20948_ACEL_CONFIG, 2, 1) & 0x6))) * 2048)
+        accelX_raw_data = self.read_icm20948_reg_data(self.ICM20948_ACEL_XOUT_H, 0, 2)
+        accelX = ((accelX_raw_data[0] << 8) + accelX_raw_data[1])
+        if accelX > 0x7fff:
+            accelX -= 65536
+        return(accelX / Accel_Sensitivity)
+
+    def get_accel_y(self):
+        Accel_Sensitivity = float((1 << (3 - (self.read_icm20948_reg_data(self.ICM20948_ACEL_CONFIG, 2, 1) & 0x6))) * 2048)
+        accelY_raw_data = self.read_icm20948_reg_data(self.ICM20948_ACEL_YOUT_H, 0, 2)
+        accelY = ((accelY_raw_data[0] << 8) + accelY_raw_data[1])
+        if accelY > 0x7fff:
+            accelY -= 65536
+        return(accelY / Accel_Sensitivity)
+
+    def get_accel_z(self):
+        Accel_Sensitivity = float((1 << (3 - (self.read_icm20948_reg_data(self.ICM20948_ACEL_CONFIG, 2, 1) & 0x6))) * 2048)
+        accelZ_raw_data = self.read_icm20948_reg_data(self.ICM20948_ACEL_ZOUT_H, 0, 2)
+        accelZ = ((accelZ_raw_data[0] << 8) + accelZ_raw_data[1])
+        if accelZ > 0x7fff:
+            accelZ -= 65536
+        return(accelZ / Accel_Sensitivity)
+
+    ## 131; 65.5; 32,8; 16,4
+
+    def get_gyro_x(self):
+        Gyro_Sensitivity = float((1 << (3 - (self.read_icm20948_reg_data(self.ICM20948_GYRO_CONFIG, 2, 1) & 0x6))) * 16.4)
+        gyroX_raw_data = self.read_icm20948_reg_data(self.ICM20948_GYRO_XOUT_H, 0, 2)
+        gyroX = ((gyroX_raw_data[0] << 8) + gyroX_raw_data[1])
+        if gyroX > 0x7fff:
+            gyroX -= 65536
+        return(gyroX / Gyro_Sensitivity)
+
+    def get_gyro_y(self):
+        Gyro_Sensitivity = float((1 << (3 - (self.read_icm20948_reg_data(self.ICM20948_GYRO_CONFIG, 2, 1) & 0x6))) * 16.4)
+        gyroY_raw_data = self.read_icm20948_reg_data(self.ICM20948_GYRO_YOUT_H, 0, 2)
+        gyroY = ((gyroY_raw_data[0] << 8) + gyroY_raw_data[1])
+        if gyroY > 0x7fff:
+            gyroY -= 65536
+        return(gyroY / Gyro_Sensitivity)
+
+    def get_gyro_z(self):
+        Gyro_Sensitivity = float((1 << (3 - (self.read_icm20948_reg_data(self.ICM20948_GYRO_CONFIG, 2, 1) & 0x6))) * 16.4)
+        gyroZ_raw_data = self.read_icm20948_reg_data(self.ICM20948_GYRO_ZOUT_H, 0, 2)
+        gyroZ = ((gyroZ_raw_data[0] << 8) + gyroZ_raw_data[1])
+        if gyroZ > 0x7fff:
+            gyroZ -= 65536
+        return(gyroZ / Gyro_Sensitivity)
+
+    
+    def SDP33_write (self, SDP33_i2c_address, command):
+        self.bus.write_i2c_block_data(self.SDP33_i2c_address, command)
+
+
+    def SDP33_read (self, SDP33_i2c_address, command):
+        # write = i2c_msg.write(SDP33_i2c_address, command)
+        # read = i2c_msg.read(SDP33_i2c_address, 9)
+        
+                # raw_data = bus2.i2c_rdwr(write, read)
+        self.bus2.write_i2c_block_data(self, self.SDP33_i2c_address, 0, [0x36, 0x24])
+        raw_data = self.bus2.read_i2c_block_data(self, self.SDP33_i2c_address, 9)        
+        return(raw_data)
+
+    def get_mag(self, cal_available):
+
+        if (cal_available):
+            cal_file = open("ICM20948_mag_cal.txt", "r")
+            cal_consts = cal_file.readline().split(",")
+
+            offset_x = float(cal_consts[0])
+            offset_y = float(cal_consts[1])
+            offset_z = float(cal_consts[2])
+
+            scale_x = float(cal_consts[3])
+            scale_y = float(cal_consts[4])
+            scale_z = float(cal_consts[5])
+
+            # print(str(offset_x)+"\n")
+            # print(str(offset_y)+"\n")
+            # print(str(offset_z)+"\n")
+
+            # print(str(scale_x)+"\n")
+            # print(str(scale_y)+"\n")
+            # print(str(scale_z)+"\n")
+        else:
+            offset_x, offset_y, offset_z = 0, 0, 0
+            scale_x, scale_y, scale_z = 1, 1, 1
+
+
+
+        mag_raw_data = self.read_icm20948_reg_data(self.ICM20948_EXT_SLV_SENS_DATA_00, 0, 13)
+
+        magX = (mag_raw_data[6] << 8) + mag_raw_data[5]
+        magY = (mag_raw_data[8] << 8) + mag_raw_data[7]
+        magZ = (mag_raw_data[10] << 8) + mag_raw_data[9]
+
+        if magX > 0x7fff:
+            magX -= 65536
+        if magY > 0x7fff:
+            magY -= 65536
+        if magZ > 0x7fff:
+            magZ -= 65536
+        
+        mag_scf = 4912/32752.0
+
+        # print(magX)
+        # print(((magX*mag_scf) - offset_x) * scale_x)
+
+        
+
+        return(((magX*mag_scf) - offset_x) * scale_x, ((magY*mag_scf) - offset_y) * scale_y, ((magZ*mag_scf) - offset_z)*scale_z)
+
+    def calib_mag(self, calib_time):
+        try:
+            decision = False
+            print("\nDo you wish to perform new magnetometer calibration? Old calibration data will be lost!")
+            
+                
+            while not decision:
+                start_cal =  raw_input("[Y/N]\n")
+                if (start_cal == 'N') or (start_cal == 'n'):
+                    print("\nCalibration canceled, no new calibration values saved.\n\n")
+                    sys.exit(1)
+                elif (start_cal == 'Y') or (start_cal == 'y'):
+                    decision = True
+
+            self.i2c_master_mag_init()
+            delay = 5
+            print("\nStarting calibration in %d seconds with duration of %d seconds!\n" % (delay,calib_time))
+            time.sleep(1)
+            for i in range(delay):
+                print(str(delay-i))
+                time.sleep(1)
+            
+            print("Calibration has started!\n")            
+
+            t_end = time.time() + calib_time
+            mag_x = []
+            mag_y = []
+            mag_z = []
+
+            while time.time() < t_end:
+                mag_x_i, mag_y_i, mag_z_i = self.get_mag(False)
+                mag_x.append(mag_x_i)
+                mag_y.append(mag_y_i)
+                mag_z.append(mag_z_i)
+                print("%f,%f,%f\n" % (mag_x_i, mag_y_i, mag_z_i))
+         
+
+            ### HARDIRON COMPAS COMPENSATION
+          
+            offset_x = (max(mag_x) + min(mag_x)) / 2
+            offset_y = (max(mag_y) + min(mag_y)) / 2
+            offset_z = (max(mag_z) + min(mag_z)) / 2
+
+            ### SOFTIRON COMPASS COMPENSATION
+
+            avg_delta_x = (max(mag_x) - min(mag_x)) / 2
+            avg_delta_y = (max(mag_y) - min(mag_y)) / 2
+            avg_delta_z = (max(mag_z) - min(mag_z)) / 2
+
+            avg_delta = (avg_delta_x + avg_delta_y + avg_delta_z) / 3
+
+            scale_x = avg_delta / avg_delta_x
+            scale_y = avg_delta / avg_delta_y
+            scale_z = avg_delta / avg_delta_z
+
+            # sys.stdout.write(str(offset_x)+"\n")
+            # sys.stdout.write(str(offset_y)+"\n")
+            # sys.stdout.write(str(offset_z)+"\n")
+
+            # sys.stdout.write(str(scale_x)+"\n")
+            # sys.stdout.write(str(scale_y)+"\n")
+            # sys.stdout.write(str(scale_z)+"\n")
+
+            decision = False
+            print("\nFinished. Do you wish to save calibration data?")
+            
+            while not decision:
+                start_cal =  raw_input("[Y/N]\n")
+                if (start_cal == 'N') or (start_cal == 'n'):
+                    print("\nCalibration canceled, no new calibration values saved.\n\n")
+                    sys.exit(1)
+                elif (start_cal == 'Y') or (start_cal == 'y'):
+                    decision = True
+
+        except KeyboardInterrupt:
+                
+            print("\nCalibration canceled, no new calibration values saved.\n\n")
+            sys.exit(0)
+
+        cal_file = open("ICM20948_mag_cal.txt", "w")
+        cal_file.write("%f,%f,%f,%f,%f,%f" % (offset_x, offset_y, offset_z, scale_x, scale_y, scale_z))
+        cal_file.close()
+
+        sys.stdout.write("Calibration successful!\n\n")
+
+
