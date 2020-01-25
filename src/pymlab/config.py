@@ -90,7 +90,8 @@ class Config(object):
     def init_drivers(self):
         from pymlab.sensors import lts, mag, sht, i2chub, altimet, acount, clkgen,\
                     imu, motor, atmega, gpio, bus_translators, light, thermopile,\
-                    rps, adc, i2cpwm, i2cio, i2clcd, lioncell, rtc, lightning
+                    rps, adc, i2cpwm, i2cio, i2clcd, lioncell, rtc, lightning,\
+                    windgauge
 
         self.drivers = {
             "i2chub": i2chub.I2CHub,
@@ -130,7 +131,8 @@ class Config(object):
             "i2clcd": i2clcd.I2CLCD,
             "rtc01": rtc.RTC01,
             "PCA9635": gpio.PCA9635,
-            "LIGHTNING01A": lightning.AS3935
+            "LIGHTNING01A": lightning.AS3935,
+            "WINDGAUGE03A": windgauge.WINDGAUGE03A
         }
 
     def get_device(self, name):
