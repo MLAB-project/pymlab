@@ -119,16 +119,19 @@ class WINDGAUGE03A(Device):
             return((self.bus.read_byte_data(self.address, reg_address)))
 
     def reset (self):
+        self.write_icm20948_reg_data(self.ICM20948_PWR_MGMT_1, 0, 0x01 | 1 << 7) # ICM20948 - reset device and register values
+        time.sleep(0.1)
         self.write_icm20948_reg_data(self.ICM20948_PWR_MGMT_1, 0, 0x01) # PWR_MGMT_1[6] (SLEEP) set to 0 - !!!DEVICE WAKEUP!!!; PWR_MGMT_1[2:0] (CLKSEL) = "001" for optimal performance
-        
-        time.sleep(1)
-        self.write_icm20948_reg_data(self.ICM20948_PWR_MGMT_1, 0, 0x01 | 1 << 7) # reset device and register values
-        time.sleep(1)
+        self.write_icm20948_reg_data(self.ICM20948_INT_PIN_CFG, 0, 0x02) # INT_PIN_CFG[1] (BYPASS_ENABLE) = 1 !ENABLE BYPASS OF ICM20948's I2C INTERFACE! (SDA and SCL connected directly to auxilary AUX_DA and AUX_CL)
+        self.bus.write_byte(self.sdp3x_i2c_address, 0x00) # SDP3x device wakeup
+        time.sleep(0.1)
+        self.bus.write_byte(0x00, 0x06) # SDP3x device soft reset
+        time.sleep(0.1)
 
     def initialize (self): 
 
         self.write_icm20948_reg_data(self.ICM20948_PWR_MGMT_1, 0, 0x01) # PWR_MGMT_1[6] (SLEEP) set to 0 - !!!DEVICE WAKEUP!!!; PWR_MGMT_1[2:0] (CLKSEL) = "001" for optimal performance
-        time.sleep(0.1)
+        # time.sleep(0.1)
 
         ### ICM20948 accelerometer configuration
         # self.write_icm20948_reg_data(self.ICM20948_ODR_ALIGN_EN, 2, 0x01)
@@ -144,13 +147,12 @@ class WINDGAUGE03A(Device):
         ### SDP3X sensor configuration #####################
         self.write_icm20948_reg_data(self.ICM20948_USER_CTRL, 0, 0x00)   # USER_CTRL[5] (I2C_MST_EN) = 0
         self.write_icm20948_reg_data(self.ICM20948_INT_PIN_CFG, 0, 0x02) # INT_PIN_CFG[1] (BYPASS_ENABLE) = 1 !ENABLE BYPASS OF ICM20948's I2C INTERFACE! (SDA and SCL connected directly to auxilary AUX_DA and AUX_CL)
-        self.bus.write_byte(0x00, 0x06) 
         self.bus.write_byte(self.sdp3x_i2c_address, 0x00) # SDP3x device wakeup
         time.sleep(0.1)
         self.bus.write_byte_data(self.sdp3x_i2c_address, 0x36, 0x7C)
         self.bus.write_byte_data(self.sdp3x_i2c_address, 0xE1, 0x02)
-        
         p_id = self.bus.read_i2c_block(self.sdp3x_i2c_address, 18)
+        print(p_id)
         p_num = ((p_id[0] << 24) | (p_id[1] << 16) | (p_id[3] << 8) | p_id[4])
 
         if (p_num == 0x03010101):
@@ -202,7 +204,7 @@ class WINDGAUGE03A(Device):
 
     def get_temp(self):
         room_temp_offset = 21.0
-        tem_sens = 333.87
+        temp_sens = 333.87
         temp_raw_data = self.read_icm20948_reg_data(self.ICM20948_TEMP_OUT_H, 0, 2)
         temp_raw = ((temp_raw_data[0] << 8) + temp_raw_data[1])
         return(((temp_raw - room_temp_offset)/temp_sens) + room_temp_offset)
@@ -361,8 +363,10 @@ class WINDGAUGE03A(Device):
             press_data -= 65536
         
         dpsf = float(raw_data[6]<<8 | raw_data[7]) # SDP3X sensor scaling factor obtained from byte 6 and 7 of read message
-
-        return(press_data/dpsf)
+        if(dpsf == 0):
+            return(0.0)
+        else:
+            return(press_data/dpsf)
 
     def get_t(self):
         raw_data = self.read_icm20948_reg_data(self.ICM20948_EXT_SLV_SENS_DATA_00, 0x00, 5)
@@ -410,9 +414,13 @@ class WINDGAUGE03A(Device):
             accel_raw[2] = - accel_raw[2]
 
         # Normalize accelerometer raw values.
-        acc_x_norm = accel_raw[0]/math.sqrt(accel_raw[0]**2 + accel_raw[1]**2 + accel_raw[2]**2)
-        acc_y_norm = accel_raw[1]/math.sqrt(accel_raw[0]**2 + accel_raw[1]**2 + accel_raw[2]**2)
-        
+        if(sum(accel_raw) == 0):
+            acc_x_norm = 0
+            acc_y_norm = 0
+        else:   
+            acc_x_norm = accel_raw[0]/math.sqrt(accel_raw[0]**2 + accel_raw[1]**2 + accel_raw[2]**2)
+            acc_y_norm = accel_raw[1]/math.sqrt(accel_raw[0]**2 + accel_raw[1]**2 + accel_raw[2]**2)
+            
         # Calculate pitch and roll
         pitch = math.asin(acc_y_norm);
 
