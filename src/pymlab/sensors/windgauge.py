@@ -152,7 +152,6 @@ class WINDGAUGE03A(Device):
         self.bus.write_byte_data(self.sdp3x_i2c_address, 0x36, 0x7C)
         self.bus.write_byte_data(self.sdp3x_i2c_address, 0xE1, 0x02)
         p_id = self.bus.read_i2c_block(self.sdp3x_i2c_address, 18)
-        print(p_id)
         p_num = ((p_id[0] << 24) | (p_id[1] << 16) | (p_id[3] << 8) | p_id[4])
 
         if (p_num == 0x03010101):

@@ -143,12 +143,10 @@ while True:
                 gps_parsed = pynmea2.parse(serialPort.readline())
                 gps_ts = gps_parsed.timestamp
 
-            if error == True:
-
-                windgauge = cfg.get_device("windgauge")
-                windgauge.reset()
-                windgauge.initialize()
-                error = False
+        if error == True:
+            windgauge.reset()
+            windgauge.initialize()
+            error = False
 
         time.sleep(0.01)
         # print(windgauge.read_icm20948_reg_data(windgauge.ICM20948_EXT_SLV_SENS_DATA_00, 0, 18)) # reading data from EXT_SLV_SENS_DATA_00 register 
