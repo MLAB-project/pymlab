@@ -1,11 +1,9 @@
-from pymlab import config   
+from pymlab import config
 import time
 import sys
 import math
 import datetime
 import os
-import serial
-import pynmea2
 
 #### Script Arguments ###############################################
 
@@ -17,6 +15,8 @@ if len(sys.argv) not in (2, 3, 4):
 port = eval(sys.argv[1])
 
 if len(sys.argv) == 3:
+    import pynmea2
+    import serial
     gps_port = str(sys.argv[2])
     serialPort = serial.Serial(gps_port, baudrate = 9600, timeout = 0.5)
 else:
@@ -121,7 +121,7 @@ while True:
 
     try:
 
-        if serialPort is not None:    
+        if serialPort is not None:
 
 
             if first:
@@ -149,7 +149,7 @@ while True:
             error = False
 
         time.sleep(0.01)
-        # print(windgauge.read_icm20948_reg_data(windgauge.ICM20948_EXT_SLV_SENS_DATA_00, 0, 18)) # reading data from EXT_SLV_SENS_DATA_00 register 
+        # print(windgauge.read_icm20948_reg_data(windgauge.ICM20948_EXT_SLV_SENS_DATA_00, 0, 18)) # reading data from EXT_SLV_SENS_DATA_00 register
         #                                                                             # (9 bytes from SDP3X and 9 bytes from magnetometer)
 
         # acc_x, acc_y, acc_z = windgauge.get_accel()
@@ -169,7 +169,7 @@ while True:
         ts = datetime.datetime.utcfromtimestamp(time.time()).isoformat()
 
         # print ("Heading: %6.2f [deg]; Diff. P: %7.2f [Pa]; Speed from diff. P: %5.2f [km/h]" % (hdg_ma, dp, spd_from_dp))
-        if serialPort is not None:  
+        if serialPort is not None:
             if(gps_ts is None):
                 gps_ts = ""
             if(gps_sogk is None):
@@ -194,14 +194,12 @@ while True:
 
     except KeyboardInterrupt:
         windgauge.stop()
-        print("\nMeasurement stopped!\n")   
+        print("\nMeasurement stopped!\n")
         log_file.close()
         sys.exit(0)
 
     except IOError:
-        
+
         sys.stdout.write("\r\n************ I2C Error\r\n\n")
         time.sleep(0.1)
         error = True
-
-        
