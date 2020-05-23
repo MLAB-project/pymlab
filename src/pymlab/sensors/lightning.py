@@ -75,12 +75,13 @@ class AS3935(Device):
 
     def getIndoor(self):
         indoor = self.bus.read_byte_data(self.address, 0x00) &  0b00111110
-        if indoor == 0b100100:
-            return True
-        elif indoor == 0b011100:
-            return False
-        else:
-            pass #TODO chybova hlaska, ze toto neni znamo
+        values = [
+            [0b100100, True],
+            [0b011100, False]]
+        try:
+          return values[indoor]
+        except LookupError:
+          print("Uknown register value {0:b}".format(indoor))
 
     def setIndoor(self, state):
         byte = self.bus.read_byte_data(self.address, 0x00)
