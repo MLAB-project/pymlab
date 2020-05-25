@@ -25,16 +25,18 @@ class AS3935(Device):
 
     def reset(self):
         self.soft_reset()
+        self.setTUN_CAP(self._TUN_CAP)
 
     def calib_rco(self):
-        byte = self.bus.read_byte_data(self.address, 0x08)   # TODO tunning
+        """calibrate RCO"""
+        byte = self.bus.read_byte_data(self.address, 0x08)
         self.bus.write_byte_data(self.address, 0x3d, 0x96);
         print bin(self.bus.read_byte_data(self.address, 0x3A))
         print bin(self.bus.read_byte_data(self.address, 0x3B))
         return
 
-    def antennatune_on(self, FDIV = 0,TUN_CAP=0):          #todo antenna tunnig
-
+    def antennatune_on(self, FDIV = 0,TUN_CAP=0):
+        """Display antenna resonance at IRQ pin"""
         # set frequency division
         data = self.bus.read_byte_data(self.address, 0x03)
         data = (data & (~(3<<6))) | (FDIV<<6)
