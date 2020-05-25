@@ -80,9 +80,9 @@ class AS3935(Device):
 
     def getIndoor(self):
         indoor = self.bus.read_byte_data(self.address, 0x00) &  0b00111110
-        values = [
-            [0b100100, True],
-            [0b011100, False]]
+        values = {
+            0b100100: True,
+            0b011100: False}
         try:
           return values[indoor]
         except LookupError:
