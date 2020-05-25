@@ -28,6 +28,7 @@ cfg = config.Config(
             "name":          "lighting",
             "type":        "LIGHTNING01A",
             "TUN_CAP":      6,
+            "address":      0x03,
         },
     ])
 cfg.initialize()

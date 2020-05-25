@@ -12,9 +12,12 @@ class AS3935(Device):
     def __init__(self, parent = None, address = 0x02,  TUN_CAP = 0, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
+        addresses = [0x02, 0x01, 0x03]
+
+        if address not in addresses:
+            raise ValueError("Unsupported sensor address")
 
         self._TUN_CAP = TUN_CAP
-
 
     def soft_reset(self):
         self.bus.write_byte_data(self.address, 0x3c, 0x96);
