@@ -21,7 +21,7 @@ port = eval(sys.argv[1])
 
 cfg = config.Config(
     i2c = {
-            "port": 0
+            "port": port
     },
     bus = [
         {
