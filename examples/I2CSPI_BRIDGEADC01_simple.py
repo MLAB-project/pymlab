@@ -12,77 +12,16 @@ import logging
 """
 Show data from BRIDGEADC01 module. 
 """
-from vispy import app, scene, color
+
+##from vispy import app, scene, color
+
 import numpy as np
 
 LOGGER = logging.getLogger(__name__)
 
-def update(ev):
+    
 
-    channel1 = scale1.getData()
-
-    scale1.setMode(
-                 mode = scale1.AD7730_SCONVERSION_MODE
-                ,polarity = scale1.AD7730_UNIPOLAR_MODE
-                ,den = scale1.AD7730_IODISABLE_MODE
-                ,iovalue = 0b00
-                ,data_length = scale1.AD7730_24bitDATA_MODE
-                ,reference = scale1.AD7730_REFERENCE_5V
-                ,input_range = scale1.AD7730_80mVIR_MODE
-                ,clock_enable = scale1.AD7730_MCLK_ENABLE_MODE
-                ,burn_out = scale1.AD7730_BURNOUT_DISABLE
-                ,channel = scale1.AD7730_AIN2P_AIN2N
-            )
-
-    while scale1.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
-        time.sleep(0.05)
-
-    channel2 = scale1.getData()
-
-    scale2.setMode(
-                 mode = scale2.AD7730_SCONVERSION_MODE
-                ,polarity = scale2.AD7730_UNIPOLAR_MODE
-                ,den = scale2.AD7730_IODISABLE_MODE
-                ,iovalue = 0b00
-                ,data_length = scale2.AD7730_24bitDATA_MODE
-                ,reference = scale2.AD7730_REFERENCE_5V
-                ,input_range = scale2.AD7730_80mVIR_MODE
-                ,clock_enable = scale2.AD7730_MCLK_ENABLE_MODE
-                ,burn_out = scale2.AD7730_BURNOUT_DISABLE
-                ,channel = scale2.AD7730_AIN1P_AIN1N
-            )
-
-    while scale2.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
-        time.sleep(0.05)
-
-    channel3 = scale2.getData()
-
-
-    scale2.setMode(
-                 mode = scale2.AD7730_SCONVERSION_MODE
-                ,polarity = scale2.AD7730_UNIPOLAR_MODE
-                ,den = scale2.AD7730_IODISABLE_MODE
-                ,iovalue = 0b00
-                ,data_length = scale2.AD7730_24bitDATA_MODE
-                ,reference = scale2.AD7730_REFERENCE_5V
-                ,input_range = scale2.AD7730_80mVIR_MODE
-                ,clock_enable = scale2.AD7730_MCLK_ENABLE_MODE
-                ,burn_out = scale2.AD7730_BURNOUT_DISABLE
-                ,channel = scale2.AD7730_AIN2P_AIN2N
-            )
-
-    while scale2.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
-        time.sleep(0.05)
-
-    channel4 = scale2.getData()
-
-    data = np.array([channel1, channel2, channel3, channel4])
-    filter_setup = scale2.setFilter()
-    print data, hex(filter_setup[0]), hex(filter_setup[1]), hex(filter_setup[2])
-    lines.roll_data(data)
-
-
-
+    
 class BRIDGEADC01:
     """
     Driver for the AD7730/AD7730L bridge ADC device. 
@@ -250,7 +189,7 @@ NOREF - No Reference Bit. If the voltage between the REF IN(+) and REF IN(-) pin
         self.single_write(self.AD7730_FILTER_REG, data)
         return data
 
-canvas = scene.SceneCanvas(keys='interactive', show=True, size=(1024, 768))
+"""canvas = scene.SceneCanvas(keys='interactive', show=True, size=(1024, 768))
 grid = canvas.central_widget.add_grid()
 view = grid.add_view(0, 1)
 view.camera = scene.MagnifyCamera(mag=1, size_factor=0.5, radius_ratio=0.6)
@@ -276,6 +215,7 @@ lines = scene.ScrollingLines(n_lines=N, line_size=M, columns=1, dx=0.8/M, #color
                              cell_size=(1, 8), parent=view.scene)
 lines.transform = scene.STTransform(scale=(1, 1/8.))
 
+"""
 
 cfg = config.Config(
     i2c = {
@@ -299,139 +239,91 @@ try:
     spi.GPIO_config(spi.I2CSPI_SS2 | spi.I2CSPI_SS3, spi.SS2_INPUT | spi.SS3_INPUT)
 
     print "Weight scale configuration.."
-    scale1 = BRIDGEADC01(spi.I2CSPI_SS0)
-    scale2 = BRIDGEADC01(spi.I2CSPI_SS1)
-    scale1.reset()
-    scale2.reset()
+    scale = BRIDGEADC01(spi.I2CSPI_SS0)
+    scale.reset()
 
 
-    scale1.setMode(
-                     mode = scale1.AD7730_INT_FULL_CALIBRATION
-                    ,polarity = scale1.AD7730_UNIPOLAR_MODE
-                    ,den = scale1.AD7730_IODISABLE_MODE
+    scale.setMode(
+                     mode = scale.AD7730_INT_FULL_CALIBRATION
+                    ,polarity = scale.AD7730_UNIPOLAR_MODE
+                    ,den = scale.AD7730_IODISABLE_MODE
                     ,iovalue = 0b00
-                    ,data_length = scale1.AD7730_24bitDATA_MODE
-                    ,reference = scale1.AD7730_REFERENCE_5V
-                    ,input_range = scale1.AD7730_80mVIR_MODE
-                    ,clock_enable = scale1.AD7730_MCLK_ENABLE_MODE
-                    ,burn_out = scale1.AD7730_BURNOUT_DISABLE
-                    ,channel = scale1.AD7730_AIN1P_AIN1N
+                    ,data_length = scale.AD7730_24bitDATA_MODE
+                    ,reference = scale.AD7730_REFERENCE_5V
+                    ,input_range = scale.AD7730_80mVIR_MODE
+                    ,clock_enable = scale.AD7730_MCLK_ENABLE_MODE
+                    ,burn_out = scale.AD7730_BURNOUT_DISABLE
+                    ,channel = scale.AD7730_AIN1P_AIN1N
 				)
-    print "Internal Full scale 1 calibration started"
+    print "Internal Full scale calibration started"
 
-    while scale1.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
-        print scale1.single_read(scale1.AD7730_MODE_REG)
+    while scale.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
+        print scale.single_read(scale.AD7730_MODE_REG)
         time.sleep(0.1)
 
     print "Full scale calibration completed. Start zero scale calibration"
 
-    scale2.setMode(
-                     mode = scale2.AD7730_INT_FULL_CALIBRATION
-                    ,polarity = scale2.AD7730_UNIPOLAR_MODE
-                    ,den = scale2.AD7730_IODISABLE_MODE
-                    ,iovalue = 0b00
-                    ,data_length = scale2.AD7730_24bitDATA_MODE
-                    ,reference = scale2.AD7730_REFERENCE_5V
-                    ,input_range = scale2.AD7730_10mVIR_MODE
-                    ,clock_enable = scale2.AD7730_MCLK_ENABLE_MODE
-                    ,burn_out = scale2.AD7730_BURNOUT_DISABLE
-                    ,channel = scale2.AD7730_AIN1P_AIN1N
-                )
-
-    print "Internal Full scale 2 calibration started"
-
-    while scale2.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
-        print scale2.single_read(scale2.AD7730_MODE_REG)
-        time.sleep(0.1)
-
-    print "Full scale calibration completed. Start zero scale calibration"
 
 
 #    spi.SPI_write(spi.I2CSPI_SS0, [0x02, 0x91, 0x80])
-    scale1.setMode(
-                     mode = scale1.AD7730_INT_ZERO_CALIBRATION
-                    ,polarity = scale1.AD7730_UNIPOLAR_MODE
-                    ,den = scale1.AD7730_IODISABLE_MODE
+    scale.setMode(
+                     mode = scale.AD7730_INT_ZERO_CALIBRATION
+                    ,polarity = scale.AD7730_UNIPOLAR_MODE
+                    ,den = scale.AD7730_IODISABLE_MODE
                     ,iovalue = 0b00
-                    ,data_length = scale1.AD7730_24bitDATA_MODE
-                    ,reference = scale1.AD7730_REFERENCE_5V
-                    ,input_range = scale1.AD7730_80mVIR_MODE
-                    ,clock_enable = scale1.AD7730_MCLK_ENABLE_MODE
-                    ,burn_out = scale1.AD7730_BURNOUT_DISABLE
-                    ,channel = scale1.AD7730_AIN1P_AIN1N
+                    ,data_length = scale.AD7730_24bitDATA_MODE
+                    ,reference = scale.AD7730_REFERENCE_5V
+                    ,input_range = scale.AD7730_80mVIR_MODE
+                    ,clock_enable = scale.AD7730_MCLK_ENABLE_MODE
+                    ,burn_out = scale.AD7730_BURNOUT_DISABLE
+                    ,channel = scale.AD7730_AIN1P_AIN1N
                 )
 
-    while scale1.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
-        print scale1.getStatus()
-        time.sleep(0.1)
-
-    scale2.setMode(
-                     mode = scale2.AD7730_INT_ZERO_CALIBRATION
-                    ,polarity = scale2.AD7730_UNIPOLAR_MODE
-                    ,den = scale2.AD7730_IODISABLE_MODE
-                    ,iovalue = 0b00
-                    ,data_length = scale2.AD7730_24bitDATA_MODE
-                    ,reference = scale2.AD7730_REFERENCE_5V
-                    ,input_range = scale2.AD7730_10mVIR_MODE
-                    ,clock_enable = scale2.AD7730_MCLK_ENABLE_MODE
-                    ,burn_out = scale2.AD7730_BURNOUT_DISABLE
-                    ,channel = scale2.AD7730_AIN1P_AIN1N
-                )
-
-    while scale2.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
-        print scale2.getStatus()
+    while scale.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
+        print scale.getStatus()
         time.sleep(0.1)
 
     print "Zero scale calibration completed.. Start reading the data.."
 
+    scale.setMode(
+                 mode = scale.AD7730_SCONVERSION_MODE
+                ,polarity = scale.AD7730_UNIPOLAR_MODE
+                ,den = scale.AD7730_IODISABLE_MODE
+                ,iovalue = 0b00
+                ,data_length = scale.AD7730_24bitDATA_MODE
+                ,reference = scale.AD7730_REFERENCE_5V
+                ,input_range = scale.AD7730_80mVIR_MODE
+                ,clock_enable = scale.AD7730_MCLK_ENABLE_MODE
+                ,burn_out = scale.AD7730_BURNOUT_DISABLE
+                ,channel = scale.AD7730_AIN1P_AIN1N
+            )
 
-finally:
-    timer = app.Timer(connect=update, interval=0)
-    timer.start()
+    while scale.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
+        time.sleep(0.05)
 
+    channel1 = scale.getData()
 
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#Future more usable code which uses SPI binding.
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-"""
-cfg = config.Config(
-    i2c = {
-        "port": 8,
-    },
+    scale.setMode(
+                 mode = scale.AD7730_SCONVERSION_MODE
+                ,polarity = scale.AD7730_UNIPOLAR_MODE
+                ,den = scale.AD7730_IODISABLE_MODE
+                ,iovalue = 0b00
+                ,data_length = scale.AD7730_24bitDATA_MODE
+                ,reference = scale.AD7730_REFERENCE_5V
+                ,input_range = scale.AD7730_80mVIR_MODE
+                ,clock_enable = scale.AD7730_MCLK_ENABLE_MODE
+                ,burn_out = scale.AD7730_BURNOUT_DISABLE
+                ,channel = scale.AD7730_AIN2P_AIN2N
+            )
 
-    bus = [
-            {
-                "name": "spi",
-                "type": "i2cspi",
-                "address": 0x2E,
-                "GPIO_config": (spi.I2CSPI_SS2 | spi.I2CSPI_SS3, 0x50),
-                
-                "children": [
-                    {"name": "bridgeadc", "type": "bridgeadc01" , "channel": 0, "SPI_config" = (spi.I2CSPI_MSB_FIRST| spi.I2CSPI_MODE_CLK_IDLE_HIGH_DATA_EDGE_TRAILING| spi.I2CSPI_CLK_461kHz)},   
-                ],
-            },
-    ],
-)
+    while scale.IsBusy():            ## wait for RDY pin to go low to indicate end of callibration cycle. 
+        time.sleep(0.05)
 
+    channel2 = scale.getData()
 
-bridgeadc = cfg.get_device("bridgeadc")
+    data = np.array([channel1, channel2])
+    print data
 
+except KeyboardInterrupt:
+    sys.exit(0)
 
-try:
-
-    bridgeadc.Setup_treshold(0x14)       # treshold setup 
-    bridgeadc.Setup_max_speed(0x07)       # max measuring speed setup 
-
-    while weight < 10:
-    
-        weight = bridgeadc.get_weight()       ## wait to defined weight
-        time.sleep(1)
-
-finally:
-    print "stop"
-"""
-
-if __name__ == '__main__':
-    import sys
-    if sys.flags.interactive != 1:
-        app.run()
