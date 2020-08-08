@@ -25,7 +25,7 @@ The latest version of python-smbus could be installed from [this fork of i2c-too
 
 Required if you want to use the [USBI2C01A](http://wiki.mlab.cz/doku.php?id=en:usbi2c) module to communicate with SMBus/I2C devices via USB HID layer. Very useful in Windows environment where standard hardware interfaces are not accessible directly.
 
-    $ sudo apt-get install libudev-dev libusb-1.0-0-dev libhidapi-dev python3-setuptools cython
+    $ sudo apt-get install libudev-dev libusb-1.0-0-dev libhidapi-dev python3-setuptools python3-dev cython
 
 
 Usage
