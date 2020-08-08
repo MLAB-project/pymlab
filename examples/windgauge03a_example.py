@@ -9,7 +9,7 @@ import os
 
 if len(sys.argv) not in (2, 3, 4):
     sys.stderr.write("Invalid number of arguments.\n")
-    sys.stderr.write("Usage: %s #I2CPORT [Config number] \n" % (sys.argv[0], ))
+    sys.stderr.write("Usage: %s #I2CPORT [NMEA source] [cal=seconds] \n" % (sys.argv[0], ))
     sys.exit(1)
 
 port = eval(sys.argv[1])
@@ -27,14 +27,28 @@ if len(sys.argv) > 3:
         cal = eval(sys.argv[3])
 else:
     cal = 0
+# select coniguration from config array bellow
+#cfg_number = 1 # HIDAPI interface
+cfg_number = 0 # SMBbus interface (needs kernel support)
 
-cfg_number = 0
 
 cfglist=[
     config.Config(
         i2c = {
             "port": port,
             "device": "smbus",
+        },
+        bus = [
+            {
+                "name":        "windgauge",
+                "type":        "WINDGAUGE03A",
+            },
+        ],
+    ),
+    config.Config(
+        i2c = {
+            "port": port,
+            "device": "hid",
         },
         bus = [
             {
