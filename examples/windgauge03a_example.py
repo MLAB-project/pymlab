@@ -123,6 +123,8 @@ else:
 log_name = ("SDP33_tp_log_%s.csv" % datetime.datetime.utcfromtimestamp(time.time()).isoformat())
 filepath = path + log_name
 log_file = open(filepath, "w")
+print ("Using logfile %s\n" % filepath)
+
 log_file.write("log_index;system_timestamp;diff_press[Pa];mag_hdg[deg];spd_from_dp[m/s];temp[degC];gps_timestamp;gps_hdg[deg];gps_sogk[m/s]\n")
 
 #### Measurement ###################################################
