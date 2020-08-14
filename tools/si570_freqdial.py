@@ -187,7 +187,6 @@ def thread():
     fgen.recall_nvm()
 
     set_ = 1
-    si570_freq = 10.0
 
     error = False
     while True:
@@ -199,17 +198,10 @@ def thread():
         set_ = dial.value
         freq_mhz = float(set_) / 1e3
         try:
-            fgen.set_freq(si570_freq, freq_mhz)
-            si570_freq = freq_mhz
+            fgen.recall_nvm()
+            fgen.set_freq(10.0, freq_mhz)
         except Exception:
-            try:
-                fgen.recall_nvm()
-                fgen.set_freq(10.0, freq_mhz)
-                si570_freq = freq_mhz
-            except Exception:
-                error = True
-            else:
-                error = False
+            error = True
         else:
             error = False
 
