@@ -1,6 +1,6 @@
 i2c = {
     "device": "remote",
-    "host": ["root@parallella.local"],
+    "host": ["root@parallella.lan"],
     "remote_device": {"port": 0}
 }
 
