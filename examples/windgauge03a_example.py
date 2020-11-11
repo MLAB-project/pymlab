@@ -36,7 +36,7 @@ cfglist=[
     config.Config(
         i2c = {
             "port": port,
-            "device": "smbus",
+            "device": "hid",
         },
         bus = [
             {
