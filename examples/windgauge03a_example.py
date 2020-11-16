@@ -6,8 +6,8 @@ import datetime
 import os
 
 #uncomment for debbug purposes
-import logging
-logging.basicConfig(level=logging.DEBUG)
+#import logging
+#logging.basicConfig(level=logging.DEBUG)
 
 #### Script Arguments ###############################################
 
