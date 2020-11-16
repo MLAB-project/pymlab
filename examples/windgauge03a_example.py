@@ -5,6 +5,10 @@ import math
 import datetime
 import os
 
+#uncomment for debbug purposes
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 #### Script Arguments ###############################################
 
 if len(sys.argv) not in (2, 3, 4):
