@@ -780,8 +780,8 @@ def load_driver(**kwargs):
                 h.open(0x10C4, 0xEA90, serial) # Try Connect HID
                 kwargs['serial'] = h.get_serial_number_string()
                 LOGGER.info("Using HID with serial number: '%s' " %(h.get_serial_number_string()))
-                h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
-                LOGGER.info("Reseting the USBI2C converter.")
+                #h.write([0x01, 0x01]) # Reset Device for cancelling all transfers and reset configuration
+                #LOGGER.info("Reseting the USBI2C converter.")
                 h.close()
                 LOGGER.info("Waiting to reinit of the device...")
                 time.sleep(1) # wait for system HID (re)mounting
