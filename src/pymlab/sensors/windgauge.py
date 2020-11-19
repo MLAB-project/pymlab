@@ -239,6 +239,26 @@ class WINDGAUGE03A(Device):
 
         return((gyro_x_raw / gyro_sens), (gyro_y_raw / gyro_sens), (gyro_z_raw / gyro_sens))
 
+    def get_mag_raw(self, *args):
+
+        mag_raw_data = self.read_icm20948_reg_data(self.ICM20948_EXT_SLV_SENS_DATA_00 + 9, 0, 9)
+
+        magX = (mag_raw_data[2] << 8) + mag_raw_data[1]
+        magY = (mag_raw_data[4] << 8) + mag_raw_data[3]
+        magZ = (mag_raw_data[6] << 8) + mag_raw_data[5]
+
+        if magX > 0x7fff:
+            magX -= 65536
+        if magY > 0x7fff:
+            magY -= 65536
+        if magZ > 0x7fff:
+            magZ -= 65536
+
+        mag_scf = 4912/32752.0
+
+        return(magX, magY, magZ)
+
+
     def get_mag(self, *args):
 
         offset_x, offset_y, offset_z = 0, 0, 0
