@@ -291,12 +291,12 @@ class SMBusDriver(Driver):
                 devices += [addr]
             if verbose:
                 if addr % 0x0f == 0:
-                    print ""
-                    print hex(addr)+":",
+                    print("", end = '')
+                    print(hex(addr)+":", end = '')
                 if out > 0:
-                    print hex(addr),
+                    print(hex(addr))
                 else:
-                    print " -- ",
+                    print(" -- ", end = '')
 
         print("")
         return devices
@@ -308,7 +308,6 @@ class HIDDriver(Driver):
 
         serial = kwargs.get('serial', None)
         if serial: serial = six.text_type(serial)
-        print(serial, type(serial))
 
         self.driver_type = 'hid'
         self.h = hid.device()
