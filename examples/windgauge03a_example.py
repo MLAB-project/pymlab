@@ -5,11 +5,15 @@ import math
 import datetime
 import os
 
+#uncomment for debbug purposes
+#import logging
+#logging.basicConfig(level=logging.DEBUG)
+
 #### Script Arguments ###############################################
 
 if len(sys.argv) not in (2, 3, 4):
     sys.stderr.write("Invalid number of arguments.\n")
-    sys.stderr.write("Usage: %s #I2CPORT [Config number] \n" % (sys.argv[0], ))
+    sys.stderr.write("Usage: %s #I2CPORT [NMEA source] [cal=seconds] \n" % (sys.argv[0], ))
     sys.exit(1)
 
 port = eval(sys.argv[1])
@@ -27,14 +31,28 @@ if len(sys.argv) > 3:
         cal = eval(sys.argv[3])
 else:
     cal = 0
+# select coniguration from config array bellow
+#cfg_number = 1 # HIDAPI interface
+cfg_number = 0 # SMBbus interface (needs kernel support)
 
-cfg_number = 0
 
 cfglist=[
     config.Config(
         i2c = {
             "port": port,
-            "device": "smbus",
+            "device": "hid",
+        },
+        bus = [
+            {
+                "name":        "windgauge",
+                "type":        "WINDGAUGE03A",
+            },
+        ],
+    ),
+    config.Config(
+        i2c = {
+            "port": port,
+            "device": "hid",
         },
         bus = [
             {
@@ -109,6 +127,8 @@ else:
 log_name = ("SDP33_tp_log_%s.csv" % datetime.datetime.utcfromtimestamp(time.time()).isoformat())
 filepath = path + log_name
 log_file = open(filepath, "w")
+print ("Using logfile %s\n" % filepath)
+
 log_file.write("log_index;system_timestamp;diff_press[Pa];mag_hdg[deg];spd_from_dp[m/s];temp[degC];gps_timestamp;gps_hdg[deg];gps_sogk[m/s]\n")
 
 #### Measurement ###################################################

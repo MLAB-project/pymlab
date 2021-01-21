@@ -13,7 +13,7 @@ import sys
 import json
 import logging
 
-import utils
+from . import utils
 #from utils import obj_repr, PrettyPrinter
 from pymlab.sensors import Bus, SimpleBus
 

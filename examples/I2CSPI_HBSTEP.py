@@ -140,7 +140,7 @@ while True:
     )
     cfg.initialize()
 
-    print "Stepper motor control example. \r\n"
+    print("Stepper motor control example. \r\n")
 
     spi = cfg.get_device("spi")
 
@@ -148,16 +148,16 @@ while True:
 
 
     try:
-        print "SPI configuration.."
+        print("SPI configuration..")
         spi.SPI_config(spi.I2CSPI_MSB_FIRST | spi.I2CSPI_MODE_CLK_IDLE_HIGH_DATA_EDGE_TRAILING| spi.I2CSPI_CLK_461kHz)
         time.sleep(1)
 
-        print "Axis inicialization"
+        print("Axis inicialization")
         X = axis(spi.I2CSPI_SS0, 0, 641)    # set Number of Steps per axis Unit and set Direction of Rotation
         X.Reset()
         X.MaxSpeed(2)                      # set maximal motor speed 
 
-        print "Axis is running. Press CTRL+C to finish the test."
+        print("Axis is running. Press CTRL+C to finish the test.")
 
         i = 0
         while True:
@@ -165,7 +165,7 @@ while True:
     #        time.sleep(0.5)
             X.MoveWait(-500)     # move 50 unit backward and wait for motor stop
     #        time.sleep(0.5)
-        print "Cycle# %d" %i
+        print("Cycle#", i)
         i +=1
 
         X.Float()   # release power
