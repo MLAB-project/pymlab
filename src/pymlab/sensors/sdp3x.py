@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Python driver for MLAB I2CADC01 module
+# Python driver for MLAB SDP3x diff pressure sensor
 
 import math
 import time
@@ -24,6 +24,7 @@ class SDP3x(Device):
         Device.__init__(self, parent, address, **kwargs)
 
     def initialize(self):
+        self.reset()
         self.bus.write_byte(self.address, 0x00) # SDP3x device wakeup
         time.sleep(0.1)
         self.bus.write_byte_data(self.address, 0x36, 0x7C)
@@ -43,9 +44,15 @@ class SDP3x(Device):
 
         self.bus.write_byte_data(self.address, 0x36, 0x15) 
 
+    def reset(self):
+        self.bus.write_byte(self.sdp3x_i2c_address, 0x00) # SDP3x device wakeup
+        time.sleep(0.1)
+        self.bus.write_byte(0x00, 0x06) # SDP3x device soft reset
+        time.sleep(0.1)
+
 
     def readData(self):
-        raw_data = self.bus.read_i2c_block_data(self.address, 0x00, 9)
+        raw_data = self.bus.read_i2c_block(self.address, 9)
         press_data = raw_data[0]<<8 | raw_data[1]
         temp_data = raw_data[3]<<8 | raw_data[4]
 
@@ -55,7 +62,7 @@ class SDP3x(Device):
         if (temp_data > 0x7fff):
             temp_data -= 65536
         
-        dpsf = float(raw_data[6]<<8 | raw_data[7]) # SDP3X sensor scaling factor obtained from byte 6 and 7 of read message
+        dpsf = float(raw_data[6]<<8 | raw_data[7])
         
         if(dpsf == 0):
             press_data = 0.0
