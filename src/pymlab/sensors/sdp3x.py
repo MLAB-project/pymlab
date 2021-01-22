@@ -45,7 +45,7 @@ class SDP3x(Device):
         self.bus.write_byte_data(self.address, 0x36, 0x15) 
 
     def reset(self):
-        self.bus.write_byte(self.sdp3x_i2c_address, 0x00) # SDP3x device wakeup
+        self.bus.write_byte(self.address, 0x00) # SDP3x device wakeup
         time.sleep(0.1)
         self.bus.write_byte(0x00, 0x06) # SDP3x device soft reset
         time.sleep(0.1)
