@@ -8,6 +8,7 @@ import time
 import struct
 import logging
 import six
+import sys
 import subprocess
 import ast
 
@@ -773,7 +774,11 @@ def load_driver(**kwargs):
             import hid
             LOGGER.info("Initiating HID driver...")
             try:
-                if serial: serial = unicode(serial)
+                if serial:
+                    if sys.version_info[0] >= 3:
+                        serial = str(serial)
+                    else:
+                        serial = unicode(serial)
 
                 h = hid.device()
                 h.open(0x10C4, 0xEA90, serial) # Try Connect HID

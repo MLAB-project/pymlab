@@ -102,7 +102,7 @@ class Config(object):
             "imu01_acc": imu.IMU01_ACC,
             "imu01_gyro": imu.IMU01_GYRO,
             "mpu6050": imu.MPU6050,
-	        "ICM20948" : imu.ICM20948,
+            "ICM20948" : imu.ICM20948,
             "sht25": sht.SHT25,
             "sht31": sht.SHT31,
             "altimet01": altimet.ALTIMET01,
