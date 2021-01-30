@@ -11,7 +11,7 @@ from pymlab.sensors import Device
 
 class WINDGAUGE03A(Device):
 
-    def __init__(self, parent = None, address = 0x68, **kwargs):
+    def __init__(self, parent = None, address = 0x68, sdp3x_address = 0x21, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
         self.r_outer = 0.018 # outer venturi tube diameter [m]
@@ -19,7 +19,7 @@ class WINDGAUGE03A(Device):
         self.air_density = 1.029 # density of air [kg/m^3]
         self.mag_declination = 4.232 # magnetic declination in deg from true north
 
-        self.sdp3x_i2c_address = 0x21
+        self.sdp3x_i2c_address = sdp3x_address
         self.mag_i2c_address = 0x0C
 
         ## USER BANK 0 REGISTERS
