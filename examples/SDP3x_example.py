@@ -7,9 +7,9 @@ import os
 
 #### Script Arguments ###############################################
 
-if len(sys.argv) not in (2, 3, 4):
-#    sys.stderr.write("Invalid number of arguments.\n")
-#    sys.stderr.write("Usage: %s #I2CPORT [Config number] \n" % (sys.argv[0], ))
+if len(sys.argv) not in (2, 3):
+    sys.stderr.write("Invalid number of arguments.\n")
+    sys.stderr.write("Usage: %s #I2CPORT [Config number] \n" % (sys.argv[0]))
     sys.exit(1)
 
 port = eval(sys.argv[1])
@@ -19,8 +19,9 @@ cfg_number = 0
 cfglist=[
     config.Config(
         i2c = {
-            "port": port,
-            "device": "smbus",
+            #"port": port,
+            "device": "hid",
+            "serial": "00A59713"
         },
         bus = [
             {

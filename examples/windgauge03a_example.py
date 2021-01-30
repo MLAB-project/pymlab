@@ -80,7 +80,7 @@ if cal > 0:
 def parseGPS(str):  # function for parsing and obtaining timestamp, heading and speed over ground data from gps receiver messages
     if str.find('VTG') > 0:
         msg2 = pynmea2.parse(str)
-        print "Heading w.r.t. true north: %s -- Speed over ground [kmph]: %s" % (msg2.true_track, msg2.spd_over_grnd_kmph)
+        print("Heading w.r.t. true north: %s -- Speed over ground [kmph]: %s" % (msg2.true_track, msg2.spd_over_grnd_kmph))
 
     # if str.find('GGA') > 0:
     #     msg = pynmea2.parse(str)
