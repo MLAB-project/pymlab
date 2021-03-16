@@ -46,30 +46,30 @@ while True:
     #guage.reset()                            # Reset Guage
 
     flash = guage.ReadFlashBlock(48, 0)
-    print "48 - ",
-    print " ".join([hex(i) for i in flash])
+    print("48 - ")
+    print(" ".join([hex(i) for i in flash]))
     flash = guage.ReadFlashBlock(64, 0)
-    print "64 - ",
-    print " ".join([hex(i) for i in flash])
+    print("64 - ")
+    print(" ".join([hex(i) for i in flash]))
     flash = guage.ReadFlashBlock(104, 0)
-    print "104 - ",
-    print " ".join([hex(i) for i in flash])
+    print("104 - ")
+    print(" ".join([hex(i) for i in flash]))
 
-    print "DesCap =", guage.DesignCapacity(), "mAh"
+    print("DesCap =", guage.DesignCapacity(), "mAh")
     flash = guage.Chemistry()
-    print "Chemistry = ",
-    print " ".join([hex(i) for i in flash])
+    print("Chemistry = ")
+    print(" ".join([hex(i) for i in flash]))
 
     try:
         while True:
             # Battery status readout
-            print "NominalAvailableCapacity =", guage.NominalAvailableCapacity(), "mAh, FullAvailabeCapacity =", guage.FullAvailabeCapacity(), "mAh, AvailableEnergy =", guage.AvailableEnergy(), "* 10 mWh"
-            print "Temp =", guage.getTemp(), "degC, RemainCapacity =", guage.getRemainingCapacity(), "mAh, cap =", guage.FullChargeCapacity(), "mAh, U =", guage.Voltage(), "mV, I =", guage.AverageCurrent(), "mA, charge =", guage.StateOfCharge(), "%"
+            print("NominalAvailableCapacity =", guage.NominalAvailableCapacity(), "mAh, FullAvailabeCapacity =", guage.FullAvailabeCapacity(), "mAh, AvailableEnergy =", guage.AvailableEnergy(), "* 10 mWh")
+            print("Temp =", guage.getTemp(), "degC, RemainCapacity =", guage.getRemainingCapacity(), "mAh, cap =", guage.FullChargeCapacity(), "mAh, U =", guage.Voltage(), "mV, I =", guage.AverageCurrent(), "mA, charge =", guage.StateOfCharge(), "%")
             time.sleep(3)
 
     except IOError:
         err = err + 1
-        print "IOError"
+        print("IOError")
         continue
 
     except KeyboardInterrupt:
