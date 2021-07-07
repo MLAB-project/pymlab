@@ -716,9 +716,10 @@ class RemoteDriver(Driver):
         self._remote_call('load_driver', remote_device)
 
     def _remote_call(self, method, *args):
-        line, errs = self.sp.communicate(repr((method,) + args) + '\n')
-        #self.sp.stdin.write(bytes(repr((method,) + args) + '\n', "utf-8"))
-        #line = self.sp.stdout.readline().strip()
+        #line, errs = self.sp.communicate(repr((method,) + args) + '\n')
+        self.sp.stdin.write(repr((method,) + args) + '\n')
+        line = self.sp.stdout.readline().strip()
+
         try:
             reply = ast.literal_eval(line)
             assert isinstance(reply, dict) and 'good' in reply
