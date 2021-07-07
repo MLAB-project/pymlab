@@ -13,7 +13,7 @@ import sys
 import json
 import logging
 
-import utils
+from . import utils
 #from utils import obj_repr, PrettyPrinter
 from pymlab.sensors import Bus, SimpleBus
 
@@ -91,7 +91,7 @@ class Config(object):
         from pymlab.sensors import lts, mag, sht, i2chub, altimet, acount, clkgen,\
                     imu, motor, atmega, gpio, bus_translators, light, thermopile,\
                     rps, adc, i2cpwm, i2cio, i2clcd, lioncell, rtc, lightning,\
-                    windgauge
+                    windgauge, sdp3x
 
         self.drivers = {
             "i2chub": i2chub.I2CHub,
@@ -102,7 +102,7 @@ class Config(object):
             "imu01_acc": imu.IMU01_ACC,
             "imu01_gyro": imu.IMU01_GYRO,
             "mpu6050": imu.MPU6050,
-	        "ICM20948" : imu.ICM20948,
+            "ICM20948" : imu.ICM20948,
             "sht25": sht.SHT25,
             "sht31": sht.SHT31,
             "altimet01": altimet.ALTIMET01,
@@ -132,7 +132,8 @@ class Config(object):
             "rtc01": rtc.RTC01,
             "PCA9635": gpio.PCA9635,
             "LIGHTNING01A": lightning.AS3935,
-            "WINDGAUGE03A": windgauge.WINDGAUGE03A
+            "WINDGAUGE03A": windgauge.WINDGAUGE03A,
+            "SDP3x": sdp3x.SDP3x
         }
 
     def get_device(self, name):

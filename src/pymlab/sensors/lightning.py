@@ -31,8 +31,8 @@ class AS3935(Device):
         """calibrate RCO"""
         byte = self.bus.read_byte_data(self.address, 0x08)
         self.bus.write_byte_data(self.address, 0x3d, 0x96);
-        print bin(self.bus.read_byte_data(self.address, 0x3A))
-        print bin(self.bus.read_byte_data(self.address, 0x3B))
+        print(bin(self.bus.read_byte_data(self.address, 0x3A)))
+        print(bin(self.bus.read_byte_data(self.address, 0x3B)))
         return
 
     def antennatune_on(self, FDIV = 0,TUN_CAP=0):
@@ -57,7 +57,7 @@ class AS3935(Device):
 
     def getDistance(self):
         data = self.bus.read_byte_data(self.address, 0x07) & 0b00111111
-        print hex(data)
+        print(hex(data))
 
         distance = {0b111111: 255,
             0b101000: 40,

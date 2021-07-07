@@ -109,21 +109,21 @@ class CLKGEN01(Device):
         hsdiv = self.get_hs_div()   # read curent dividers
         n1div = self.get_n1_div()   #
 
-        if abs((freq-fout)*1e6/fout) > 3500:  
-            # Large change of frequency      
+        if abs((freq-fout)*1e6/fout) > 3500:  # check if new requested frequency is withing 3500 ppm from last Center Frequency Configuration
+            # Large change of frequency
             fdco = fout * hsdiv * n1div # calculate high frequency oscillator
-            fxtal =  fdco / self.get_rfreq()  # should be fxtal = 114.285        
-        
+            fxtal =  fdco / self.get_rfreq()  # should be fxtal = 114.285
+
             for hsdiv_iter in hsdiv_tuple:      # find dividers with minimal power consumption
                 for n1div_iter in n1div_tuple:
                     fdco_new = freq * hsdiv_iter * n1div_iter
                     if (fdco_new >= 4850) and (fdco_new <= 5670):
                         if (fdco_new <= fdco_min):
-                            fdco_min = fdco_new        
+                            fdco_min = fdco_new
                             hsdiv = hsdiv_iter
                             n1div = n1div_iter
-            rfreq = fdco_min / fxtal        
-        
+            rfreq = fdco_min / fxtal
+
             self.freeze_dco()       # write registers
             self.set_hs_div(hsdiv)
             self.set_n1_div(n1div)
@@ -134,10 +134,10 @@ class CLKGEN01(Device):
             # Small change of frequency
             rfreq = self.get_rfreq() * (freq/fout)
 
-            self.freeze_m()         # write registers           
+            self.freeze_m()         # write registers
             self.set_rfreq(rfreq)
-            self.unfreeze_m()            
-        
+            self.unfreeze_m()
+
 
     # For Si571 only !
     def freeze_vcadc(self):

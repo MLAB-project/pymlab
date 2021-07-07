@@ -86,7 +86,7 @@ class I2CHub(Device):
             result = {}
         else:
             result = { self.name: self, }
-        for channel in self.channels.itervalues():
+        for channel in self.channels.values():
             result.update(channel.get_named_devices())
         return result
 
@@ -119,7 +119,7 @@ class I2CHub(Device):
     def initialize(self):
         Device.initialize(self)
 
-        for channel, bus in self.channels.iteritems():
+        for channel, bus in self.channels.items():
             self.setup(1 << channel)
             bus.initialize()
 
