@@ -48,7 +48,7 @@ class FreqDialWidget(wx.Window):
 
         border, dw = self.border, self.digitw
         self.digit_rects = [
-            wx.Rect(border + dw*(8-i) - offset, border, dw, self.digith)
+            wx.Rect(border + dw*(8-i) - int(offset), border, dw, self.digith)
             for i, offset in enumerate([0, 0, 0, dw/2, dw/2, dw/2, dw])
         ]
 
@@ -97,7 +97,7 @@ class FreqDialWidget(wx.Window):
             if rect.Contains(self.mouse_pos):
                 self.focused_digit_no = i
                 dc.SetBrush(wx.LIGHT_GREY_BRUSH)
-                dc.DrawRectangleRect(rect)
+                dc.DrawRectangle(rect)
 
             if v != 0 or i == 0:
                 dc.DrawText(str(v % 10), rect.GetX(), rect.GetY())
@@ -167,7 +167,7 @@ top = wx.Frame(None, title="Frequency Dial")
 sizer = wx.BoxSizer(wx.VERTICAL)
 
 dial = FreqDialWidget(top, default=10e3)
-sizer.AddF(dial, wx.SizerFlags().Expand().Border())
+sizer.Add(dial, 0, wx.EXPAND)
 
 import time
 def thread():
