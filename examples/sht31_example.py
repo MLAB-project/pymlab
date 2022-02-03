@@ -13,12 +13,18 @@ from pymlab import config
 
 #### Script Arguments ###############################################
 
-if len(sys.argv) != 2:
+if len(sys.argv) not in (2, 3):
     sys.stderr.write("Invalid number of arguments.\n")
     sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
     sys.exit(1)
 
 port    = eval(sys.argv[1])
+
+if len(sys.argv) == 3:
+    address = eval(sys.argv[2])
+else:
+    address = 0x45
+
 #### Sensor Configuration ###########################################
 
 ''''
@@ -49,6 +55,7 @@ cfg = config.Config(
         {
             "name":          "sht",
             "type":        "sht31",
+            "address":        address,
         },
     ],
 )
