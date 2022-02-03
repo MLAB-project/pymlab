@@ -301,7 +301,7 @@ class WINDGAUGE03A(Device):
 
 
             while not decision:
-                start_cal =  raw_input("[Y/N]\n")
+                start_cal =  input("[Y/N]\n")
                 if (start_cal == 'N') or (start_cal == 'n'):
                     print("\nCalibration canceled, no new calibration values saved.\n\n")
                     self.stop()
@@ -353,7 +353,7 @@ class WINDGAUGE03A(Device):
             print("\nFinished. Do you wish to save calibration data?")
 
             while not decision:
-                start_cal =  raw_input("[Y/N]\n")
+                start_cal =  input("[Y/N]\n")
                 if (start_cal == 'N') or (start_cal == 'n'):
                     print("\nCalibration canceled, no new calibration values saved.\n\n")
                     self.stop()
