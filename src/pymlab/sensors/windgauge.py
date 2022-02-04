@@ -154,11 +154,11 @@ class WINDGAUGE03A(Device):
         p_num = ((p_id[0] << 24) | (p_id[1] << 16) | (p_id[3] << 8) | p_id[4])
 
         if (p_num == 0x03010101):
-            sensor = "SDP31"
+            sensor = "SDP31 500Pa"
         elif (p_num == 0x03010201):
-            sensor = "SDP32"
+            sensor = "SDP32 125Pa"
         elif (p_num == 0x03010384):
-            sensor = "SDP33"
+            sensor = "SDP33 1500Pa"
         else:
             sensor = "unknown"
         print("ID: %s - sensor: %s" % (hex(p_num), sensor))
@@ -311,7 +311,7 @@ class WINDGAUGE03A(Device):
 
             self.initialize()
             delay = 5
-            print("\nStarting calibration in %d seconds with duration of %d seconds!\n" % (delay,calib_time))
+            print("\nStarting calibration in %d seconds with duration of %d seconds! Please manually rotate by sensor to every direction\n" % (delay, calib_time))
             time.sleep(1)
             for i in range(delay):
                 print(str(delay-i))
