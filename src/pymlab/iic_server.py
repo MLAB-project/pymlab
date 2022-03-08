@@ -4,7 +4,10 @@ from pymlab.sensors.iic import load_driver
 def main():
     tru_stdout = sys.stdout; sys.stdout = sys.stderr
     def read_msg():
-        m = input()
+        try:
+            m = eval(input())
+        except EOFError:
+            sys.exit(0)
         if not isinstance(m, tuple) or len(m) == 0:
             raise RuntimeError('received invalid message ' + repr(m))
         return m[0], m[1:]

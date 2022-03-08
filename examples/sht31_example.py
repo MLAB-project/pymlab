@@ -4,7 +4,7 @@
 
 #uncomment for debbug purposes
 #import logging
-#logging.basicConfig(level=logging.DEBUG) 
+#logging.basicConfig(level=logging.DEBUG)
 
 import time
 import datetime
@@ -13,12 +13,18 @@ from pymlab import config
 
 #### Script Arguments ###############################################
 
-if len(sys.argv) != 2:
+if len(sys.argv) not in (2, 3):
     sys.stderr.write("Invalid number of arguments.\n")
     sys.stderr.write("Usage: %s PORT ADDRESS\n" % (sys.argv[0], ))
     sys.exit(1)
 
 port    = eval(sys.argv[1])
+
+if len(sys.argv) == 3:
+    address = eval(sys.argv[2])
+else:
+    address = 0x45
+
 #### Sensor Configuration ###########################################
 
 ''''
@@ -31,7 +37,7 @@ cfg = config.Config(
 		{
             "type": "i2chub",
             "address": 0x72,
-            
+
             "children": [
                 {"name": "sht", "type": "sht31", "channel": 1, }
             ],
@@ -43,12 +49,13 @@ cfg = config.Config(
 cfg = config.Config(
     i2c = {
         "port": port,
-        "device": 'smbus',
+        "device": 'hid',
     },
     bus = [
         {
             "name":          "sht",
             "type":        "sht31",
+            "address":        address,
         },
     ],
 )
@@ -56,7 +63,7 @@ cfg = config.Config(
 
 cfg.initialize()
 
-print "SHT31 sensor readout example \r\n"
+print ("SHT31 sensor readout example \r\n")
 sensor = cfg.get_device("sht")
 
 sensor.soft_reset()

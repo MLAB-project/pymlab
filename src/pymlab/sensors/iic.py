@@ -704,21 +704,26 @@ class RemoteDriver(Driver):
         import sys
 
         hosts = host if isinstance(host, list) else [host]
-        self.host = hosts[-1]
+        self.host = hosts[-1] if len(hosts) > 0 else "local"
 
         cmd = [arg for h in hosts for arg in ["ssh", h]] \
               + ["python3", "-m", "pymlab.iic_server"]
         self.sp = subprocess.Popen(cmd, stdin=subprocess.PIPE,
                                    stdout=subprocess.PIPE,
-                                   stderr=sys.stderr,
                                    text=True)
 
         self._remote_call('load_driver', remote_device)
 
+    def close(self):
+        self.sp.stdin.close()
+        self.sp.wait()
+
     def _remote_call(self, method, *args):
-        line, errs = self.sp.communicate(repr((method,) + args) + '\n')
-        #self.sp.stdin.write(bytes(repr((method,) + args) + '\n', "utf-8"))
-        #line = self.sp.stdout.readline().strip()
+        #line, errs = self.sp.communicate(repr((method,) + args) + '\n')
+        self.sp.stdin.write(repr((method,) + args) + '\n')
+        self.sp.stdin.flush()
+        line = self.sp.stdout.readline().strip()
+
         try:
             reply = ast.literal_eval(line)
             assert isinstance(reply, dict) and 'good' in reply
@@ -759,6 +764,49 @@ class RemoteDriver(Driver):
     def scan_bus(self):
         return self._remote_call('scan_bus')
 
+
+class DummyDriver(Driver):
+    def __init__(self):
+        self.driver_type = 'dummy'
+
+    def get_handler(self):
+        raise NotImplementedError()
+
+    def write_byte(self, address, value):
+        pass
+
+    def read_byte(self, address):
+        return 0xaa
+
+    def write_byte_data(self, address, register, value):
+        pass
+
+    def read_byte_data(self, address, register):
+        return 0xaa
+
+    def write_word_data(self, address, register, value):
+        pass
+
+    def read_word_data(self, address, register):
+        return 0xaaaa
+
+    def write_block_data(self, address, register, value):
+        raise NotImplementedError()
+
+    def read_block_data(self, address, register):
+        raise NotImplementedError()
+
+    def write_i2c_block(self, address, value):
+        raise NotImplementedError()
+
+    def read_i2c_block(self, address):
+        raise NotImplementedError()
+
+    def write_i2c_block_data(self, address, register, value):
+        raise NotImplementedError()
+
+    def read_i2c_block_data(self, address, register, length = 1):
+        raise NotImplementedError()
 
 
 DRIVER = None
@@ -825,6 +873,9 @@ def load_driver(**kwargs):
 
     if device == "remote":
         return RemoteDriver(kwargs['host'], kwargs.get("remote_device", {}))
+
+    if device == "dummy":
+        return DummyDriver()
 
     raise RuntimeError("Failed to load I2C driver. Enable logging for more details.")
 
