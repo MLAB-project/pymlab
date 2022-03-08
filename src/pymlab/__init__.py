@@ -40,7 +40,7 @@ Currently supported interfaces are:
 """
 
 
-__version__ = "0.3"
+__version__ = "0.4"
 
 
 #from pymlab import config
