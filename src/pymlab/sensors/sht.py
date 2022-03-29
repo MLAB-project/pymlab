@@ -3,7 +3,8 @@
 #import smbus
 import time
 import sys
-
+import datetime
+import struct
 from pymlab.sensors import Device
 
 
@@ -86,33 +87,86 @@ class SHT31(Device):
     def __init__(self, parent = None, address = 0x44, **kwargs):
         Device.__init__(self, parent, address, **kwargs)
 
+        self.temperature = None
+        self.humidity = None
+
+
         self.SOFT_RESET = [0x30, 0xA2]
         self.STATUS_REG = [0xF3, 0x2D]
         self.MEASURE_H_CLKSD = [0x24, 0x00]
+        self.READ_PERIODIC = [0xE0, 0x00]
+        self.PERIODIC_MEAS_1MPS_M = [0x21, 0x26]
+        self.RESET = [0x30, 0xA2]
+        self.CLEAR_STATUS = [0x30, 0x41]
 
-    def soft_reset(self):
-        self.bus.write_i2c_block(self.address, self.SOFT_RESET);
-        return
+        self.selected_mode = self.PERIODIC_MEAS_1MPS_M
+        #self.soft_reset()
+
+    def reset(self):
+        #self.bus.write_i2c_block(self.address, self.SOFT_RESET);
+        # Do sw reset on start
+        #time.sleep(1)
+        self.bus.write_byte(self.address, 6)
+        time.sleep(0.5)
+        self.initialize()
+
+    def initialize(self):
+        print("Configure")
+
+        self.bus.write_byte_data(self.address, self.CLEAR_STATUS[0], self.CLEAR_STATUS[1])
+        time.sleep(0.2)
+        self.bus.write_i2c_block_data(self.address, 0xE1, [0x1F, 0xFF, 0xFF, self.calc_checksum([0xff, 0xff])])
+        time.sleep(0.2)
+        self.bus.write_i2c_block_data(self.address, 0xE1, [0x02, 0x00, 0x00, self.calc_checksum([0x00, 0x00])])
+        time.sleep(0.2)
+        self.bus.write_i2c_block_data(self.address, 0x61, [0x1D, 0xFF, 0xFF, self.calc_checksum([0xff, 0xff])])
+        time.sleep(0.2)
+        self.bus.write_i2c_block_data(self.address, 0x61, [0x00, 0x00, 0x00, self.calc_checksum([0x00, 0x00])])
+
+        self.bus.write_byte_data(self.address, self.selected_mode[0], self.selected_mode[1])
+        time.sleep(2)
+
 
     def get_status(self):
-        self.bus.write_i2c_block(self.address, self.STATUS_REG)
-        status = self.bus.read_i2c_block(self.address, 3)
-        bits_values = dict([('Invalid_checksum',status[0] & 0x01 == 0x01),
-                    ('Invalid_command',status[0] & 0x02 == 0x02),
-                    ('System_reset',status[0] & 0x10 == 0x10),
-                    ('T_alert',status[1] & 0x04 == 0x04),
-                    ('RH_alert',status[1] & 0x08 == 0x08),
-                    ('Heater',status[1] & 0x20 == 0x02),
-                    ('Alert_pending',status[1] & 0x80 == 0x80),
-                    ('Checksum',status[2])])
+        self.bus.write_i2c_block_data(self.address, self.STATUS_REG[0], self.STATUS_REG[1:])
+        status = self.bus.read_i2c_block_data(self.address, 0, 3)
+        #print([format(x, '08b') for x in status])
+        st = status[1] | (status[0] << 8)
+        bits_values = dict([('Invalid_checksum', bool(st & 1<<0)),
+                    ('Invalid_command', bool(st & 1<<1)),
+                    ('System_reset', bool(st & 1<<4)),
+                    ('T_alert', bool(st & 1<<10)),
+                    ('RH_alert', bool(st & 1<<11 )),
+                    ('Heater', bool(st & 1<<13)),
+                    ('Alert_pending', bool(st & 1<<15)),
+                    ('Checksum', status[2]) ])
         return bits_values
+
+    def get_periodic_measurement(self):
+        print(self.get_status())
+
+        self.bus.write_byte_data(self.address, self.READ_PERIODIC[0], self.READ_PERIODIC[1])
+        time.sleep(0.2)
+        data = self.bus.read_i2c_block_data(self.address, 0, 6)
+
+        temp_data = data[0]<<8 | data[1]
+        hum_data = data[3]<<8 | data[4]
+
+        self.humidity = 100.0*(hum_data/65535.0)
+        self.temperature = -45.0 + 175.0*(temp_data/65535.0)
+        self.updated = datetime.datetime.now()
+
+        #self.bus.write_byte_data(self.address, self.CLEAR_STATUS[0], self.CLEAR_STATUS[1])
+
+
+        return(self.temperature, self.humidity)
 
 
     def get_TempHum(self):
-        self.bus.write_i2c_block(self.address, self.MEASURE_H_CLKSD); # start temperature and humidity measurement
+        self.bus.write_i2c_block_data(self.address, self.MEASURE_H_CLKSD[0], self.MEASURE_H_CLKSD[1:]); # start temperature and humidity measurement
         time.sleep(0.05)
 
-        data = self.bus.read_i2c_block(self.address, 6)
+        data = self.bus.read_i2c_block_data(self.address, 0x00, 6)
 
         temp_data = data[0]<<8 | data[1]
         hum_data = data[3]<<8 | data[4]
@@ -161,6 +215,19 @@ class SHT31(Device):
                 else:
                     crc = (crc << 1)
         return crc
+
+    def calc_checksum(self, data):
+        crc = 0xff
+        for d in data:
+            crc ^= d
+            for bit in range(8, 0, -1):
+                if bool(crc & 0x80):
+                    crc = (crc << 1) ^ 0x31
+                else:
+                    crc = crc << 1
+
+        return (crc & 0xff)
+
 
 def main():
     print(__doc__)

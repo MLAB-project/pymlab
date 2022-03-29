@@ -73,8 +73,13 @@ class SMBusDriver(Driver):
 
     def __init__(self, port, smbus):
         self.port = port
+        print(smbus)
         self.smbus = smbus
         self.driver_type = 'smbus'
+
+    @property
+    def driver(self):
+        return self.smbus
 
     def write_byte(self, address, value):
         """
@@ -847,6 +852,18 @@ def load_driver(**kwargs):
         except ImportError:
             LOGGER.warning("HID driver cannot be imported, we will try SMBus driver...(2)")
 
+    if (device == "smbus2" or device == None):
+        print("SMBUS2222")
+        if not port:
+            port = 1
+        try:
+            import smbus2
+            smb = smbus2.SMBus(port)
+            print("Loading SMBus2 driver...", smb)
+            LOGGER.info("Loading SMBus2 driver...", smb)
+            return SMBusDriver(port, smb)
+        except ImportError:
+            LOGGER.warning("Failed to import 'smbus2' module. SMBus driver cannot be loaded.")
 
     if (device == "smbus" or device == None) and (port is not None):
         try:
