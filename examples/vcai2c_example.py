@@ -40,8 +40,8 @@ cfg = config.Config(
 )
 cfg.initialize()
 
-print "Current loop sensor example \r\n"
-print "Time, channel #1,  channel #2,  channel #3 ,  channel #4,  channel #5   \r\n"
+print ("Current loop sensor example \r\n")
+print ("Time, channel #1,  channel #2,  channel #3 ,  channel #4,  channel #5   \r\n")
 sensor1 = cfg.get_device("current_sensor1")
 sensor2 = cfg.get_device("current_sensor2")
 time.sleep(0.5)
