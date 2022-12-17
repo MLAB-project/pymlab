@@ -73,12 +73,12 @@ class InfluxLogger():
         from influxdb_client import InfluxDBClient, Point, WritePrecision
         from influxdb_client.client.write_api import SYNCHRONOUS
 
-        # You can generate a Token from the "Tokens Tab" in the UI
-        token = "o7XuAHu7sqjlIN5PpbPsOOhMy04mlJyWxLs2z7MrLpPoSlLLeBxIRq1MqC_zhuemSVbEce3vwEihuKpm3x6fAQ=="
+        # You can generate a Token from the "Tokens Tab" in the UI"
+        token = "FrTdVeNHkBrAe-xWciEiU_XUXOwS33RN61_4Vj47UkGmzwdlF_lJE3C3D6G7Nk1ymeEsrotts1q0DAnQSU95Ow=="
         org = "meteobox"
         bucket = "meteobox"
 
-        self.client = InfluxDBClient(url="http://10.8.0.3:8086", token=token)
+        self.client = InfluxDBClient(url="http://localhost:8086", token=token)
         self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
 
     def insert_data(self, values):

@@ -49,7 +49,7 @@ cfg = config.Config(
 cfg = config.Config(
     i2c = {
         "port": port,
-        "device": 'hid',
+#        "device": 'hid',
     },
     bus = [
         {

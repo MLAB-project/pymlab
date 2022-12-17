@@ -41,15 +41,16 @@ cfg.initialize()
 print ("Sensirion SEN5x sensor readout example \r\n")
 sensor = cfg.get_device("sen5x")
 
+print("Cekam minutu na ustaleni senzoru")
 sensor.reset()
-time.sleep(0.1)
+time.sleep(120)
 
 #### Data Logging ###################################################
 
 try:
     while True:
         data = sensor.get_data(wait=True)
-        print(data)
+        #print(data)
         logger.insert_data(data)
         time.sleep(args['period'])
 

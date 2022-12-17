@@ -50,10 +50,10 @@ try:
     while True:
         temperature, humidity = sensor.get_periodic_measurement()
         data = {"temp": temperature, "hum": humidity}
-        print(data)
+        #print(data)
         logger.insert_data(data)
-        print("Temp: %0.2f, Hum: %0.2f\r\n" % (temperature, humidity))
-        sys.stdout.flush()
+        #print("Temp: %0.2f, Hum: %0.2f\r\n" % (temperature, humidity))
+        #sys.stdout.flush()
         time.sleep(args['period'])
 
 except KeyboardInterrupt:
