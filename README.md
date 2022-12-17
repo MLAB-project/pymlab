@@ -9,7 +9,7 @@ Installation
 ------------
 
 ### Dependencies
-    $ sudo apt-get install git python3-setuptools python3-smbus python3-six python3-pip python3-numpy python3-hidapi
+    $ sudo apt-get install git python3-setuptools python3-smbus python3-six python3-pip python3-numpy python3-hidapi python3-smbus2
 
 The latest version of pymlab library use true I²C transfers instead of SMBus transfers. It is needed by some sensors. Namely by SHT31, SHT25 etc.  Therefore an updated version of i2c-tools and python-smbus module is needed for correct working of pymlab library and some examples.
 The latest version of python-smbus could be installed from [this fork of i2c-tools](https://github.com/MLAB-project/i2c-tools).

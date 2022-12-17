@@ -853,14 +853,11 @@ def load_driver(**kwargs):
             LOGGER.warning("HID driver cannot be imported, we will try SMBus driver...(2)")
 
     if (device == "smbus2" or device == None):
-        print("SMBUS2222")
-        if not port:
-            port = 1
         try:
             import smbus2
             smb = smbus2.SMBus(port)
-            print("Loading SMBus2 driver...", smb)
-            LOGGER.info("Loading SMBus2 driver...", smb)
+            print("Loading Python smbus2 driver...", smb)
+            LOGGER.info("Loading Python smbus2 driver...", smb)
             return SMBusDriver(port, smb)
         except ImportError:
             LOGGER.warning("Failed to import 'smbus2' module. SMBus driver cannot be loaded.")
@@ -871,8 +868,18 @@ def load_driver(**kwargs):
             LOGGER.info("Loading SMBus driver...")
             return SMBusDriver(port, smbus.SMBus(int(port)))
         except ImportError:
-            LOGGER.warning("Failed to import 'smbus' module. SMBus driver cannot be loaded.")
-    if (device == "smbus") and (port is None):
+            LOGGER.warning("Failed to import Python 'smbus' module. We will try Python 'smbus2' as replacement.")
+
+        try:
+            import smbus2
+            smb = smbus2.SMBus(port)
+            print("Loading Python smbus2 driver...", smb)
+            LOGGER.info("Loading Python smbus2 driver...", smb)
+            return SMBusDriver(port, smb)
+        except ImportError:
+            LOGGER.warning("Failed to import 'smbus2' module. SMBus driver cannot be loaded.")
+
+    if (device == "smbus" or device == "smbus2") and (port is None):
         LOGGER.error("Port of SMBus must be specified")
 
     if device == "serial" or device == None:
