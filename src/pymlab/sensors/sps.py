@@ -86,7 +86,7 @@ class SPS30(Device):
 
     def get_data(self, wait = True):
         while not self.data_ready():
-            time.sleep(0.1)
+            time.sleep(0.2)
 
         raw = self.read_command(self.REG_READ_MEASURED_VALUES, 40)
         data = {}
@@ -189,7 +189,7 @@ class SEN5x(Device):
 
     def get_data(self, wait = True):
         while not self.data_ready():
-            time.sleep(0.1)
+            time.sleep(0.2)
 
         raw = self.read_command(self.REG_READ_MEASURED_VALUES, 40)
         data = {}
@@ -200,6 +200,8 @@ class SEN5x(Device):
 
         data['hum'] = (raw[9] | raw[8]<<8) /  100.0
         data['temp'] = (raw[11] | raw[10]<<8) /  200.0
+        if data['temp'] >= 255:
+            data['temp'] -= 328 # observed
         data['voc'] = (raw[13] | raw[12]<<8) /  11.0
         data['nox'] = (raw[15] | raw[14]<<8) /  10.0
 
