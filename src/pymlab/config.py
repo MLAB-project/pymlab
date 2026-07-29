@@ -91,11 +91,12 @@ class Config(object):
         from pymlab.sensors import lts, mag, sht, i2chub, altimet, acount, clkgen,\
                     imu, motor, atmega, gpio, bus_translators, light, thermopile,\
                     rps, adc, i2cpwm, i2cio, i2clcd, lioncell, rtc, lightning,\
-                    windgauge, sdp3x, sps
+                    windgauge, sdp3x, sps, drv
 
         self.drivers = {
             "i2chub": i2chub.I2CHub,
-
+            
+            "drv10987": drv.DRV10987,
             "lts01": lts.LTS01,
             "mag01": mag.MAG01,
             "rps01": rps.RPS01,
@@ -105,6 +106,7 @@ class Config(object):
             "ICM20948" : imu.ICM20948,
             "sht25": sht.SHT25,
             "sht31": sht.SHT31,
+            "sht4x": sht.SHT4x,
             "altimet01": altimet.ALTIMET01,
             "SDP600": altimet.SDP6XX,
             "SDP610": altimet.SDP6XX,

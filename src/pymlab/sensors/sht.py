@@ -229,6 +229,89 @@ class SHT31(Device):
         return (crc & 0xff)
 
 
+class SHT4x(Device):
+    'Python library for SHT4x MLAB module with Sensirion SHT40/SHT41/SHT45 i2c humidity and temperature sensor.'
+
+    # Measurement commands (single byte, sensor is pure I2C)
+    MEAS_HIGH_PRECISION = 0xFD
+    MEAS_MEDIUM_PRECISION = 0xF6
+    MEAS_LOW_PRECISION = 0xE0
+    # Heater commands: (command, activation time in seconds)
+    HEATER_200mW_1s = 0x39
+    HEATER_200mW_100ms = 0x32
+    HEATER_110mW_1s = 0x2F
+    HEATER_110mW_100ms = 0x24
+    HEATER_20mW_1s = 0x1E
+    HEATER_20mW_100ms = 0x15
+    READ_SERIAL = 0x89
+    SOFT_RESET = 0x94
+
+    def __init__(self, parent = None, address = 0x44, **kwargs):
+        Device.__init__(self, parent, address, **kwargs)
+
+        self.temperature = None
+        self.humidity = None
+
+        self.precision = self.MEAS_HIGH_PRECISION
+
+    def soft_reset(self):
+        self.bus.write_byte(self.address, self.SOFT_RESET)
+        time.sleep(0.001)   # soft reset takes max 1 ms
+
+    def get_serial_number(self):
+        self.bus.write_byte(self.address, self.READ_SERIAL)
+        time.sleep(0.01)
+        data = self.bus.read_i2c_block(self.address, 6)
+        # two 16bit words, each followed by a CRC byte
+        return (data[0] << 24) | (data[1] << 16) | (data[3] << 8) | data[4]
+
+    def get_TempHum(self, precision = None):
+        """Trigger a measurement and return (temperature [degC], humidity [%RH])."""
+        command = precision if precision is not None else self.precision
+        self.bus.write_byte(self.address, command)
+        time.sleep(0.01)    # high precision measurement takes max 8.2 ms
+
+        data = self.bus.read_i2c_block(self.address, 6)
+
+        temp_data = data[0] << 8 | data[1]
+        hum_data = data[3] << 8 | data[4]
+
+        self.temperature = -45.0 + 175.0 * (temp_data / 65535.0)
+        humidity = -6.0 + 125.0 * (hum_data / 65535.0)
+        # physical relative humidity is limited to 0..100 %RH
+        self.humidity = max(0.0, min(100.0, humidity))
+        self.updated = datetime.datetime.now()
+
+        return self.temperature, self.humidity
+
+    def get_temp(self):
+        temperature, humidity = self.get_TempHum()
+        return temperature
+
+    def get_hum(self):
+        temperature, humidity = self.get_TempHum()
+        return humidity
+
+    def activate_heater(self, command = HEATER_200mW_1s):
+        """Activate the on-chip heater and return the measurement taken during heating.
+
+        The heater is switched off automatically after the activation time
+        (100 ms or 1 s depending on the selected command).
+        """
+        self.bus.write_byte(self.address, command)
+        time.sleep(1.1)     # longest heater pulse is 1 s
+
+        data = self.bus.read_i2c_block(self.address, 6)
+
+        temp_data = data[0] << 8 | data[1]
+        hum_data = data[3] << 8 | data[4]
+
+        temperature = -45.0 + 175.0 * (temp_data / 65535.0)
+        humidity = max(0.0, min(100.0, -6.0 + 125.0 * (hum_data / 65535.0)))
+
+        return temperature, humidity
+
+
 def main():
     print(__doc__)
 
